@@ -33,12 +33,13 @@ import { useSelector } from "react-redux";
 import { PostListItem, PostFilters } from "@/lib/types";
 import { toast } from "sonner";
 import { useSearchParams } from "next/navigation";
+import { useProfile } from "@/lib/redux/useProfile";
 
 interface AuthState {
   user: {
     id: string;
     email: string;
-    account_type: 'WORKER' | 'BUSINESS';
+    account_type: "WORKER" | "BUSINESS";
     first_name: string;
     last_name: string;
   } | null;
@@ -51,8 +52,10 @@ interface RootState {
 
 export default function Jobs() {
   const router = useRouter();
-  const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
-
+  const { user, isAuthenticated } = useSelector(
+    (state: RootState) => state.auth
+  );
+  const { handleApplyWithProfileCheck } = useProfile();
   const {
     posts: jobs,
     selectedPost: selectedJob,
@@ -76,28 +79,26 @@ export default function Jobs() {
   const [filters, setFilters] = useState<PostFilters>({
     //post_type: 'JOB',
     page: 1,
-    ordering: '-created_at'
+    ordering: "-created_at",
   });
-
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/login');
+      router.push("/login");
       return;
     }
   }, [isAuthenticated, router]);
 
   useEffect(() => {
-    if (searchParams.get('success') === 'created') {
+    if (searchParams.get("success") === "created") {
       toast.success("Job posting created successfully!", {
         description: "Your job is now live and visible to candidates.",
       });
       const url = new URL(window.location.href);
-      url.searchParams.delete('success');
-      window.history.replaceState({}, '', url.toString());
+      url.searchParams.delete("success");
+      window.history.replaceState({}, "", url.toString());
     }
   }, [searchParams]);
-
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -105,12 +106,20 @@ export default function Jobs() {
         ...filters,
         ...(searchTerm && { search: searchTerm }),
         ...(selectedLocation && { location: selectedLocation }),
-        ...(selectedType && { priority: selectedType as 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT' }),
+        ...(selectedType && {
+          priority: selectedType as "LOW" | "MEDIUM" | "HIGH" | "URGENT",
+        }),
       };
       loadPosts(filterParams);
     }
-  }, [isAuthenticated, loadPosts, filters, searchTerm, selectedLocation, selectedType]);
-
+  }, [
+    isAuthenticated,
+    loadPosts,
+    filters,
+    searchTerm,
+    selectedLocation,
+    selectedType,
+  ]);
 
   if (!isAuthenticated || !user) {
     return (
@@ -123,33 +132,33 @@ export default function Jobs() {
   const isBusinessUser = user.account_type === "BUSINESS";
 
   const handleSearch = () => {
-    setFilters(prev => ({ ...prev, page: 1 }));
+    setFilters((prev) => ({ ...prev, page: 1 }));
   };
 
   const handleLocationChange = (location: string) => {
     setSelectedLocation(location);
-    setFilters(prev => ({ ...prev, page: 1 }));
+    setFilters((prev) => ({ ...prev, page: 1 }));
   };
 
   const handleTypeChange = (type: string) => {
     setSelectedType(type);
-    setFilters(prev => ({ ...prev, page: 1 }));
+    setFilters((prev) => ({ ...prev, page: 1 }));
   };
 
   const handleSaveJob = async (jobId: string) => {
     try {
       await pokePost(jobId);
     } catch (error) {
-      console.error('Failed to save job:', error);
+      console.error("Failed to save job:", error);
     }
   };
 
   const handleDeleteJob = async (jobId: string) => {
-    if (window.confirm('Are you sure you want to delete this job?')) {
+    if (window.confirm("Are you sure you want to delete this job?")) {
       try {
         await removePost(jobId);
       } catch (error) {
-        console.error('Failed to delete job:', error);
+        console.error("Failed to delete job:", error);
       }
     }
   };
@@ -159,9 +168,9 @@ export default function Jobs() {
     setSelectedLocation("");
     setSelectedType("");
     setFilters({
-      post_type: 'JOB',
+      post_type: "JOB",
       page: 1,
-      ordering: '-created_at'
+      ordering: "-created_at",
     });
   };
 
@@ -173,7 +182,9 @@ export default function Jobs() {
       });
 
     const uniqueLocations = [...new Set(locations)];
-    return uniqueLocations.length > 0 ? uniqueLocations : ["No locations available"];
+    return uniqueLocations.length > 0
+      ? uniqueLocations
+      : ["No locations available"];
   };
 
   const showJobDetails = (job: PostListItem) => {
@@ -185,18 +196,17 @@ export default function Jobs() {
   };
 
   const handlePageChange = (newPage: number) => {
-    setFilters(prev => ({ ...prev, page: newPage }));
+    setFilters((prev) => ({ ...prev, page: newPage }));
   };
-
 
   const jobTypes = ["LOW", "MEDIUM", "HIGH", "URGENT"];
 
   const formatJobType = (priority: string) => {
     const typeMap = {
-      'LOW': 'Part-time',
-      'MEDIUM': 'Full-time',
-      'HIGH': 'Contract',
-      'URGENT': 'Temporary'
+      LOW: "Part-time",
+      MEDIUM: "Full-time",
+      HIGH: "Contract",
+      URGENT: "Temporary",
     };
     return typeMap[priority as keyof typeof typeMap] || priority;
   };
@@ -231,7 +241,10 @@ export default function Jobs() {
                     {selectedJob.title}
                   </CardTitle>
                   <CardDescription className="text-lg text-blue-700 mt-1">
-                    {typeof selectedJob.user === 'object' ? selectedJob.user.email : selectedJob.user} • {selectedJob.location}
+                    {typeof selectedJob.user === "object"
+                      ? selectedJob.user.email
+                      : selectedJob.user}{" "}
+                    • {selectedJob.location}
                   </CardDescription>
                 </div>
                 <Button
@@ -246,7 +259,10 @@ export default function Jobs() {
 
             <CardContent className="space-y-6">
               <div className="flex flex-wrap gap-4">
-                <Badge variant="secondary" className="bg-blue-100 text-blue-800 font-medium">
+                <Badge
+                  variant="secondary"
+                  className="bg-blue-100 text-blue-800 font-medium"
+                >
                   {formatJobType(selectedJob.priority)}
                 </Badge>
                 {selectedJob.salary_range && (
@@ -270,7 +286,9 @@ export default function Jobs() {
               </div>
 
               <div>
-                <h3 className="font-semibold text-xl text-gray-900 mb-3">Job Description</h3>
+                <h3 className="font-semibold text-xl text-gray-900 mb-3">
+                  Job Description
+                </h3>
                 <p className="text-gray-700 leading-relaxed text-base whitespace-pre-wrap">
                   {selectedJob.description}
                 </p>
@@ -278,7 +296,9 @@ export default function Jobs() {
 
               {selectedJob.requirements && (
                 <div>
-                  <h3 className="font-semibold text-xl text-gray-900 mb-3">Requirements</h3>
+                  <h3 className="font-semibold text-xl text-gray-900 mb-3">
+                    Requirements
+                  </h3>
                   <p className="text-gray-700 leading-relaxed text-base whitespace-pre-wrap">
                     {selectedJob.requirements}
                   </p>
@@ -381,7 +401,7 @@ export default function Jobs() {
                     }
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                    onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                     className="pl-10 border-gray-300 focus:ring-blue-700 bg-white rounded-md text-base"
                   />
                 </div>
@@ -457,10 +477,11 @@ export default function Jobs() {
                             {job.title}
                           </CardTitle>
                           <CardDescription className="text-base text-blue-700 mt-1">
-                            {typeof job.user === 'object'
-                              ? `${job.user.first_name || ''} ${job.user.last_name || ''}`.trim() || job.user.email
-                              : job.user
-                            }
+                            {typeof job.user === "object"
+                              ? `${job.user.first_name || ""} ${
+                                  job.user.last_name || ""
+                                }`.trim() || job.user.email
+                              : job.user}
                           </CardDescription>
                         </div>
                       </div>
@@ -476,13 +497,18 @@ export default function Jobs() {
                             <Heart className="h-4 w-4" />
                           </Button>
                         ) : (
-                          user.id === (typeof job.user === 'object' ? job.user.id : job.user) && (
+                          user.id ===
+                            (typeof job.user === "object"
+                              ? job.user.id
+                              : job.user) && (
                             <div className="flex gap-2">
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 className="p-2 text-blue-700 hover:text-blue-800"
-                                onClick={() => router.push(`/edit-job/${job.id}`)}
+                                onClick={() =>
+                                  router.push(`/jobs/${job.id}/edit`)
+                                }
                               >
                                 <Edit className="h-4 w-4" />
                               </Button>
@@ -556,11 +582,14 @@ export default function Jobs() {
 
                       {!isBusinessUser && (
                         <Button
-                        className="w-full bg-blue-700 hover:bg-blue-800 text-lg px-8 py-3"
-                        onClick={() => router.push(`/jobs/${job.id}/apply`)}
-                      >
-                        Apply Now
-                      </Button>
+                          className="w-full bg-blue-700 hover:bg-blue-800 text-lg px-8 py-3"
+                          //onClick={() => router.push(`/jobs/${job.id}/apply`)}
+                          onClick={() =>
+                            handleApplyWithProfileCheck(job.id, job.title)
+                          }
+                        >
+                          Apply Now
+                        </Button>
                       )}
                     </div>
                   </CardContent>
@@ -579,9 +608,7 @@ export default function Jobs() {
                 >
                   Previous
                 </Button>
-                <span className="text-gray-600">
-                  Page {currentPage}
-                </span>
+                <span className="text-gray-600">Page {currentPage}</span>
                 <Button
                   variant="outline"
                   onClick={() => handlePageChange(currentPage + 1)}

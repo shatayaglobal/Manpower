@@ -81,11 +81,11 @@ export const usePosts = () => {
     return posts.find(post => post.id === id);
   }, [posts]);
 
-  const isPostLiked = useCallback((postId: string): boolean => {
-    return false; // Placeholder
+  const isPostLiked = useCallback((): boolean => {
+    return false;
   }, []);
 
-  const isPostPoked = useCallback((postId: string): boolean => {
+  const isPostPoked = useCallback((): boolean => {
     return false;
   }, []);
 

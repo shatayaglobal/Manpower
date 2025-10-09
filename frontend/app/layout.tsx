@@ -39,7 +39,8 @@ export default function RootLayout({
     >
       <body className="font-sans">
         <ReduxProvider>
-          <Navbar>{children}
+          <Navbar>
+            {children}
             <Toaster position="top-right" duration={3000} theme="light"/>
           </Navbar>
         </ReduxProvider>

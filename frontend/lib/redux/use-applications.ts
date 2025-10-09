@@ -1,8 +1,16 @@
-import { useDispatch, useSelector } from 'react-redux';
-import { useCallback } from 'react';
-import { AppDispatch } from './store';
-import { submitJobApplication, fetchUserApplications, clearError, fetchJobApplications } from './applicationsSlice';
-import { JobApplication } from '@/lib/types';
+import { useDispatch, useSelector } from "react-redux";
+import { useCallback } from "react";
+import { AppDispatch } from "./store";
+import {
+  submitJobApplication,
+  fetchUserApplications,
+  clearError,
+  fetchJobApplications,
+  fetchBusinessApplications,
+  updateApplicationStatus as updateApplicationStatusAction,
+} from "./applicationsSlice";
+
+import { JobApplication } from "@/lib/types";
 
 interface RootState {
   applications: {
@@ -13,12 +21,17 @@ interface RootState {
 }
 
 export const useApplications = () => {
-  const dispatch = useDispatch<AppDispatch>(); 
-  const { applications, loading, error } = useSelector((state: RootState) => state.applications);
+  const dispatch = useDispatch<AppDispatch>();
+  const { applications, loading, error } = useSelector(
+    (state: RootState) => state.applications
+  );
 
-  const submitApplication = useCallback((formData: FormData) => {
-    return dispatch(submitJobApplication(formData));
-  }, [dispatch]);
+  const submitApplication = useCallback(
+    (formData: FormData) => {
+      return dispatch(submitJobApplication(formData));
+    },
+    [dispatch]
+  );
 
   const loadUserApplications = useCallback(() => {
     return dispatch(fetchUserApplications());
@@ -28,10 +41,25 @@ export const useApplications = () => {
     dispatch(clearError());
   }, [dispatch]);
 
+  const loadJobApplications = useCallback(
+    (jobId: string, page: number = 1) => {
+      return dispatch(fetchJobApplications({ jobId, page }));
+    },
+    [dispatch]
+  );
 
-  const loadJobApplications = useCallback((jobId: string, page: number = 1) => {
-    return dispatch(fetchJobApplications({ jobId, page }));
+  const loadBusinessApplications = useCallback(() => {
+    return dispatch(fetchBusinessApplications());
   }, [dispatch]);
+
+  const updateApplicationStatus = useCallback(
+    (applicationId: string, status: string) => {
+      return dispatch(
+        updateApplicationStatusAction({ id: applicationId, status })
+      );
+    },
+    [dispatch]
+  );
 
   return {
     applications,
@@ -40,6 +68,8 @@ export const useApplications = () => {
     submitApplication,
     loadUserApplications,
     clearApplicationError,
-    loadJobApplications
+    loadJobApplications,
+    loadBusinessApplications,
+    updateApplicationStatus,
   };
 };

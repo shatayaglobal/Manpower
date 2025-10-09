@@ -1,13 +1,9 @@
 "use client";
 
-import React, { useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import React, { useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
@@ -21,7 +17,6 @@ import {
   Building,
   Briefcase,
   Calendar,
-  User,
   Loader2,
 } from "lucide-react";
 import { usePosts } from "@/lib/redux/usePosts";
@@ -31,7 +26,7 @@ interface AuthState {
   user: {
     id: string;
     email: string;
-    account_type: 'WORKER' | 'BUSINESS';
+    account_type: "WORKER" | "BUSINESS";
     first_name: string;
     last_name: string;
   } | null;
@@ -47,19 +42,21 @@ export default function JobDetailsPage() {
   const router = useRouter();
   const jobId = params.id as string;
 
-  const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { user, isAuthenticated } = useSelector(
+    (state: RootState) => state.auth
+  );
   const {
     selectedPost: job,
     loading,
     error,
     loadPost,
     likePost,
-    pokePost
+    pokePost,
   } = usePosts();
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/login');
+      router.push("/login");
       return;
     }
   }, [isAuthenticated, router]);
@@ -75,7 +72,7 @@ export default function JobDetailsPage() {
     try {
       await pokePost(job.id);
     } catch (error) {
-      console.error('Failed to save job:', error);
+      console.error("Failed to save job:", error);
     }
   };
 
@@ -84,16 +81,16 @@ export default function JobDetailsPage() {
     try {
       await likePost(job.id);
     } catch (error) {
-      console.error('Failed to like job:', error);
+      console.error("Failed to like job:", error);
     }
   };
 
   const formatJobType = (priority: string) => {
     const typeMap = {
-      'LOW': 'Low Priority',
-      'MEDIUM': 'Medium Priority',
-      'HIGH': 'High Priority',
-      'URGENT': 'Urgent'
+      LOW: "Low Priority",
+      MEDIUM: "Medium Priority",
+      HIGH: "High Priority",
+      URGENT: "Urgent",
     };
     return typeMap[priority as keyof typeof typeMap] || priority;
   };
@@ -109,7 +106,12 @@ export default function JobDetailsPage() {
   };
 
   const isBusinessUser = user?.account_type === "BUSINESS";
-  const isOwner = job && user && (typeof job.user === 'object' ? job.user.id === user.id : job.user === user.id);
+  const isOwner =
+    job &&
+    user &&
+    (typeof job.user === "object"
+      ? job.user.id === user.id
+      : job.user === user.id);
 
   if (!isAuthenticated || !user) {
     return (
@@ -121,7 +123,7 @@ export default function JobDetailsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex items-center justify-center py-20">
             <Loader2 className="h-8 w-8 animate-spin text-blue-700" />
@@ -133,7 +135,7 @@ export default function JobDetailsPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <Card className="border-red-200 bg-red-50">
             <CardContent className="p-6 text-center">
@@ -146,7 +148,7 @@ export default function JobDetailsPage() {
               <p className="text-red-700 mb-4">{error}</p>
               <Button
                 variant="outline"
-                onClick={() => router.push('/jobs')}
+                onClick={() => router.push("/jobs")}
                 className="border-red-300 text-red-700 hover:bg-red-100"
               >
                 Back to Jobs
@@ -160,7 +162,7 @@ export default function JobDetailsPage() {
 
   if (!job) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <Card>
             <CardContent className="p-6 text-center">
@@ -169,12 +171,10 @@ export default function JobDetailsPage() {
                 Job Not Found
               </h3>
               <p className="text-gray-600 mb-4">
-                The job you&apos;re looking for doesn&apos;t exist or has been removed.
+                The job you&apos;re looking for doesn&apos;t exist or has been
+                removed.
               </p>
-              <Button
-                variant="outline"
-                onClick={() => router.push('/jobs')}
-              >
+              <Button variant="outline" onClick={() => router.push("/jobs")}>
                 Back to Jobs
               </Button>
             </CardContent>
@@ -185,13 +185,13 @@ export default function JobDetailsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="min-h-screen bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header Navigation */}
         <div className="mb-4">
           <Button
             variant="ghost"
-            onClick={() => router.push('/jobs')}
+            onClick={() => router.push("/jobs")}
             className="text-blue-700 hover:text-blue-800 hover:bg-blue-50"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -211,10 +211,6 @@ export default function JobDetailsPage() {
                 <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
                   {job.title}
                 </h1>
-                <p className="text-lg text-blue-700 flex items-center gap-2 mb-3">
-                  <User className="h-4 w-4" />
-                  {job.user_name || (typeof job.user === 'object' ? job.user.email : job.user)}
-                </p>
 
                 {/* Meta Info */}
                 <div className="flex flex-wrap gap-4 text-sm text-gray-600">
@@ -240,7 +236,10 @@ export default function JobDetailsPage() {
               </div>
 
               <div className="flex flex-col gap-2">
-                <Badge variant="secondary" className="bg-blue-100 text-blue-800 font-medium">
+                <Badge
+                  variant="secondary"
+                  className="bg-blue-100 text-blue-800 font-medium"
+                >
                   {formatJobType(job.priority)}
                 </Badge>
               </div>
@@ -252,12 +251,14 @@ export default function JobDetailsPage() {
                 <>
                   <Button
                     className="bg-blue-700 hover:bg-blue-800"
-                    onClick={() => router.push(`/jobs/edit/${job.id}`)}
+                    onClick={() => router.push(`/jobs/${job.id}/edit`)}
                   >
                     <Edit className="h-4 w-4 mr-2" />
                     Edit Job
                   </Button>
-                  <Button variant="outline" className="border-gray-300"
+                  <Button
+                    variant="outline"
+                    className="border-gray-300"
                     onClick={() => router.push(`/jobs/${job.id}/applications`)}
                   >
                     <Users className="h-4 w-4 mr-2" />
@@ -269,9 +270,9 @@ export default function JobDetailsPage() {
                   <Button
                     className="bg-blue-700 hover:bg-blue-800 text-lg px-8 py-3"
                     onClick={() => router.push(`/jobs/${job.id}/apply`)}
-                    >
+                  >
                     Apply Now
-                    </Button>
+                  </Button>
                   <Button
                     variant="outline"
                     onClick={handleSaveJob}
@@ -331,7 +332,9 @@ export default function JobDetailsPage() {
                   </div>
                   {job.salary_range && (
                     <div>
-                      <span className="text-sm text-gray-500">Salary Range</span>
+                      <span className="text-sm text-gray-500">
+                        Salary Range
+                      </span>
                       <p className="font-medium">{job.salary_range}</p>
                     </div>
                   )}
@@ -347,7 +350,9 @@ export default function JobDetailsPage() {
                   </div>
                   {job.expires_at && (
                     <div>
-                      <span className="text-sm text-gray-500">Application Deadline</span>
+                      <span className="text-sm text-gray-500">
+                        Application Deadline
+                      </span>
                       <p className="font-medium flex items-center">
                         <Calendar className="h-4 w-4 mr-1 text-amber-600" />
                         {new Date(job.expires_at).toLocaleDateString()}
@@ -360,8 +365,12 @@ export default function JobDetailsPage() {
                     <>
                       {job.updated_at && job.updated_at !== job.created_at && (
                         <div>
-                          <span className="text-sm text-gray-500">Last Updated</span>
-                          <p className="font-medium">{formatDate(job.updated_at)}</p>
+                          <span className="text-sm text-gray-500">
+                            Last Updated
+                          </span>
+                          <p className="font-medium">
+                            {formatDate(job.updated_at)}
+                          </p>
                         </div>
                       )}
                     </>

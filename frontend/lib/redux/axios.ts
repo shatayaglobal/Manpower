@@ -1,9 +1,11 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios'
 import { refreshTokenThunk, logoutThunk } from './authSlice'
 
+// Import from config for consistency
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/',
+  baseURL: API_URL.endsWith('/') ? API_URL : `${API_URL}/`, // Ensure trailing slash
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -17,7 +19,6 @@ export const setupInterceptors = (store: typeof import('./store').store) => {
 
   axiosInstance.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
-
       const state = store.getState()
       const token = state.auth.accessToken
 
@@ -35,7 +36,6 @@ export const setupInterceptors = (store: typeof import('./store').store) => {
       return Promise.reject(error)
     }
   )
-
 
   axiosInstance.interceptors.response.use(
     (response: AxiosResponse) => {
@@ -58,7 +58,6 @@ export const setupInterceptors = (store: typeof import('./store').store) => {
 
         if (refreshToken) {
           try {
-
             const result = await store.dispatch(refreshTokenThunk(refreshToken))
 
             if (refreshTokenThunk.fulfilled.match(result)) {

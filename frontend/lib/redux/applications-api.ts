@@ -4,14 +4,25 @@ import { JobApplication, PaginatedResponse } from '@/lib/types';
 
 export const applicationsApi = {
   submitApplication: async (data: FormData) => {
-    const jobId = data.get('job') as string;
-    data.delete('job');
-    const response = await axiosInstance.post<JobApplication>(`posts/jobs/${jobId}/apply/`, data);
-    return response.data;
+    try {
+      const jobId = data.get('job') as string;
+      data.delete('job');
+      const response = await axiosInstance.post<JobApplication>(`posts/jobs/${jobId}/apply/`, data);
+      return response.data;
+    } catch (error) {
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { status?: number; data?: string[] } };
+        if (axiosError.response?.status === 400 && Array.isArray(axiosError.response.data)) {
+          throw new Error(axiosError.response.data[0]);
+        }
+      }
+      throw error;
+    }
   },
+
   getUserApplications: async () => {
-    const response = await axiosInstance.get<JobApplication[]>('applications/');
-    return response.data;
+    const response = await axiosInstance.get<PaginatedResponse<JobApplication>>('posts/applications/user/');
+    return response.data.results;
   },
 
   getApplication: async (id: string) => {
@@ -32,5 +43,15 @@ export const applicationsApi = {
     return response.data;
   },
 
+  getBusinessApplications: async () => {
+    const response = await axiosInstance.get<PaginatedResponse<JobApplication>>('posts/business/applications/');
+    return response.data.results;
+  },
 
+  updateApplicationStatus: async (applicationId: string, status: string) => {
+    const response = await axiosInstance.patch(`posts/applications/${applicationId}/status/`, {
+      status: status
+    });
+    return response.data;
+  },
 };

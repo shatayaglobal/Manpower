@@ -1,24 +1,29 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import React, { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Users, Loader2, FileText, Calendar, ChevronUp, Eye } from "lucide-react";
-import { useSelector } from 'react-redux';
+import {
+  ArrowLeft,
+  Users,
+  Loader2,
+  FileText,
+  Calendar,
+  ChevronUp,
+  Eye,
+} from "lucide-react";
+import { useSelector } from "react-redux";
 import { usePosts } from "@/lib/redux/usePosts";
 import { useApplications } from "@/lib/redux/use-applications";
-import { JobApplication } from '@/lib/types';
+import { JobApplication } from "@/lib/types";
 
 interface AuthState {
   user: {
     id: string;
     email: string;
-    account_type: 'WORKER' | 'BUSINESS';
+    account_type: "WORKER" | "BUSINESS";
     first_name: string;
     last_name: string;
   } | null;
@@ -48,23 +53,25 @@ export default function JobApplicationsPage() {
   const jobId = params.id as string;
 
   // Redux selectors
-  const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { user, isAuthenticated } = useSelector(
+    (state: RootState) => state.auth
+  );
   const { selectedPost: job, loadPost } = usePosts();
   const {
     applications,
     loading: applicationsLoading,
     error: applicationsError,
-    loadJobApplications
+    loadJobApplications,
   } = useApplications();
 
-  const [expandedApplications, setExpandedApplications] = useState<Set<string>>(new Set());
-  const [statusFilter, setStatusFilter] = useState<string>('ALL');
-
-
+  const [expandedApplications, setExpandedApplications] = useState<Set<string>>(
+    new Set()
+  );
+  const [statusFilter, setStatusFilter] = useState<string>("ALL");
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/login');
+      router.push("/login");
       return;
     }
     if (jobId && isAuthenticated) {
@@ -83,8 +90,8 @@ export default function JobApplicationsPage() {
     setExpandedApplications(newExpanded);
   };
 
-  const filteredApplications = applications.filter(app => {
-    if (statusFilter === 'ALL') return true;
+  const filteredApplications = applications.filter((app) => {
+    if (statusFilter === "ALL") return true;
     return app.status === statusFilter;
   });
 
@@ -93,7 +100,12 @@ export default function JobApplicationsPage() {
     return acc;
   }, {} as Record<string, number>);
 
-  const isOwner = job && user && (typeof job.user === 'object' ? job.user.id === user.id : job.user === user.id);
+  const isOwner =
+    job &&
+    user &&
+    (typeof job.user === "object"
+      ? job.user.id === user.id
+      : job.user === user.id);
 
   if (!isAuthenticated || !user) {
     return (
@@ -105,8 +117,8 @@ export default function JobApplicationsPage() {
 
   if (!isOwner) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="min-h-screen bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <Card className="border-red-200 bg-red-50">
             <CardContent className="p-6 text-center">
               <div className="text-red-600 mb-4">
@@ -120,7 +132,7 @@ export default function JobApplicationsPage() {
               </p>
               <Button
                 variant="outline"
-                onClick={() => router.push('/jobs')}
+                onClick={() => router.push("/jobs")}
                 className="border-red-300 text-red-700 hover:bg-red-100"
               >
                 Back to Jobs
@@ -134,7 +146,7 @@ export default function JobApplicationsPage() {
 
   if (applicationsLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-whites">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex items-center justify-center py-20">
             <Loader2 className="h-8 w-8 animate-spin text-blue-700" />
@@ -146,7 +158,7 @@ export default function JobApplicationsPage() {
 
   if (applicationsError) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <Card className="border-red-200 bg-red-50">
             <CardContent className="p-6 text-center">
@@ -159,7 +171,7 @@ export default function JobApplicationsPage() {
               <p className="text-red-700 mb-4">{applicationsError}</p>
               <Button
                 variant="outline"
-                onClick={() => router.push('/jobs')}
+                onClick={() => router.push("/jobs")}
                 className="border-red-300 text-red-700 hover:bg-red-100"
               >
                 Back to Jobs
@@ -172,27 +184,28 @@ export default function JobApplicationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Header Navigation */}
-        <div className="mb-4">
-          <Button
-            variant="ghost"
-            onClick={() => router.push(`/jobs/${jobId}`)}
-            className="text-blue-700 hover:text-blue-800 hover:bg-blue-50"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Job Details
-          </Button>
-        </div>
-
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Applications for {job?.title || 'Job'}
-          </h1>
+        <div className="mb-6 mt-10">
+          <div className="flex items-center gap-2 mb-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => router.push(`/jobs/${jobId}`)}
+              className="text-blue-700 hover:text-blue-800 hover:bg-blue-50 p-2 -ml-4"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Applications for {job?.title || "Job"}
+            </h1>
+          </div>
           <p className="text-gray-600">
-            {applications.length} {applications.length === 1 ? 'application' : 'applications'} received
+            {applications.length}{" "}
+            {applications.length === 1 ? "application" : "applications"}{" "}
+            received
           </p>
         </div>
 
@@ -200,44 +213,44 @@ export default function JobApplicationsPage() {
         <div className="mb-6">
           <div className="flex flex-wrap gap-2">
             <Button
-              variant={statusFilter === 'ALL' ? 'default' : 'outline'}
+              variant={statusFilter === "ALL" ? "default" : "outline"}
               size="sm"
-              onClick={() => setStatusFilter('ALL')}
+              onClick={() => setStatusFilter("ALL")}
               className="text-sm"
             >
               All ({applications.length})
             </Button>
             <Button
-              variant={statusFilter === 'PENDING' ? 'default' : 'outline'}
+              variant={statusFilter === "PENDING" ? "default" : "outline"}
               size="sm"
-              onClick={() => setStatusFilter('PENDING')}
+              onClick={() => setStatusFilter("PENDING")}
               className="text-sm"
             >
-              Pending ({statusCounts['PENDING'] || 0})
+              Pending ({statusCounts["PENDING"] || 0})
             </Button>
             <Button
-              variant={statusFilter === 'REVIEWED' ? 'default' : 'outline'}
+              variant={statusFilter === "REVIEWED" ? "default" : "outline"}
               size="sm"
-              onClick={() => setStatusFilter('REVIEWED')}
+              onClick={() => setStatusFilter("REVIEWED")}
               className="text-sm"
             >
-              Reviewed ({statusCounts['REVIEWED'] || 0})
+              Reviewed ({statusCounts["REVIEWED"] || 0})
             </Button>
             <Button
-              variant={statusFilter === 'ACCEPTED' ? 'default' : 'outline'}
+              variant={statusFilter === "ACCEPTED" ? "default" : "outline"}
               size="sm"
-              onClick={() => setStatusFilter('ACCEPTED')}
+              onClick={() => setStatusFilter("ACCEPTED")}
               className="text-sm"
             >
-              Accepted ({statusCounts['ACCEPTED'] || 0})
+              Accepted ({statusCounts["ACCEPTED"] || 0})
             </Button>
             <Button
-              variant={statusFilter === 'REJECTED' ? 'default' : 'outline'}
+              variant={statusFilter === "REJECTED" ? "default" : "outline"}
               size="sm"
-              onClick={() => setStatusFilter('REJECTED')}
+              onClick={() => setStatusFilter("REJECTED")}
               className="text-sm"
             >
-              Rejected ({statusCounts['REJECTED'] || 0})
+              Rejected ({statusCounts["REJECTED"] || 0})
             </Button>
           </div>
         </div>
@@ -252,7 +265,7 @@ export default function JobApplicationsPage() {
                   No Applications Found
                 </h3>
                 <p className="text-gray-600">
-                  {statusFilter === 'ALL'
+                  {statusFilter === "ALL"
                     ? "No one has applied to this job yet."
                     : `No ${statusFilter.toLowerCase()} applications found.`}
                 </p>
@@ -262,7 +275,10 @@ export default function JobApplicationsPage() {
             filteredApplications.map((application) => {
               const isExpanded = expandedApplications.has(application.id);
               return (
-                <Card key={application.id} className="border-gray-200 hover:shadow-md transition-shadow">
+                <Card
+                  key={application.id}
+                  className="border-gray-200 hover:shadow-md transition-shadow"
+                >
                   <CardContent className="p-4">
                     {/* Compact View */}
                     <div className="flex items-center justify-between">
@@ -275,10 +291,13 @@ export default function JobApplicationsPage() {
                             <Badge
                               variant="outline"
                               className={
-                                application.status === 'ACCEPTED' ? 'border-green-300 text-green-700 bg-green-50' :
-                                application.status === 'REJECTED' ? 'border-red-300 text-red-700 bg-red-50' :
-                                application.status === 'PENDING' ? 'border-yellow-300 text-yellow-700 bg-yellow-50' :
-                                'border-blue-300 text-blue-700 bg-blue-50'
+                                application.status === "ACCEPTED"
+                                  ? "border-green-300 text-green-700 bg-green-50"
+                                  : application.status === "REJECTED"
+                                  ? "border-red-300 text-red-700 bg-red-50"
+                                  : application.status === "PENDING"
+                                  ? "border-yellow-300 text-yellow-700 bg-yellow-50"
+                                  : "border-blue-300 text-blue-700 bg-blue-50"
                               }
                             >
                               {application.status}
@@ -302,7 +321,7 @@ export default function JobApplicationsPage() {
                             </a>
                           )}
 
-                          {application.status === 'PENDING' && (
+                          {application.status === "PENDING" && (
                             <div className="flex gap-1">
                               <Button
                                 size="sm"
@@ -327,7 +346,11 @@ export default function JobApplicationsPage() {
                             onClick={() => toggleExpanded(application.id)}
                             className="p-2"
                           >
-                            {isExpanded ? <ChevronUp className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            {isExpanded ? (
+                              <ChevronUp className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
                           </Button>
                         </div>
                       </div>
@@ -337,7 +360,9 @@ export default function JobApplicationsPage() {
                     {isExpanded && (
                       <div className="mt-4 pt-4 border-t border-gray-200 space-y-4">
                         <div>
-                          <h4 className="text-sm font-medium text-gray-900 mb-2">Cover Letter</h4>
+                          <h4 className="text-sm font-medium text-gray-900 mb-2">
+                            Cover Letter
+                          </h4>
                           <div className="bg-gray-50 p-3 rounded-md max-h-32 overflow-y-auto">
                             <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">
                               {application.cover_letter}
@@ -347,7 +372,9 @@ export default function JobApplicationsPage() {
 
                         {application.additional_info && (
                           <div>
-                            <h4 className="text-sm font-medium text-gray-900 mb-2">Additional Information</h4>
+                            <h4 className="text-sm font-medium text-gray-900 mb-2">
+                              Additional Information
+                            </h4>
                             <div className="bg-gray-50 p-3 rounded-md">
                               <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">
                                 {application.additional_info}
@@ -379,7 +406,3 @@ export default function JobApplicationsPage() {
     </div>
   );
 }
-function updateApplicationStatus(arg0: { id: string; status: "ACCEPTED" | "REJECTED"; }) {
-  throw new Error('Function not implemented.');
-}
-
