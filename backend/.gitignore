@@ -1,31 +1,40 @@
+# Environment variables - NEVER COMMIT THESE
 .env
-env.example
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
 .venv
-*.pyc
-__pycache__
-*.pyo
-*.pyd
-*.db
-*.sqlite3
-*.egg-info
-.DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production
+staticfiles/
+# Django
 *.log
-*.pot
-*.mo
-*.po
-*.coverage
-.coverage.*
-*.cache
-*.egg
+db.sqlite3
+db.sqlite3-journal
+/media
+/staticfiles
+/static
 
+# Database
+*.sqlite3
 
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
 
-*.egg-info
-.installed.cfg
-*.egg-info/
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
 
 

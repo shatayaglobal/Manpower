@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.conf import settings
+from authentication.models import UserProfile
 from .models import JobApplication, Post, Like, Poke, Comment
 from drf_spectacular.utils import extend_schema_field
 
@@ -53,15 +54,26 @@ class PostSerializer(serializers.ModelSerializer):
 
 class PostListSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source='user.full_name', read_only=True)
+    user = serializers.SerializerMethodField()  # Add this for user details
     total_likes = serializers.SerializerMethodField()
     total_comments = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
         fields = [
-            'id', 'user_name', 'title', 'post_type', 'location',
+            'id', 'user', 'user_name', 'title', 'post_type', 'location',
+            'salary_range', 'description',  # Add these fields
             'total_likes', 'total_comments', 'created_at'
         ]
+
+    def get_user(self, obj):
+        """Return user details for job applications"""
+        return {
+            'id': obj.user.id,
+            'email': obj.user.email,
+            'first_name': obj.user.first_name,
+            'last_name': obj.user.last_name,
+        }
 
     @extend_schema_field(serializers.IntegerField)
     def get_total_likes(self, obj) -> int:
@@ -102,19 +114,48 @@ class PokeSerializer(serializers.ModelSerializer):
 
 
 class JobApplicationSerializer(serializers.ModelSerializer):
+    cover_letter = serializers.CharField(required=False, allow_blank=True)
+    resume = serializers.FileField(required=False, allow_null=True)
+    additional_info = serializers.CharField(required=False, allow_blank=True)
+
     class Meta:
         model = JobApplication
         fields = ['cover_letter', 'resume', 'additional_info']
+
+    def validate(self, attrs):
+        request = self.context['request']
+
+        # Set default cover letter if not provided
+        if not attrs.get('cover_letter'):
+            attrs['cover_letter'] = "Application submitted via profile"
+
+        # Handle resume from profile if not uploaded
+        if not attrs.get('resume'):
+            try:
+                user_profile = request.user.profile
+                if user_profile.resume:
+                    attrs['resume'] = user_profile.resume
+                else:
+                    raise serializers.ValidationError({
+                        'resume': ['No resume found. Please upload a resume to your profile first.']
+                    })
+            except UserProfile.DoesNotExist:
+                raise serializers.ValidationError({
+                    'profile': ['Profile not found. Please create your profile first.']
+                })
+
+        return attrs
 
 
 class JobApplicationListSerializer(serializers.ModelSerializer):
     applicant_name = serializers.SerializerMethodField()
     resume_url = serializers.SerializerMethodField()
+    job = PostListSerializer(read_only=True)
 
     class Meta:
         model = JobApplication
         fields = [
-            'id', 'applicant', 'applicant_name', 'cover_letter',
+            'id', 'applicant', 'applicant_name', 'cover_letter','job',
             'resume', 'resume_url', 'additional_info', 'status',
             'created_at', 'updated_at', 'reviewed_at'
         ]
@@ -129,3 +170,20 @@ class JobApplicationListSerializer(serializers.ModelSerializer):
         if obj.resume:
             return obj.resume.url
         return None
+
+
+
+class ApplicationStatusUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JobApplication
+        fields = ['status']
+
+    def validate_status(self, value):
+        instance = self.instance
+        if instance and instance.status in ['ACCEPTED', 'REJECTED']:
+            raise serializers.ValidationError("Cannot change status of finalized applications")
+
+        allowed_statuses = ['PENDING', 'REVIEWED', 'ACCEPTED', 'REJECTED']
+        if value not in allowed_statuses:
+            raise serializers.ValidationError(f"Status must be one of: {allowed_statuses}")
+        return value

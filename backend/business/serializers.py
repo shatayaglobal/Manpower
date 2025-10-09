@@ -7,6 +7,7 @@ class BusinessSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source='user.full_name', read_only=True)
     total_staff = serializers.SerializerMethodField()
     total_active_staff = serializers.SerializerMethodField()
+    website = serializers.URLField(required=False, allow_blank=True)
 
     class Meta:
         model = Business

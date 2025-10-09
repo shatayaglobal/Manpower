@@ -148,22 +148,36 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = [
-            'id', 'user_email', 'user_name', 'account_type', 'address',
-            'phone', 'profession', 'avatar', 'bio', 'date_of_birth',
-            'linkedin_url', 'website_url', 'created_at', 'updated_at'
+            'id', 'user_email', 'user_name', 'account_type',
+            # Personal Information
+            'address', 'city', 'state', 'country', 'postal_code',
+            'phone', 'alternate_phone', 'date_of_birth', 'gender',
+            'marital_status', 'nationality',
+            # Professional Information
+            'profession', 'current_job_title', 'current_company',
+            'employment_status', 'experience_level', 'years_of_experience',
+            'bio', 'objective',
+            # Skills and arrays
+            'skills', 'languages', 'certifications', 'work_experience', 'education',
+            # Additional
+            'hobbies', 'achievements', 'references',
+            # Salary and availability
+            'expected_salary_min', 'expected_salary_max', 'salary_currency',
+            'available_for_work', 'availability_date', 'willing_to_relocate', 'travel_willingness',
+            # Files
+            'avatar', 'resume', 'portfolio',
+            # Social links
+            'linkedin_url', 'github_url', 'portfolio_url', 'website_url', 'twitter_url',
+            # Privacy
+            'profile_visibility', 'email_notifications', 'sms_notifications',
+            # Emergency contact
+            'emergency_contact_name', 'emergency_contact_phone', 'emergency_contact_relationship',
+            # Timestamps
+            'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
-        extra_kwargs = {
-            'address': {'help_text': 'User address'},
-            'phone': {'help_text': 'User phone number'},
-            'profession': {'help_text': 'User profession/job title'},
-            'bio': {'help_text': 'User biography/description'},
-            'date_of_birth': {'help_text': 'User date of birth'},
-            'linkedin_url': {'help_text': 'LinkedIn profile URL'},
-            'website_url': {'help_text': 'Personal website URL'},
-        }
 
-
+        
 class UserSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(read_only=True)
     full_name = serializers.SerializerMethodField()

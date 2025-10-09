@@ -8,7 +8,7 @@ app_name = 'authentication'
 urlpatterns = [
     # JWT Authentication endpoints
     path('login/', views.CustomTokenObtainPairView.as_view(), name='login'),
-    path('token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),  
+    path('token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
     path('register/', views.UserRegistrationView.as_view(), name='register'),
     path('logout/', views.LogoutView.as_view(), name='logout'),
     path('google-auth/', views.GoogleAuthView.as_view(), name='google-auth'),
@@ -21,4 +21,7 @@ urlpatterns = [
     path('users/<uuid:id>/', views.UserRetrieveUpdateDestroyView.as_view(), name='user-detail'),
     path('profiles/', views.UserProfileListCreateView.as_view(), name='profile-list-create'),
     path('profiles/<uuid:id>/', views.UserProfileRetrieveUpdateDestroyView.as_view(), name='profile-detail'),
+
+    # NEW: Profile completion check endpoint
+    path('profile/check-complete/', views.check_profile_complete, name='check-profile-complete'),
 ]

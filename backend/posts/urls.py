@@ -18,4 +18,11 @@ urlpatterns = [
 
     path('jobs/<uuid:job_id>/applications/', views.JobApplicationListView.as_view(), name='job-applications'),
     path('applications/<uuid:pk>/', views.JobApplicationUpdateView.as_view(), name='application-detail'),
+
+
+
+    path('applications/user/', views.UserApplicationsListView.as_view(), name='user-applications'),
+    path('business/applications/', views.BusinessApplicationsListView.as_view(), name='business-applications'),
+
+    path('applications/<uuid:pk>/status/', views.ApplicationStatusUpdateView.as_view(), name='application-status-update'),
 ]

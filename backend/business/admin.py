@@ -5,9 +5,9 @@ from .models import Business, ContactUs
 
 @admin.register(Business)
 class BusinessAdmin(admin.ModelAdmin):
-    list_display = ['name', 'business_id', 'user', 'category', 'size', 'city', 'is_verified', 'is_active', 'created_at']
+    list_display = ['name', 'business_id', 'user', 'category', 'size', 'city', 'country', 'is_verified', 'is_active', 'created_at']
     list_filter = ['category', 'size', 'is_verified', 'is_active', 'created_at', 'city', 'country']
-    search_fields = ['name', 'business_id', 'user__email', 'description']
+    search_fields = ['name', 'business_id', 'user__email', 'description', 'email', 'phone']
     readonly_fields = ['business_id', 'slug', 'verification_token', 'created_at', 'updated_at']
     ordering = ['-created_at']
     actions = ['verify_businesses', 'unverify_businesses']

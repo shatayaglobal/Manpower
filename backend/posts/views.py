@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend # type: ignore
 from rest_framework.filters import SearchFilter, OrderingFilter
@@ -12,7 +12,7 @@ from drf_spectacular.openapi import OpenApiResponse
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from .models import JobApplication, Post, Like, Poke, Comment
 from .serializers import (
-    JobApplicationListSerializer, PostSerializer, PostListSerializer, CommentSerializer,
+    ApplicationStatusUpdateSerializer, JobApplicationListSerializer, PostSerializer, PostListSerializer, CommentSerializer,
     LikeSerializer, PokeSerializer, CommentSerializer, JobApplicationSerializer
 )
 from rest_framework.views import APIView
@@ -22,7 +22,7 @@ class PostListCreateView(ListCreateAPIView):
     queryset = Post.objects.filter(is_active=True)
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['post_type', 'priority', 'location', 'user__account_type']
+    filterset_fields = ['post_type', 'priority', 'location', 'user__account_type', 'user']
     search_fields = ['title', 'description', 'location']
     ordering_fields = ['created_at', 'priority', 'view_count']
     ordering = ['-created_at']
@@ -341,4 +341,88 @@ class JobApplicationUpdateView(UpdateAPIView):
         serializer.save(
             reviewed_by=self.request.user,
             reviewed_at=timezone.now()
+        )
+
+
+class UserApplicationsListView(ListAPIView):
+    serializer_class = JobApplicationListSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [OrderingFilter]
+    ordering = ['-created_at']
+
+    def get_queryset(self):
+        # Return applications for the current user
+        return JobApplication.objects.filter(
+            applicant=self.request.user
+        ).select_related('job', 'job__user')
+
+
+
+class BusinessApplicationsListView(ListAPIView):
+    serializer_class = JobApplicationListSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = ['status', 'job']
+    ordering = ['-created_at']
+
+    def get_queryset(self):
+        if self.request.user.account_type != 'BUSINESS':
+            return JobApplication.objects.none()
+
+        return JobApplication.objects.filter(
+            job__user=self.request.user,
+            job__is_active=True
+        ).select_related('job', 'applicant')
+
+
+class ApplicationStatusUpdateView(UpdateAPIView):
+    serializer_class = ApplicationStatusUpdateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return JobApplication.objects.all()
+
+    def perform_update(self, serializer):
+        application = self.get_object()
+
+        # Only job owner can update status
+        if application.job.user != self.request.user:
+            raise PermissionDenied("You can only update applications for your own jobs")
+
+        # Store old status before updating
+        old_status = application.status
+
+        from django.utils import timezone
+        serializer.save(
+            reviewed_by=self.request.user,
+            reviewed_at=timezone.now()
+        )
+
+        # Get the new status after save
+        new_status = serializer.validated_data.get('status', old_status)
+
+        # Create automatic message if status changed to ACCEPTED or REJECTED
+        if old_status != new_status and new_status in ['ACCEPTED', 'REJECTED']:
+            self.create_application_message(application, new_status)
+
+    def create_application_message(self, job_application, new_status):
+        """Create automatic message when application status changes"""
+        from messaging.models import Messages
+
+        if new_status == 'ACCEPTED':
+            message_text = f"🎉 Congratulations! Your application for '{job_application.job.title}' has been accepted. The employer is now available to chat with you about next steps."
+            message_type = 'APPLICATION_ACCEPTED'
+        elif new_status == 'REJECTED':
+            message_text = f"Thank you for your interest in '{job_application.job.title}'. Unfortunately, your application was not selected this time. Keep applying - the right opportunity is out there!"
+            message_type = 'APPLICATION_REJECTED'
+        else:
+            return None
+
+        # Create the message
+        Messages.objects.create(
+            sender=job_application.job.user,  # Business owner
+            receiver=job_application.applicant,  # Worker
+            message=message_text,
+            message_type=message_type,
+            job_application=job_application
         )

@@ -18,6 +18,7 @@ from django.utils.encoding import force_bytes
 from django.conf import settings
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.openapi import OpenApiResponse
+from rest_framework.decorators import api_view, permission_classes
 
 from .models import User, UserProfile
 from .serializers import (
@@ -26,6 +27,7 @@ from .serializers import (
     ChangePasswordSerializer, PasswordResetSerializer
 )
 from . import serializers
+from rest_framework.decorators import api_view
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -513,3 +515,29 @@ class UserProfileRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     )
     def delete(self, request, *args, **kwargs):
         return super().delete(request, *args, **kwargs)
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def check_profile_complete(request):
+    user = request.user
+
+    if user.account_type != 'WORKER':
+        return Response({
+            'is_complete': True,
+            'completion_percentage': 100,
+            'message': 'Business accounts do not require profile completion'
+        })
+
+    try:
+        profile = user.profile
+    except UserProfile.DoesNotExist:
+        profile = UserProfile.objects.create(user=user)
+
+    return Response({
+        'is_complete': profile.is_application_ready,  # Use new property
+        'completion_percentage': profile.completion_percentage,
+        'missing_fields': profile.missing_application_fields,  # Use new property
+        'message': 'Profile completion status retrieved successfully'
+    }, status=status.HTTP_200_OK)

@@ -16,13 +16,11 @@ from .serializers import BusinessSerializer, BusinessListSerializer, ContactUsSe
 
 
 class BusinessListCreateView(ListCreateAPIView):
-    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['category', 'size', 'city', 'country', 'is_verified']
     search_fields = ['name', 'business_id', 'description', 'city']
     ordering_fields = ['created_at', 'name', 'size']
     ordering = ['-created_at']
-
 
     def get_queryset(self):
         if getattr(self, 'swagger_fake_view', False):
@@ -30,8 +28,10 @@ class BusinessListCreateView(ListCreateAPIView):
 
         user = self.request.user
         if user.account_type == 'BUSINESS':
+            # Business users only see their own business
             return Business.objects.filter(user=user)
         else:
+            # Workers see all verified, active businesses
             return Business.objects.filter(is_verified=True, is_active=True)
 
     def get_serializer_class(self):
@@ -43,7 +43,14 @@ class BusinessListCreateView(ListCreateAPIView):
         if self.request.user.account_type != 'BUSINESS':
             from rest_framework.exceptions import PermissionDenied
             raise PermissionDenied("Only business accounts can create businesses")
-        serializer.save(user=self.request.user)
+
+        # CHECK: Enforce one business per account
+        existing_business = Business.objects.filter(user=self.request.user).first()
+        if existing_business:
+            from rest_framework.exceptions import ValidationError
+            raise ValidationError("You can only create one business per account")
+
+        serializer.save(user=self.request.user, is_verified=True)
 
     @extend_schema(
         summary="List businesses",
@@ -60,12 +67,14 @@ class BusinessListCreateView(ListCreateAPIView):
 
     @extend_schema(
         summary="Create business",
-        description="Register new business (business accounts only)",
+        description="Register new business (business accounts only, one per account)",
         request=BusinessSerializer,
         responses={201: BusinessSerializer}
     )
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
+
+
 
 
 class BusinessRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
