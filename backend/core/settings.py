@@ -284,22 +284,32 @@ SPECTACULAR_SETTINGS = {
 
 # CORS settings
 # CORS settings
+# CORS settings
 FRONTEND_URL = env('FRONTEND_URL', default='http://localhost:3000')
+
+# Base CORS origins - always include localhost for development
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
 
+# Add production URLs
+if not DEBUG:
+    CORS_ALLOWED_ORIGINS.extend([
+        "https://www.shatayaglobal.com",
+        "https://shatayaglobal.com",
+    ])
+
+# Also add FRONTEND_URL if it's different
 if FRONTEND_URL and FRONTEND_URL not in CORS_ALLOWED_ORIGINS:
     CORS_ALLOWED_ORIGINS.append(FRONTEND_URL)
 
-# For JWT, we don't need credentials (cookies)
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_HEADERS = [
     "accept",
     "accept-encoding",
-    "authorization",  # Essential for JWT Bearer tokens
+    "authorization",
     "content-type",
     "dnt",
     "origin",
@@ -317,7 +327,6 @@ CORS_ALLOW_METHODS = [
     'POST',
     'PUT',
 ]
-
 # Security settings for production
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
