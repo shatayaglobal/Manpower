@@ -109,41 +109,46 @@ export default function AppLayout({ children }: AppLayoutProps) {
   }, [isAuthenticated, user?.id, dispatch, user, getUnreadCount]);
 
   return (
-    <div className="min-h-screen bg-white mt-4">
-      {/* Header/Navbar */}
-      <header className="bg-white/95 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-md sm:max-w-2xl lg:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-14 sm:h-16">
-            <Link href="/" className="flex items-center space-x-2 sm:space-x-3">
-              <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-full overflow-hidden shadow-sm border-2 border-white bg-white">
+    <div className="min-h-screen bg-white">
+      {/* Header/Navbar - Fixed positioning */}
+      <header className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-b border-gray-200 z-50 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <Link
+              href="/"
+              className="flex items-center space-x-2 flex-shrink-0"
+            >
+              <div className="w-10 h-10 rounded-full overflow-hidden shadow-sm border-2 border-white bg-white">
                 <Image
                   src="/shataya.jpeg"
                   alt="ShatayaGlobal Ltd"
-                  width={48}
-                  height={48}
+                  width={40}
+                  height={40}
                   className="w-full h-full object-cover"
                   priority
                 />
               </div>
-              <span className="font-semibold text-lg sm:text-xl text-gray-900">
+              <span className="font-semibold text-base sm:text-lg lg:text-xl text-gray-900 hidden xs:block">
                 ShatayaGlobal Ltd
               </span>
             </Link>
+
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-4 sm:space-x-6">
+            <nav className="hidden lg:flex items-center space-x-6">
               {isAuthenticated ? (
                 <>
                   {isBusinessUser && (
                     <>
                       <Link
                         href="/jobs"
-                        className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm sm:text-base flex items-center gap-1"
+                        className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm"
                       >
                         Manage Jobs
                       </Link>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <button className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm sm:text-base flex items-center gap-1">
+                          <button className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm flex items-center gap-1">
                             Business
                             <ChevronDown className="h-3 w-3" />
                           </button>
@@ -202,15 +207,15 @@ export default function AppLayout({ children }: AppLayoutProps) {
                     <>
                       <Link
                         href="/companies"
-                        className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm sm:text-base flex items-center gap-1"
+                        className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm flex items-center gap-1"
                       >
                         <Building className="h-4 w-4" />
-                        Browse Companies
+                        Companies
                       </Link>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <button className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm sm:text-base flex items-center gap-1">
-                            Jobs & Applications
+                          <button className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm flex items-center gap-1">
+                            Jobs
                             <ChevronDown className="h-3 w-3" />
                           </button>
                         </DropdownMenuTrigger>
@@ -245,19 +250,19 @@ export default function AppLayout({ children }: AppLayoutProps) {
                   )}
                   <Link
                     href="/messages"
-                    className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm sm:text-base flex items-center gap-1 relative"
+                    className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm flex items-center gap-1 relative"
                   >
                     <MessageCircle className="h-4 w-4" />
-                    Messages
+                    <span className="hidden xl:inline">Messages</span>
                     {unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 sm:h-5 w-4 sm:w-5 flex items-center justify-center min-w-[1.25rem]">
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center text-[10px]">
                         {unreadCount > 99 ? "99+" : unreadCount}
                       </span>
                     )}
                   </Link>
                   <Link
                     href="/blog"
-                    className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm sm:text-base flex items-center gap-1"
+                    className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm"
                   >
                     Blog
                   </Link>
@@ -266,13 +271,13 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 <>
                   <Link
                     href="/about"
-                    className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm sm:text-base"
+                    className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm"
                   >
                     About
                   </Link>
                   <Link
                     href="/contact"
-                    className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm sm:text-base"
+                    className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm"
                   >
                     Contact
                   </Link>
@@ -280,176 +285,33 @@ export default function AppLayout({ children }: AppLayoutProps) {
               )}
             </nav>
 
-            {/* Mobile Navigation */}
-            <div className="md:hidden">
-              <DropdownMenu
-                open={isMobileMenuOpen}
-                onOpenChange={setIsMobileMenuOpen}
-              >
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <Menu className="h-6 w-6" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  {isAuthenticated ? (
-                    <>
-                      {isBusinessUser && (
-                        <>
-                          <DropdownMenuItem asChild>
-                            <Link href="/jobs" className="flex items-center">
-                              Manage Jobs
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem asChild>
-                            <Link
-                              href="/post-job"
-                              className="flex items-center"
-                            >
-                              <Briefcase className="mr-2 h-4 w-4" />
-                              Post New Job
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link
-                              href="/manage-applications"
-                              className="flex items-center"
-                            >
-                              <UserCheck className="mr-2 h-4 w-4" />
-                              Manage Applications
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link
-                              href="/business"
-                              className="flex items-center"
-                            >
-                              <Building className="mr-2 h-4 w-4" />
-                              My Business
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link href="/staff" className="flex items-center">
-                              <UserCheck className="mr-2 h-4 w-4" />
-                              Staff Management
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link href="/shifts" className="flex items-center">
-                              <Calendar className="mr-2 h-4 w-4" />
-                              Shift Scheduling
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link href="/hours" className="flex items-center">
-                              <Clock className="mr-2 h-4 w-4" />
-                              Hours & Attendance
-                            </Link>
-                          </DropdownMenuItem>
-                        </>
-                      )}
-                      {isWorkerUser && (
-                        <>
-                          <DropdownMenuItem asChild>
-                            <Link
-                              href="/companies"
-                              className="flex items-center"
-                            >
-                              <Building className="mr-2 h-4 w-4" />
-                              Browse Companies
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem asChild>
-                            <Link href="/jobs" className="flex items-center">
-                              <Search className="mr-2 h-4 w-4" />
-                              Search All Jobs
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link
-                              href="/jobs/job-applications"
-                              className="flex items-center"
-                            >
-                              <Briefcase className="mr-2 h-4 w-4" />
-                              My Applications
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link
-                              href="/jobs/saved"
-                              className="flex items-center"
-                            >
-                              <UserCheck className="mr-2 h-4 w-4" />
-                              Saved Jobs
-                            </Link>
-                          </DropdownMenuItem>
-                        </>
-                      )}
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild>
-                        <Link
-                          href="/messages"
-                          className="flex items-center relative"
-                        >
-                          <MessageCircle className="mr-2 h-4 w-4" />
-                          Messages
-                          {unreadCount > 0 && (
-                            <span className="absolute left-6 top-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                              {unreadCount > 99 ? "99+" : unreadCount}
-                            </span>
-                          )}
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/blog" className="flex items-center">
-                          Blog
-                        </Link>
-                      </DropdownMenuItem>
-                    </>
-                  ) : (
-                    <>
-                      <DropdownMenuItem asChild>
-                        <Link href="/about" className="flex items-center">
-                          About
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/contact" className="flex items-center">
-                          Contact
-                        </Link>
-                      </DropdownMenuItem>
-                    </>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-
-            {/* Authentication Section */}
-            <div className="flex items-center space-x-2 sm:space-x-3">
+            {/* Right side - Auth/Profile + Mobile Menu */}
+            <div className="flex items-center gap-2">
+              {/* Authentication Section */}
               {isAuthenticated && user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-1 sm:py-2 hover:bg-gray-100"
+                      className="flex items-center space-x-2 px-2 py-1 hover:bg-gray-100 h-10"
                     >
-                      <div className="w-7 sm:w-8 h-7 sm:h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs sm:text-sm font-medium">
+                      <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
                         {getUserInitials()}
                       </div>
-                      <span className="text-gray-700 font-medium hidden sm:block text-sm sm:text-base">
+                      <span className="text-gray-700 font-medium hidden md:block text-sm max-w-[100px] truncate">
                         {getUserDisplayName()}
                       </span>
-                      <ChevronDown className="h-4 w-4 text-gray-500" />
+                      <ChevronDown className="h-4 w-4 text-gray-500 hidden md:block" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
                     <div className="px-2 py-1.5">
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-gray-900 truncate">
                         {getUserDisplayName()}
                       </p>
-                      <p className="text-xs text-gray-500">{user.email}</p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {user.email}
+                      </p>
                       {user.account_type && (
                         <p className="text-xs text-blue-500 capitalize mt-1">
                           {user.account_type.toLowerCase()} Account
@@ -480,32 +342,220 @@ export default function AppLayout({ children }: AppLayoutProps) {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <>
+                <div className="hidden md:flex items-center gap-2">
                   <Button
                     variant="ghost"
-                    className="text-gray-600 hover:text-blue-500 text-sm sm:text-base px-2 sm:px-3"
+                    className="text-gray-600 hover:text-blue-500 text-sm px-3"
                     asChild
                   >
                     <Link href="/login">Sign In</Link>
                   </Button>
                   <Button
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 sm:px-6 text-sm sm:text-base shadow-sm"
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 text-sm shadow-sm"
                     asChild
                   >
                     <Link href="/signup">Get Started</Link>
                   </Button>
-                </>
+                </div>
               )}
+
+              {/* Mobile Menu Button */}
+              <div className="lg:hidden">
+                <DropdownMenu
+                  open={isMobileMenuOpen}
+                  onOpenChange={setIsMobileMenuOpen}
+                >
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-10 w-10">
+                      <Menu className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-64">
+                    {isAuthenticated ? (
+                      <>
+                        {isBusinessUser && (
+                          <>
+                            <DropdownMenuItem asChild>
+                              <Link
+                                href="/jobs"
+                                className="flex items-center py-2"
+                              >
+                                <Briefcase className="mr-2 h-4 w-4" />
+                                Manage Jobs
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem asChild>
+                              <Link
+                                href="/jobs/create"
+                                className="flex items-center py-2"
+                              >
+                                <Briefcase className="mr-2 h-4 w-4" />
+                                Post New Job
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <Link
+                                href="/manage-applications"
+                                className="flex items-center py-2"
+                              >
+                                <UserCheck className="mr-2 h-4 w-4" />
+                                Manage Applications
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <Link
+                                href="/business"
+                                className="flex items-center py-2"
+                              >
+                                <Building className="mr-2 h-4 w-4" />
+                                My Business
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <Link
+                                href="/staff"
+                                className="flex items-center py-2"
+                              >
+                                <UserCheck className="mr-2 h-4 w-4" />
+                                Staff Management
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <Link
+                                href="/shifts"
+                                className="flex items-center py-2"
+                              >
+                                <Calendar className="mr-2 h-4 w-4" />
+                                Shift Scheduling
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <Link
+                                href="/hours"
+                                className="flex items-center py-2"
+                              >
+                                <Clock className="mr-2 h-4 w-4" />
+                                Hours & Attendance
+                              </Link>
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                        {isWorkerUser && (
+                          <>
+                            <DropdownMenuItem asChild>
+                              <Link
+                                href="/companies"
+                                className="flex items-center py-2"
+                              >
+                                <Building className="mr-2 h-4 w-4" />
+                                Browse Companies
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem asChild>
+                              <Link
+                                href="/jobs"
+                                className="flex items-center py-2"
+                              >
+                                <Search className="mr-2 h-4 w-4" />
+                                Search All Jobs
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <Link
+                                href="/jobs/job-applications"
+                                className="flex items-center py-2"
+                              >
+                                <Briefcase className="mr-2 h-4 w-4" />
+                                My Applications
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <Link
+                                href="/jobs/saved"
+                                className="flex items-center py-2"
+                              >
+                                <UserCheck className="mr-2 h-4 w-4" />
+                                Saved Jobs
+                              </Link>
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link
+                            href="/messages"
+                            className="flex items-center relative py-2"
+                          >
+                            <MessageCircle className="mr-2 h-4 w-4" />
+                            Messages
+                            {unreadCount > 0 && (
+                              <span className="ml-auto bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                {unreadCount > 99 ? "99+" : unreadCount}
+                              </span>
+                            )}
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/blog" className="flex items-center py-2">
+                            Blog
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
+                    ) : (
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link
+                            href="/about"
+                            className="flex items-center py-2"
+                          >
+                            About
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link
+                            href="/contact"
+                            className="flex items-center py-2"
+                          >
+                            Contact
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link
+                            href="/login"
+                            className="flex items-center py-2"
+                          >
+                            Sign In
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link
+                            href="/signup"
+                            className="flex items-center py-2 text-blue-500 font-medium"
+                          >
+                            Get Started
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           </div>
         </div>
       </header>
-      <main className="py-8 sm:py-12">{children}</main>
 
+      {/* Main Content - Add padding top to account for fixed header */}
+      <main className="pt-16">{children}</main>
+
+      {/* Footer */}
       <footer className="bg-white border-t border-gray-200 py-12 sm:py-16">
-        <div className="max-w-md sm:max-w-2xl lg:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
-            {/* Logo and Description - Full width on mobile */}
+            {/* Logo and Description */}
             <div className="col-span-2 space-y-3 sm:space-y-4 text-center md:text-left md:col-span-1">
               <div className="flex items-center space-x-2 sm:space-x-3 justify-center md:justify-start">
                 <div className="w-8 sm:w-10 h-8 sm:h-10 rounded-full overflow-hidden shadow-sm border-2 border-white bg-white">
@@ -601,7 +651,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
               </ul>
             </div>
 
-            {/* Support - Now properly aligned */}
+            {/* Support */}
             <div className="text-center md:text-left">
               <h3 className="font-semibold text-base sm:text-lg text-gray-900 mb-3 sm:mb-4">
                 Support
