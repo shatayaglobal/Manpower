@@ -123,7 +123,10 @@ export default function SignInPage() {
         });
 
         if (result.success) {
-          toast.success("Google sign-in successful! Welcome to your Worker account.", {});
+          toast.success(
+            "Google sign-in successful! Welcome to your Worker account.",
+            {}
+          );
           setTimeout(() => {
             router.push("/home");
           }, 100);
@@ -136,8 +139,6 @@ export default function SignInPage() {
     },
     [googleAuth, router]
   );
-
-
 
   useEffect(() => {
     const script = document.createElement("script");
@@ -156,13 +157,12 @@ export default function SignInPage() {
             cancel_on_tap_outside: true,
           });
 
-          // Render the button automatically
           window.google.accounts.id.renderButton(
             document.getElementById("google-signin-button")!,
             {
               theme: "outline",
               size: "large",
-              width: "100%",
+              width: `${Math.min(400, window.innerWidth - 48)}`,
             }
           );
         } catch {
@@ -178,45 +178,54 @@ export default function SignInPage() {
     };
   }, [handleCredentialResponse]);
 
-
   return (
-    <div className="bg-gradient-to-br from-white via-blue-50/30 to-yellow-50/20 min-h-screen">
-      <div className="flex items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-        <div className="w-full max-w-md space-y-8">
-          <div className="text-center space-y-4">
-            <h1 className="font-bold text-3xl text-gray-900">Welcome Back</h1>
-            <p className="text-gray-600">
+    <div className="bg-gradient-to-br from-white via-slate-50/20 to-amber-50/15 min-h-screen">
+      <div className="flex items-center justify-center min-h-screen py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-md space-y-4 sm:space-y-6 lg:space-y-8">
+          {/* Header */}
+          <div className="text-center space-y-2 sm:space-y-3 lg:space-y-4">
+            <h1 className="font-bold text-2xl sm:text-3xl lg:text-4xl text-gray-900">
+              Welcome Back
+            </h1>
+            <p className="text-gray-600 text-sm sm:text-base px-2">
               Sign in to your account to continue connecting talent with
               opportunity
             </p>
           </div>
 
+          {/* Sign In Card */}
           <Card className="border-0 shadow-lg bg-white">
-            <CardHeader className="space-y-4 pb-6">
-              <CardTitle className="text-2xl font-semibold text-center text-gray-900">
+            <CardHeader className="space-y-2 sm:space-y-3 lg:space-y-4 pb-3 sm:pb-4 lg:pb-6 px-4 sm:px-6 pt-4 sm:pt-6">
+              <CardTitle className="text-xl sm:text-2xl font-semibold text-center text-gray-900">
                 Sign In
               </CardTitle>
-              <CardDescription className="text-center text-gray-600">
+              <CardDescription className="text-center text-gray-600 text-xs sm:text-sm lg:text-base">
                 Access your account with email or Google
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4 sm:space-y-5 lg:space-y-6 px-4 sm:px-6 pb-4 sm:pb-6">
               {/* Error Display */}
               {error && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{error.message}</AlertDescription>
+                <Alert variant="destructive" className="py-2 sm:py-3">
+                  <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <AlertDescription className="text-xs sm:text-sm">
+                    {error.message}
+                  </AlertDescription>
                 </Alert>
               )}
 
               {/* Google Sign In Button */}
               <div className="space-y-2">
-              <div id="google-signin-button" className="w-full"></div>
-                <p className="text-xs text-gray-500 text-center">
+                <div
+                  id="google-signin-button"
+                  className="w-full flex justify-center"
+                ></div>
+                <p className="text-xs text-gray-500 text-center px-2">
                   Google sign-in creates a Worker account
                 </p>
               </div>
 
+              {/* Divider */}
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <Separator className="w-full" />
@@ -229,17 +238,17 @@ export default function SignInPage() {
               </div>
 
               {/* Sign In Form */}
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                 {/* Email Field */}
-                <div className="space-y-2">
+                <div className="space-y-1.5 sm:space-y-2">
                   <Label
                     htmlFor="email"
-                    className="text-sm font-medium text-gray-700"
+                    className="text-xs sm:text-sm font-medium text-gray-700"
                   >
                     Email Address
                   </Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Mail className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
                     <Input
                       id="email"
                       type="email"
@@ -248,7 +257,7 @@ export default function SignInPage() {
                       onChange={(e) =>
                         handleInputChange("email", e.target.value)
                       }
-                      className={`pl-10 w-full ${
+                      className={`pl-8 sm:pl-10 h-10 sm:h-11 text-sm sm:text-base ${
                         error?.errors?.email ? "border-red-300" : ""
                       }`}
                       required
@@ -256,30 +265,30 @@ export default function SignInPage() {
                     />
                   </div>
                   {error?.errors?.email && (
-                    <p className="text-sm text-red-600">
+                    <p className="text-xs text-red-600">
                       {error.errors.email[0]}
                     </p>
                   )}
                 </div>
 
                 {/* Password Field */}
-                <div className="space-y-2">
+                <div className="space-y-1.5 sm:space-y-2">
                   <div className="flex items-center justify-between">
                     <Label
                       htmlFor="password"
-                      className="text-sm font-medium text-gray-700"
+                      className="text-xs sm:text-sm font-medium text-gray-700"
                     >
                       Password
                     </Label>
                     <Link
                       href="/forgot-password"
-                      className="text-sm text-blue-600 hover:text-blue-700 underline"
+                      className="text-xs text-blue-500 hover:text-blue-600 underline"
                     >
                       Forgot password?
                     </Link>
                   </div>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Lock className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
@@ -288,7 +297,7 @@ export default function SignInPage() {
                       onChange={(e) =>
                         handleInputChange("password", e.target.value)
                       }
-                      className={`pl-10 pr-10 w-full ${
+                      className={`pl-8 sm:pl-10 pr-9 sm:pr-10 h-10 sm:h-11 text-sm sm:text-base ${
                         error?.errors?.password ? "border-red-300" : ""
                       }`}
                       required
@@ -296,19 +305,19 @@ export default function SignInPage() {
                     />
                     <button
                       type="button"
-                      className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                      className="absolute right-2.5 sm:right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 touch-manipulation"
                       onClick={() => setShowPassword(!showPassword)}
                       disabled={isLoginLoading || isGoogleAuthLoading}
                     >
                       {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
+                        <EyeOff className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       ) : (
-                        <Eye className="h-4 w-4" />
+                        <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       )}
                     </button>
                   </div>
                   {error?.errors?.password && (
-                    <p className="text-sm text-red-600">
+                    <p className="text-xs text-red-600">
                       {error.errors.password[0]}
                     </p>
                   )}
@@ -317,7 +326,7 @@ export default function SignInPage() {
                 {/* Submit Button */}
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3 shadow-lg"
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white h-10 sm:h-11 text-sm sm:text-base shadow-sm mt-4 sm:mt-6"
                   disabled={isLoginLoading || isGoogleAuthLoading}
                 >
                   {isLoginLoading ? (
@@ -328,7 +337,7 @@ export default function SignInPage() {
                   ) : (
                     <>
                       Sign In
-                      <ArrowRight className="ml-2 h-4 w-4" />
+                      <ArrowRight className="ml-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     </>
                   )}
                 </Button>
@@ -337,21 +346,21 @@ export default function SignInPage() {
           </Card>
 
           {/* Additional Links */}
-          <div className="text-center space-y-4">
-            <p className="text-sm text-gray-600">
+          <div className="text-center space-y-2 sm:space-y-3 px-2">
+            <p className="text-xs sm:text-sm text-gray-600">
               Don&apos;t have an account?{" "}
               <Link
                 href="/signup"
-                className="text-blue-600 hover:text-blue-700 underline font-medium"
+                className="text-blue-500 hover:text-blue-600 underline font-medium"
               >
                 Sign up here
               </Link>
             </p>
-            <p className="text-sm text-gray-600">
+            <p className="text-xs sm:text-sm text-gray-600">
               Need help?{" "}
               <Link
                 href="/contact"
-                className="text-blue-600 hover:text-blue-700 underline"
+                className="text-blue-500 hover:text-blue-600 underline"
               >
                 Contact Support
               </Link>
@@ -362,4 +371,3 @@ export default function SignInPage() {
     </div>
   );
 }
-

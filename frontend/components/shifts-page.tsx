@@ -52,20 +52,14 @@ const ShiftManagementPage: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
   const [localSearchTerm, setLocalSearchTerm] = useState<string>("");
   const [localDayFilter, setLocalDayFilter] = useState<string>("all");
-  const [localShiftTypeFilter, setLocalShiftTypeFilter] =
-    useState<string>("all");
+  const [localShiftTypeFilter, setLocalShiftTypeFilter] = useState<string>("all");
   const [localStaffFilter, setLocalStaffFilter] = useState<string>("all");
   const [sortField, setSortField] = useState<SortField>("day_of_week");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const {
-    businesses,
-    loading: businessLoading,
-    loadBusinesses,
-  } = useBusiness();
-
+  const { businesses, loading: businessLoading, loadBusinesses } = useBusiness();
   const {
     shifts,
     selectedShift,
@@ -99,12 +93,8 @@ const ShiftManagementPage: React.FC = () => {
       loadShifts({
         page: currentPage,
         search: localSearchTerm,
-        day_of_week:
-          localDayFilter === "all" ? "" : (localDayFilter as DayOfWeek),
-        shift_type:
-          localShiftTypeFilter === "all"
-            ? ""
-            : (localShiftTypeFilter as ShiftType),
+        day_of_week: localDayFilter === "all" ? "" : (localDayFilter as DayOfWeek),
+        shift_type: localShiftTypeFilter === "all" ? "" : (localShiftTypeFilter as ShiftType),
         staff: localStaffFilter === "all" ? "" : localStaffFilter,
         ordering: sortDirection === "desc" ? `-${sortField}` : sortField,
       });
@@ -126,25 +116,19 @@ const ShiftManagementPage: React.FC = () => {
   }, [localSearchTerm, localDayFilter, localShiftTypeFilter, localStaffFilter]);
 
   const handleDeleteShift = async (shiftId: string, shiftName: string) => {
-    if (
-      window.confirm(`Are you sure you want to delete shift: ${shiftName}?`)
-    ) {
+    if (window.confirm(`Are you sure you want to delete shift: ${shiftName}?`)) {
       try {
         await removeShift(shiftId);
         toast.success("Shift deleted successfully");
         loadShifts({
           page: currentPage,
           search: localSearchTerm,
-          day_of_week:
-            localDayFilter === "all" ? "" : (localDayFilter as DayOfWeek),
-          shift_type:
-            localShiftTypeFilter === "all"
-              ? ""
-              : (localShiftTypeFilter as ShiftType),
+          day_of_week: localDayFilter === "all" ? "" : (localDayFilter as DayOfWeek),
+          shift_type: localShiftTypeFilter === "all" ? "" : (localShiftTypeFilter as ShiftType),
           staff: localStaffFilter === "all" ? "" : localStaffFilter,
           ordering: sortDirection === "desc" ? `-${sortField}` : sortField,
         });
-      } catch{
+      } catch {
         toast("Failed to delete shift");
       }
     }
@@ -181,11 +165,11 @@ const ShiftManagementPage: React.FC = () => {
 
   const getShiftTypeBadge = (type: ShiftType) => {
     const typeConfig = {
-      MORNING: { label: "Morning", color: "bg-yellow-100 text-yellow-800" },
-      AFTERNOON: { label: "Afternoon", color: "bg-orange-100 text-orange-800" },
-      EVENING: { label: "Evening", color: "bg-purple-100 text-purple-800" },
-      NIGHT: { label: "Night", color: "bg-blue-100 text-blue-800" },
-      FULL_DAY: { label: "Full Day", color: "bg-green-100 text-green-800" },
+      MORNING: { label: "Morning", color: "bg-amber-50 text-amber-600 border border-amber-200" },
+      AFTERNOON: { label: "Afternoon", color: "bg-orange-50 text-orange-600 border border-orange-200" },
+      EVENING: { label: "Evening", color: "bg-purple-50 text-purple-600 border border-purple-200" },
+      NIGHT: { label: "Night", color: "bg-blue-50 text-blue-500 border border-blue-200" },
+      FULL_DAY: { label: "Full Day", color: "bg-green-50 text-green-600 border border-green-200" },
     };
 
     const config = typeConfig[type] || typeConfig.MORNING;
@@ -200,13 +184,13 @@ const ShiftManagementPage: React.FC = () => {
 
   const getDayBadge = (day: DayOfWeek) => {
     const dayColors: Record<DayOfWeek, string> = {
-      MONDAY: "bg-blue-100 text-blue-800",
-      TUESDAY: "bg-green-100 text-green-800",
-      WEDNESDAY: "bg-yellow-100 text-yellow-800",
-      THURSDAY: "bg-orange-100 text-orange-800",
-      FRIDAY: "bg-purple-100 text-purple-800",
-      SATURDAY: "bg-pink-100 text-pink-800",
-      SUNDAY: "bg-red-100 text-red-800",
+      MONDAY: "bg-blue-50 text-blue-500 border border-blue-200",
+      TUESDAY: "bg-green-50 text-green-600 border border-green-200",
+      WEDNESDAY: "bg-amber-50 text-amber-600 border border-amber-200",
+      THURSDAY: "bg-orange-50 text-orange-600 border border-orange-200",
+      FRIDAY: "bg-purple-50 text-purple-600 border border-purple-200",
+      SATURDAY: "bg-pink-50 text-pink-600 border border-pink-200",
+      SUNDAY: "bg-red-50 text-red-600 border border-red-200",
     };
 
     return (
@@ -226,7 +210,7 @@ const ShiftManagementPage: React.FC = () => {
     children: React.ReactNode;
   }) => (
     <th
-      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+      className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
       onClick={() => handleSort(field)}
     >
       <div className="flex items-center space-x-1">
@@ -318,12 +302,8 @@ const ShiftManagementPage: React.FC = () => {
         loadShifts({
           page: currentPage,
           search: localSearchTerm,
-          day_of_week:
-            localDayFilter === "all" ? "" : (localDayFilter as DayOfWeek),
-          shift_type:
-            localShiftTypeFilter === "all"
-              ? ""
-              : (localShiftTypeFilter as ShiftType),
+          day_of_week: localDayFilter === "all" ? "" : (localDayFilter as DayOfWeek),
+          shift_type: localShiftTypeFilter === "all" ? "" : (localShiftTypeFilter as ShiftType),
           staff: localStaffFilter === "all" ? "" : localStaffFilter,
           ordering: sortDirection === "desc" ? `-${sortField}` : sortField,
         });
@@ -342,10 +322,10 @@ const ShiftManagementPage: React.FC = () => {
 
     return (
       <div className="fixed inset-0 bg-black/20 flex items-center justify-center p-4 z-50">
-        <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden">
-          <div className="p-6 border-b border-gray-200">
+        <div className="bg-white rounded-lg max-w-full w-full sm:max-w-lg md:max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="p-4 sm:p-6 border-b border-gray-200">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-900">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
                 {shift ? "Edit Shift" : "Create New Shift"}
               </h2>
               <button
@@ -357,9 +337,9 @@ const ShiftManagementPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="p-6 overflow-y-auto max-h-[60vh]">
+          <div className="p-4 sm:p-6">
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Staff Member *
@@ -383,7 +363,7 @@ const ShiftManagementPage: React.FC = () => {
                       ))}
                   </select>
                   {errors.staff && (
-                    <p className="text-red-500 text-sm mt-1">{errors.staff}</p>
+                    <p className="text-red-600 text-sm mt-1">{errors.staff}</p>
                   )}
                 </div>
 
@@ -403,12 +383,12 @@ const ShiftManagementPage: React.FC = () => {
                     placeholder="Morning Shift"
                   />
                   {errors.name && (
-                    <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+                    <p className="text-red-600 text-sm mt-1">{errors.name}</p>
                   )}
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Shift Type *
@@ -456,7 +436,7 @@ const ShiftManagementPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Start Time *
@@ -472,9 +452,7 @@ const ShiftManagementPage: React.FC = () => {
                     }`}
                   />
                   {errors.start_time && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.start_time}
-                    </p>
+                    <p className="text-red-600 text-sm mt-1">{errors.start_time}</p>
                   )}
                 </div>
 
@@ -493,9 +471,7 @@ const ShiftManagementPage: React.FC = () => {
                     }`}
                   />
                   {errors.end_time && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.end_time}
-                    </p>
+                    <p className="text-red-600 text-sm mt-1">{errors.end_time}</p>
                   )}
                 </div>
               </div>
@@ -526,7 +502,7 @@ const ShiftManagementPage: React.FC = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, is_active: e.target.checked })
                   }
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500"
                 />
                 <label
                   htmlFor="is_active"
@@ -538,18 +514,23 @@ const ShiftManagementPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-end space-x-3">
-            <Button variant="outline" onClick={onClose} disabled={submitting}>
+          <div className="px-4 sm:px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-end space-x-0 sm:space-x-3 gap-4 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={onClose}
+              disabled={submitting}
+              className="w-full sm:w-auto border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600 min-w-[120px] py-3"
+            >
               Cancel
             </Button>
             <Button
               onClick={handleSubmit}
               disabled={submitting}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white min-w-[120px] py-3"
             >
               {submitting ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin text-blue-500" />
                   {shift ? "Updating..." : "Creating..."}
                 </>
               ) : shift ? (
@@ -567,17 +548,17 @@ const ShiftManagementPage: React.FC = () => {
   if (!businessLoading && !business) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-          <AlertCircle className="w-20 h-20 text-yellow-500 mx-auto mb-6" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16 text-center">
+          <AlertCircle className="w-16 sm:w-20 h-16 sm:h-20 text-amber-600 mx-auto mb-6" />
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
             No Business Profile Found
           </h2>
-          <p className="text-gray-600 mb-8">
+          <p className="text-base sm:text-lg text-gray-600 mb-8">
             You need to create your business profile before managing shifts.
           </p>
           <Button
             onClick={() => router.push("/business")}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white min-w-[160px] py-3"
           >
             Create Business Profile
           </Button>
@@ -589,19 +570,19 @@ const ShiftManagementPage: React.FC = () => {
   const activeShifts = shifts.filter((s) => s.is_active).length;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 -mt-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {shiftError && (
           <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-            <div className="flex">
-              <AlertCircle className="h-5 w-5 text-red-400 mr-2" />
+            <div className="flex items-center">
+              <AlertCircle className="h-5 w-5 text-red-600 mr-2" />
               <div>
-                <p className="text-sm text-red-800">{shiftError}</p>
+                <p className="text-sm text-red-600">{shiftError}</p>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={clearShiftError}
-                  className="mt-2"
+                  className="mt-2 border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
                 >
                   Dismiss
                 </Button>
@@ -611,36 +592,38 @@ const ShiftManagementPage: React.FC = () => {
         )}
 
         <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-6">
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                 Shift Management
               </h1>
-              <p className="text-gray-600 mt-1">
+              <p className="text-gray-600 text-sm sm:text-base mt-1">
                 Schedule and manage work shifts for your team
               </p>
             </div>
-            <Button
-              onClick={() => {
-                selectShift(null);
-                setShowCreateModal(true);
-              }}
-              className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Create Shift
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto min-w-0">
+              <Button
+                onClick={() => {
+                  selectShift(null);
+                  setShowCreateModal(true);
+                }}
+                className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white shadow-sm min-w-[120px] py-3"
+              >
+                <Plus className="w-4 h-4 mr-2 text-amber-600" />
+                Create Shift
+              </Button>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
-                <Calendar className="w-6 h-6 text-blue-600" />
+              <div className="w-10 sm:w-12 h-10 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                <Calendar className="w-5 sm:w-6 h-5 sm:h-6 text-blue-500" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">
                   {shiftPagination.count}
                 </p>
                 <p className="text-gray-600 text-sm">Total Shifts</p>
@@ -648,13 +631,13 @@ const ShiftManagementPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
-                <Clock className="w-6 h-6 text-green-600" />
+              <div className="w-10 sm:w-12 h-10 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                <Clock className="w-5 sm:w-6 h-5 sm:h-6 text-green-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">
                   {activeShifts}
                 </p>
                 <p className="text-gray-600 text-sm">Active Shifts</p>
@@ -662,13 +645,13 @@ const ShiftManagementPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
-                <Users className="w-6 h-6 text-purple-600" />
+              <div className="w-10 sm:w-12 h-10 sm:h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+                <Users className="w-5 sm:w-6 h-5 sm:h-6 text-purple-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">
                   {staff.filter((s) => s.status === "ACTIVE").length}
                 </p>
                 <p className="text-gray-600 text-sm">Active Staff</p>
@@ -677,10 +660,10 @@ const ShiftManagementPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm mb-6">
-          <div className="flex flex-col sm:flex-row gap-4">
+        <div className="bg-white p-4 sm:p-6 rounded-lg border border-gray-200 shadow-sm mb-6">
+          <div className="flex flex-col gap-4">
             <div className="flex-1 relative">
-              <Search className="w-5 h-5 text-gray-400 absolute left-3 top-3" />
+              <Search className="w-5 h-5 text-amber-600 absolute left-3 top-3" />
               <input
                 type="text"
                 placeholder="Search by shift name or staff..."
@@ -689,26 +672,28 @@ const ShiftManagementPage: React.FC = () => {
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
-            <div className="flex items-center gap-3">
-              <Filter className="w-5 h-5 text-gray-400" />
-              <select
-                value={localDayFilter}
-                onChange={(e) => setLocalDayFilter(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">All Days</option>
-                <option value="MONDAY">Monday</option>
-                <option value="TUESDAY">Tuesday</option>
-                <option value="WEDNESDAY">Wednesday</option>
-                <option value="THURSDAY">Thursday</option>
-                <option value="FRIDAY">Friday</option>
-                <option value="SATURDAY">Saturday</option>
-                <option value="SUNDAY">Sunday</option>
-              </select>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Filter className="w-5 h-5 text-amber-600" />
+                <select
+                  value={localDayFilter}
+                  onChange={(e) => setLocalDayFilter(e.target.value)}
+                  className="w-full sm:w-auto px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="all">All Days</option>
+                  <option value="MONDAY">Monday</option>
+                  <option value="TUESDAY">Tuesday</option>
+                  <option value="WEDNESDAY">Wednesday</option>
+                  <option value="THURSDAY">Thursday</option>
+                  <option value="FRIDAY">Friday</option>
+                  <option value="SATURDAY">Saturday</option>
+                  <option value="SUNDAY">Sunday</option>
+                </select>
+              </div>
               <select
                 value={localShiftTypeFilter}
                 onChange={(e) => setLocalShiftTypeFilter(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full sm:w-auto px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="all">All Types</option>
                 <option value="MORNING">Morning</option>
@@ -720,7 +705,7 @@ const ShiftManagementPage: React.FC = () => {
               <select
                 value={localStaffFilter}
                 onChange={(e) => setLocalStaffFilter(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full sm:w-auto px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="all">All Staff</option>
                 {staff
@@ -737,16 +722,16 @@ const ShiftManagementPage: React.FC = () => {
 
         {shiftLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
             <p className="ml-2 text-gray-600">Loading shifts...</p>
           </div>
         ) : shifts.length === 0 ? (
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-12 text-center">
-            <Calendar className="w-20 h-20 text-gray-300 mx-auto mb-6" />
-            <h3 className="text-xl font-medium text-gray-900 mb-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 sm:p-12 text-center">
+            <Calendar className="w-16 sm:w-20 h-16 sm:h-20 text-gray-300 mx-auto mb-6" />
+            <h3 className="text-lg sm:text-xl font-medium text-gray-900 mb-3">
               No shifts scheduled yet
             </h3>
-            <p className="text-gray-600 mb-8 max-w-md mx-auto">
+            <p className="text-gray-600 text-sm sm:text-base mb-8 max-w-md mx-auto">
               Start scheduling shifts for your team members.
             </p>
             <Button
@@ -755,9 +740,9 @@ const ShiftManagementPage: React.FC = () => {
                 setShowCreateModal(true);
               }}
               size="lg"
-              className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+              className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white shadow-sm min-w-[160px] py-3"
             >
-              <Plus className="w-5 h-5 mr-2" />
+              <Plus className="w-5 h-5 mr-2 text-amber-600" />
               Create Your First Shift
             </Button>
           </div>
@@ -769,50 +754,47 @@ const ShiftManagementPage: React.FC = () => {
                   <thead className="bg-gray-50">
                     <tr>
                       <SortableHeader field="name">Shift Name</SortableHeader>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
                         Staff Member
                       </th>
                       <SortableHeader field="day_of_week">Day</SortableHeader>
                       <SortableHeader field="shift_type">Type</SortableHeader>
                       <SortableHeader field="start_time">Time</SortableHeader>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {shifts.map((shift) => {
-                      const staffMember = staff.find(
-                        (s) => s.id === shift.staff
-                      );
+                      const staffMember = staff.find((s) => s.id === shift.staff);
                       return (
                         <tr
                           key={shift.id}
                           className="hover:bg-gray-50 transition-colors"
                         >
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">
+                          <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900 truncate">
                               {shift.name}
                             </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">
-                              {staffMember?.name || "N/A"}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {staffMember?.job_title}
+                            <div className="text-xs text-gray-500 sm:hidden">
+                              {staffMember?.name || "N/A"} - {staffMember?.job_title || ""}
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-4 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
+                            <div className="text-sm text-gray-900">{staffMember?.name || "N/A"}</div>
+                            <div className="text-sm text-gray-500">{staffMember?.job_title}</div>
+                          </td>
+                          <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                             {getDayBadge(shift.day_of_week)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                             {getShiftTypeBadge(shift.shift_type)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-900">
                               {shift.start_time} - {shift.end_time}
                             </div>
@@ -822,39 +804,35 @@ const ShiftManagementPage: React.FC = () => {
                               </div>
                             )}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                             {shift.is_active ? (
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-50 text-green-600 border border-green-200">
                                 Active
                               </span>
                             ) : (
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-50 text-gray-600 border border-gray-200">
                                 Inactive
                               </span>
                             )}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="sm">
-                                  <MoreHorizontal className="w-4 h-4" />
+                                  <MoreHorizontal className="w-4 h-4 text-blue-500" />
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                  onClick={() => handleEditShift(shift)}
-                                >
-                                  <Edit2 className="w-4 h-4 mr-2" />
+                                <DropdownMenuItem onClick={() => handleEditShift(shift)}>
+                                  <Edit2 className="w-4 h-4 mr-2 text-blue-500" />
                                   Edit
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
                                   className="text-red-600"
-                                  onClick={() =>
-                                    handleDeleteShift(shift.id, shift.name)
-                                  }
+                                  onClick={() => handleDeleteShift(shift.id, shift.name)}
                                 >
-                                  <Trash2 className="w-4 h-4 mr-2" />
+                                  <Trash2 className="w-4 h-4 mr-2 text-red-600" />
                                   Delete
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
@@ -868,14 +846,14 @@ const ShiftManagementPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Server-side Pagination */}
             {shiftPagination.count > itemsPerPage && (
-              <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-4 rounded-lg">
+              <div className="bg-white px-4 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 sm:px-6 mt-4 rounded-lg gap-4 sm:gap-0">
                 <div className="flex-1 flex justify-between sm:hidden">
                   <Button
                     onClick={handlePreviousPage}
                     disabled={!shiftPagination.hasPrevious || shiftLoading}
                     variant="outline"
+                    className="w-full sm:w-auto border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600 min-w-[120px] py-3"
                   >
                     Previous
                   </Button>
@@ -886,6 +864,7 @@ const ShiftManagementPage: React.FC = () => {
                     onClick={handleNextPage}
                     disabled={!shiftPagination.hasNext || shiftLoading}
                     variant="outline"
+                    className="w-full sm:w-auto border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600 min-w-[120px] py-3"
                   >
                     Next
                   </Button>
@@ -899,15 +878,10 @@ const ShiftManagementPage: React.FC = () => {
                       </span>{" "}
                       -{" "}
                       <span className="font-medium">
-                        {Math.min(
-                          currentPage * itemsPerPage,
-                          shiftPagination.count
-                        )}
+                        {Math.min(currentPage * itemsPerPage, shiftPagination.count)}
                       </span>{" "}
                       of{" "}
-                      <span className="font-medium">
-                        {shiftPagination.count}
-                      </span>{" "}
+                      <span className="font-medium">{shiftPagination.count}</span>{" "}
                       results
                     </p>
                   </div>
@@ -917,11 +891,10 @@ const ShiftManagementPage: React.FC = () => {
                         onClick={handlePreviousPage}
                         disabled={!shiftPagination.hasPrevious || shiftLoading}
                         variant="outline"
-                        className="rounded-r-none"
+                        className="rounded-r-none border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
                       >
                         Previous
                       </Button>
-
                       {Array.from({ length: totalPages }, (_, i) => i + 1)
                         .filter((page) => {
                           return (
@@ -939,10 +912,8 @@ const ShiftManagementPage: React.FC = () => {
                                 </span>
                                 <Button
                                   onClick={() => setCurrentPage(page)}
-                                  variant={
-                                    currentPage === page ? "default" : "outline"
-                                  }
-                                  className="rounded-none"
+                                  variant={currentPage === page ? "default" : "outline"}
+                                  className="rounded-none border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
                                   disabled={shiftLoading}
                                 >
                                   {page}
@@ -954,22 +925,19 @@ const ShiftManagementPage: React.FC = () => {
                             <Button
                               key={page}
                               onClick={() => setCurrentPage(page)}
-                              variant={
-                                currentPage === page ? "default" : "outline"
-                              }
-                              className="rounded-none"
+                              variant={currentPage === page ? "default" : "outline"}
+                              className="rounded-none border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
                               disabled={shiftLoading}
                             >
                               {page}
                             </Button>
                           );
                         })}
-
                       <Button
                         onClick={handleNextPage}
                         disabled={!shiftPagination.hasNext || shiftLoading}
                         variant="outline"
-                        className="rounded-l-none"
+                        className="rounded-l-none border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
                       >
                         Next
                       </Button>

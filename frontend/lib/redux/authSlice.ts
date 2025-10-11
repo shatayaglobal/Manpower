@@ -126,22 +126,23 @@ export const updateCurrentUserThunk = createAsyncThunk(
 
 export const logoutThunk = createAsyncThunk(
   "auth/logout",
-  async (_, { rejectWithValue }) => {
-    try {
-      await authService.logout();
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("persist:root");
-      }
-      return true;
-    } catch (error: unknown) {
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("persist:root");
-      }
-      return rejectWithValue(extractErrorInfo(error));
+  async (_, { getState }) => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("persist:root");
     }
+    try {
+      const state = getState() as { auth: AuthState };
+      const token = state.auth.accessToken;
+      if (token) {
+        await authService.logout();
+      }
+    } catch  {
+      console.log('Logout API call failed, but local logout succeeded');
+    }
+
+    return true;
   }
 );
-
 export const googleAuthThunk = createAsyncThunk(
   "auth/googleAuth",
   async (googleData: GoogleAuthData, { rejectWithValue }) => {

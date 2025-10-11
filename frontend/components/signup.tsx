@@ -38,17 +38,12 @@ import { useAuthState } from "@/lib/redux/redux";
 import { toast } from "sonner";
 import { GoogleCredentialResponse } from "@/lib/types";
 
-
-
 export default function SignUpPage() {
   const router = useRouter();
-  const { register, googleAuth, clearAuthError, clearAuthSuccessStates } = useAuthSlice();
-  const {
-    isRegisterLoading,
-    error,
-    isAuthenticated,
-    isGoogleAuthLoading,
-  } = useAuthState();
+  const { register, googleAuth, clearAuthError, clearAuthSuccessStates } =
+    useAuthSlice();
+  const { isRegisterLoading, error, isAuthenticated, isGoogleAuthLoading } =
+    useAuthState();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -61,22 +56,18 @@ export default function SignUpPage() {
     account_type: "",
   });
 
-
-
-
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/home');
+      router.push("/home");
     }
   }, [isAuthenticated, router]);
-
 
   useEffect(() => {
     clearAuthError();
     clearAuthSuccessStates();
   }, [clearAuthError, clearAuthSuccessStates]);
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleresultChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (error) {
       clearAuthError();
@@ -107,39 +98,39 @@ export default function SignUpPage() {
     const result = await register(submitData);
 
     if (result.success) {
-      router.push('/login?registered=true');
+      router.push("/login?registered=true");
     }
   };
 
-   const handleCredentialResponse = useCallback(
-     async (response: GoogleCredentialResponse) => {
-       try {
-         const result = await googleAuth({
-           credential: response.credential,
-           token: "",
-         });
+  const handleCredentialResponse = useCallback(
+    async (response: GoogleCredentialResponse) => {
+      try {
+        const result = await googleAuth({
+          credential: response.credential,
+          token: "",
+        });
 
-         if (result.success) {
-           toast.success("Google sign-in successful! Welcome to your Worker account.", {});
-           setTimeout(() => {
-             router.push("/home");
-           }, 100);
-         } else {
-           toast.error("Google sign-in failed. Please try again.", {});
-         }
-       } catch {
-         toast.error("An error occurred during Google sign-in.", {});
-       }
-     },
-     [googleAuth, router]
-   );
+        if (result.success) {
+          toast.success(
+            "Google sign-in successful! Welcome to your Worker account.",
+            {}
+          );
+          setTimeout(() => {
+            router.push("/home");
+          }, 100);
+        } else {
+          toast.error("Google sign-in failed. Please try again.", {});
+        }
+      } catch {
+        toast.error("An error occurred during Google sign-in.", {});
+      }
+    },
+    [googleAuth, router]
+  );
 
-
-
-
-   useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
     script.async = true;
     script.defer = true;
     document.head.appendChild(script);
@@ -154,16 +145,20 @@ export default function SignUpPage() {
             cancel_on_tap_outside: true,
           });
 
+          const googleButtonWidth =
+            window.innerWidth >= 1024
+              ? "100%"
+              : `${Math.min(400, window.innerWidth - 32)}`;
           window.google.accounts.id.renderButton(
             document.getElementById("google-signup-button")!,
             {
               theme: "outline",
               size: "large",
-              width: "100%",
+              width: googleButtonWidth,
             }
           );
         } catch (error) {
-          console.error('Error initializing Google Sign-In:', error);
+          console.error("Error initializing Google Sign-In:", error);
         }
       }
     };
@@ -175,45 +170,45 @@ export default function SignUpPage() {
     };
   }, [handleCredentialResponse]);
 
-
   return (
-    <div className="bg-gradient-to-br from-white via-blue-50/30 to-yellow-50/20 min-h-screen">
+    <div className="bg-gradient-to-br from-white via-slate-50/20 to-amber-50/15 min-h-screen">
       {/* Main Content */}
-      <div className="flex items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-        <div className="w-full max-w-md space-y-8">
-          <div className="text-center space-y-4">
-            <h1 className="font-bold text-3xl text-gray-900">
+      <div className="flex items-center justify-center min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-md sm:max-w-lg lg:max-w-2xl xl:max-w-3xl space-y-6">
+          <div className="text-center space-y-3">
+            <h1 className="font-bold text-2xl sm:text-3xl text-gray-900">
               Create Your Account
             </h1>
-            <p className="text-gray-600">
+            <p className="text-sm sm:text-base text-gray-600">
               Join thousands of professionals connecting talent with opportunity
             </p>
           </div>
 
-          <Card className="border-0 shadow-lg bg-white">
-            <CardHeader className="space-y-4 pb-6">
-              <CardTitle className="text-2xl font-semibold text-center text-gray-900">
+          <Card className="border-0 shadow-lg bg-white w-full">
+            <CardHeader className="space-y-3 pb-4">
+              <CardTitle className="text-xl sm:text-2xl font-semibold text-center text-gray-900">
                 Sign Up
               </CardTitle>
-              <CardDescription className="text-center text-gray-600">
+              <CardDescription className="text-center text-sm sm:text-base text-gray-600">
                 Choose your account type and get started today
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-5">
               {/* Error Display */}
               {error && (
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    {error.message}
-                  </AlertDescription>
+                  <AlertDescription>{error.message}</AlertDescription>
                 </Alert>
               )}
 
               {/* Google Sign Up Button */}
               <div className="space-y-2">
-              <div id="google-signup-button" className="w-full"></div>
-                <p className="text-xs text-gray-500 text-center">
+                <div
+                  id="google-signup-button"
+                  className="w-full max-w-full mx-auto"
+                ></div>
+                <p className="text-xs sm:text-sm text-gray-500 text-center">
                   Google sign-up creates a Worker account
                 </p>
               </div>
@@ -222,7 +217,7 @@ export default function SignUpPage() {
                 <div className="absolute inset-0 flex items-center">
                   <Separator className="w-full" />
                 </div>
-                <div className="relative flex justify-center text-xs uppercase">
+                <div className="relative flex justify-center text-xs sm:text-sm uppercase">
                   <span className="bg-white px-2 text-gray-500">
                     Or continue with email
                   </span>
@@ -242,7 +237,7 @@ export default function SignUpPage() {
                   <Select
                     value={formData.account_type}
                     onValueChange={(value) =>
-                      handleInputChange("account_type", value)
+                      handleresultChange("account_type", value)
                     }
                     disabled={isRegisterLoading || isGoogleAuthLoading}
                   >
@@ -258,19 +253,21 @@ export default function SignUpPage() {
                       </SelectItem>
                       <SelectItem value="BUSINESS">
                         <div className="flex items-center space-x-2">
-                          <Building2 className="h-4 w-4 text-yellow-600" />
+                          <Building2 className="h-4 w-4 text-amber-600" />
                           <span>Business - Hiring talent</span>
                         </div>
                       </SelectItem>
                     </SelectContent>
                   </Select>
                   {error?.errors?.account_type && (
-                    <p className="text-sm text-red-600">{error.errors.account_type[0]}</p>
+                    <p className="text-xs sm:text-sm text-red-600">
+                      {error.errors.account_type[0]}
+                    </p>
                   )}
                 </div>
 
                 {/* Name Fields */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label
                       htmlFor="firstName"
@@ -284,14 +281,18 @@ export default function SignUpPage() {
                       placeholder="John"
                       value={formData.first_name}
                       onChange={(e) =>
-                        handleInputChange("first_name", e.target.value)
+                        handleresultChange("first_name", e.target.value)
                       }
-                      className={`w-full ${error?.errors?.first_name ? 'border-red-300' : ''}`}
+                      className={`w-full ${
+                        error?.errors?.first_name ? "border-red-300" : ""
+                      }`}
                       required
                       disabled={isRegisterLoading || isGoogleAuthLoading}
                     />
                     {error?.errors?.first_name && (
-                      <p className="text-sm text-red-600">{error.errors.first_name[0]}</p>
+                      <p className="text-xs sm:text-sm text-red-600">
+                        {error.errors.first_name[0]}
+                      </p>
                     )}
                   </div>
                   <div className="space-y-2">
@@ -307,14 +308,18 @@ export default function SignUpPage() {
                       placeholder="Doe"
                       value={formData.last_name}
                       onChange={(e) =>
-                        handleInputChange("last_name", e.target.value)
+                        handleresultChange("last_name", e.target.value)
                       }
-                      className={`w-full ${error?.errors?.last_name ? 'border-red-300' : ''}`}
+                      className={`w-full ${
+                        error?.errors?.last_name ? "border-red-300" : ""
+                      }`}
                       required
                       disabled={isRegisterLoading || isGoogleAuthLoading}
                     />
                     {error?.errors?.last_name && (
-                      <p className="text-sm text-red-600">{error.errors.last_name[0]}</p>
+                      <p className="text-xs sm:text-sm text-red-600">
+                        {error.errors.last_name[0]}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -335,15 +340,19 @@ export default function SignUpPage() {
                       placeholder="john.doe@example.com"
                       value={formData.email}
                       onChange={(e) =>
-                        handleInputChange("email", e.target.value)
+                        handleresultChange("email", e.target.value)
                       }
-                      className={`pl-10 w-full ${error?.errors?.email ? 'border-red-300' : ''}`}
+                      className={`pl-10 w-full ${
+                        error?.errors?.email ? "border-red-300" : ""
+                      }`}
                       required
                       disabled={isRegisterLoading || isGoogleAuthLoading}
                     />
                   </div>
                   {error?.errors?.email && (
-                    <p className="text-sm text-red-600">{error.errors.email[0]}</p>
+                    <p className="text-xs sm:text-sm text-red-600">
+                      {error.errors.email[0]}
+                    </p>
                   )}
                 </div>
 
@@ -363,9 +372,11 @@ export default function SignUpPage() {
                       placeholder="Create a strong password"
                       value={formData.password}
                       onChange={(e) =>
-                        handleInputChange("password", e.target.value)
+                        handleresultChange("password", e.target.value)
                       }
-                      className={`pl-10 pr-10 w-full ${error?.errors?.password ? 'border-red-300' : ''}`}
+                      className={`pl-10 pr-10 w-full ${
+                        error?.errors?.password ? "border-red-300" : ""
+                      }`}
                       required
                       disabled={isRegisterLoading || isGoogleAuthLoading}
                     />
@@ -383,7 +394,9 @@ export default function SignUpPage() {
                     </button>
                   </div>
                   {error?.errors?.password && (
-                    <p className="text-sm text-red-600">{error.errors.password[0]}</p>
+                    <p className="text-xs sm:text-sm text-red-600">
+                      {error.errors.password[0]}
+                    </p>
                   )}
                 </div>
 
@@ -403,7 +416,7 @@ export default function SignUpPage() {
                       placeholder="Confirm your password"
                       value={formData.confirmPassword}
                       onChange={(e) =>
-                        handleInputChange("confirmPassword", e.target.value)
+                        handleresultChange("confirmPassword", e.target.value)
                       }
                       className="pl-10 pr-10 w-full"
                       required
@@ -427,7 +440,7 @@ export default function SignUpPage() {
                 </div>
 
                 {/* Terms and Privacy */}
-                <div className="text-xs text-gray-600 leading-relaxed">
+                <div className="text-xs sm:text-sm text-gray-600 leading-relaxed">
                   By creating an account, you agree to our{" "}
                   <Link
                     href="/terms"
@@ -448,7 +461,7 @@ export default function SignUpPage() {
                 {/* Submit Button */}
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3 shadow-lg"
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white h-10 sm:h-11 text-sm sm:text-base shadow-sm mt-4 sm:mt-6"
                   disabled={isRegisterLoading || isGoogleAuthLoading}
                 >
                   {isRegisterLoading ? (
@@ -468,10 +481,13 @@ export default function SignUpPage() {
           </Card>
 
           {/* Additional Links */}
-          <div className="text-center space-y-4">
+          <div className="text-center space-y-3">
             <p className="text-sm text-gray-600">
               Already have an account?{" "}
-              <Link href="/login" className="text-blue-600 hover:text-blue-700 underline font-medium">
+              <Link
+                href="/login"
+                className="text-blue-600 hover:text-blue-700 underline font-medium"
+              >
                 Sign in here
               </Link>
             </p>

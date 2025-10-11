@@ -53,7 +53,7 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="h-[calc(100vh-4rem)] bg-gray-50">
+    <div className="h-[calc(100vh-4rem)] bg-gray-50 -mt-12">
       <div className="max-w-7xl mx-auto h-full">
         <div className="h-full flex border-x border-gray-200">
           {/* Sidebar - Conversation List */}

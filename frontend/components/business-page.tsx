@@ -81,32 +81,6 @@ const MyBusinessPage: React.FC = () => {
     }
   };
 
-  // const handleDeleteBusiness = async (businessId: string) => {
-  //   if (
-  //     window.confirm(
-  //       "Are you sure you want to delete your business? This action cannot be undone."
-  //     )
-  //   ) {
-  //     try {
-  //       await removeBusiness(businessId);
-  //       toast.success("Business deleted successfully");
-  //     } catch (error) {
-  //       console.error("Error deleting business:", error);
-  //       toast.error("Failed to delete business");
-  //     }
-  //   }
-  // };
-
-  // const handleRequestVerification = async (businessId: string) => {
-  //   try {
-  //     await requestBusinessVerification(businessId);
-  //     toast.success("Verification request submitted");
-  //   } catch (error) {
-  //     console.error("Error requesting verification:", error);
-  //     toast.error("Failed to request verification");
-  //   }
-  // };
-
   const BusinessModal: React.FC<BusinessModalProps> = ({
     business,
     onClose,
@@ -203,8 +177,7 @@ const MyBusinessPage: React.FC = () => {
         selectBusiness(null);
         loadBusinesses();
       } catch {
-        const errorMessage =
-          "Failed to save business. Please try again.";
+        const errorMessage = "Failed to save business. Please try again.";
         toast.error(errorMessage);
       } finally {
         setSubmitting(false);
@@ -227,30 +200,30 @@ const MyBusinessPage: React.FC = () => {
 
     return (
       <div className="fixed inset-0 bg-black/20 flex items-center justify-center p-4 z-50">
-        <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden">
+        <div className="bg-white rounded-lg max-w-full w-full sm:max-w-lg md:max-w-2xl max-h-[90vh] overflow-hidden">
           {/* Header */}
-          <div className="p-6 border-b border-gray-200">
+          <div className="p-4 sm:p-6 border-b border-gray-200">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
                 {business ? "Edit Business" : "Add New Business"}
               </h2>
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
+                className="text-gray-400 hover:text-gray-600 text-xl sm:text-2xl leading-none"
               >
                 ×
               </button>
             </div>
 
             {/* Progress Steps */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4 overflow-x-auto">
               {steps.map((step: Step, index: number) => (
-                <div key={step.number} className="flex items-center">
+                <div key={step.number} className="flex items-center min-w-0">
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
+                    className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-sm font-medium
                     ${
                       currentStep >= step.number
-                        ? "bg-blue-600 text-white"
+                        ? "bg-blue-500 text-white"
                         : "bg-gray-200 text-gray-600"
                     }`}
                   >
@@ -258,9 +231,9 @@ const MyBusinessPage: React.FC = () => {
                   </div>
                   <div className="ml-2 hidden sm:block">
                     <p
-                      className={`text-sm font-medium ${
+                      className={`text-xs sm:text-sm font-medium ${
                         currentStep >= step.number
-                          ? "text-blue-600"
+                          ? "text-blue-500"
                           : "text-gray-500"
                       }`}
                     >
@@ -269,9 +242,9 @@ const MyBusinessPage: React.FC = () => {
                   </div>
                   {index < steps.length - 1 && (
                     <div
-                      className={`w-8 h-px mx-4 ${
+                      className={`w-4 sm:w-8 h-px mx-2 sm:mx-4 ${
                         currentStep > step.number
-                          ? "bg-blue-600"
+                          ? "bg-blue-500"
                           : "bg-gray-200"
                       }`}
                     />
@@ -282,7 +255,7 @@ const MyBusinessPage: React.FC = () => {
           </div>
 
           {/* Content */}
-          <div className="p-6 overflow-y-auto max-h-96">
+          <div className="p-4 sm:p-6 overflow-y-auto max-h-[60vh] sm:max-h-96">
             {currentStep === 1 && (
               <div className="space-y-4">
                 <div>
@@ -301,11 +274,11 @@ const MyBusinessPage: React.FC = () => {
                     placeholder="Enter your business name"
                   />
                   {errors.name && (
-                    <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+                    <p className="text-red-600 text-sm mt-1">{errors.name}</p>
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Category *
@@ -315,7 +288,8 @@ const MyBusinessPage: React.FC = () => {
                       onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                         setFormData({
                           ...formData,
-                          category: e.target.value as BusinessFormData['category'],
+                          category: e.target
+                            .value as BusinessFormData["category"],
                         })
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -337,7 +311,7 @@ const MyBusinessPage: React.FC = () => {
                       onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                         setFormData({
                           ...formData,
-                          size: e.target.value as BusinessFormData['size'],
+                          size: e.target.value as BusinessFormData["size"],
                         })
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -350,7 +324,7 @@ const MyBusinessPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Email *
@@ -367,7 +341,7 @@ const MyBusinessPage: React.FC = () => {
                       placeholder="business@example.com"
                     />
                     {errors.email && (
-                      <p className="text-red-500 text-sm mt-1">
+                      <p className="text-red-600 text-sm mt-1">
                         {errors.email}
                       </p>
                     )}
@@ -389,7 +363,7 @@ const MyBusinessPage: React.FC = () => {
                       placeholder="+256-700-000000"
                     />
                     {errors.phone && (
-                      <p className="text-red-500 text-sm mt-1">
+                      <p className="text-red-600 text-sm mt-1">
                         {errors.phone}
                       </p>
                     )}
@@ -446,13 +420,13 @@ const MyBusinessPage: React.FC = () => {
                     placeholder="Street address, building, floor"
                   />
                   {errors.address && (
-                    <p className="text-red-500 text-sm mt-1">
+                    <p className="text-red-600 text-sm mt-1">
                       {errors.address}
                     </p>
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       City *
@@ -469,7 +443,7 @@ const MyBusinessPage: React.FC = () => {
                       placeholder="Kampala"
                     />
                     {errors.city && (
-                      <p className="text-red-500 text-sm mt-1">{errors.city}</p>
+                      <p className="text-red-600 text-sm mt-1">{errors.city}</p>
                     )}
                   </div>
 
@@ -489,7 +463,7 @@ const MyBusinessPage: React.FC = () => {
                       placeholder="Uganda"
                     />
                     {errors.country && (
-                      <p className="text-red-500 text-sm mt-1">
+                      <p className="text-red-600 text-sm mt-1">
                         {errors.country}
                       </p>
                     )}
@@ -518,7 +492,7 @@ const MyBusinessPage: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Service Hours
                   </label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4">
                     <div>
                       <label className="block text-xs text-gray-500 mb-1">
                         Opening Time
@@ -561,7 +535,6 @@ const MyBusinessPage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Preview */}
                   <div className="mt-2 p-2 bg-gray-50 rounded text-sm text-gray-600">
                     Hours:{" "}
                     {formData.service_time ||
@@ -637,8 +610,8 @@ const MyBusinessPage: React.FC = () => {
 
                 <div className="bg-blue-50 rounded-lg p-4">
                   <div className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-blue-600 mr-2" />
-                    <p className="text-sm text-blue-800">
+                    <CheckCircle className="w-5 h-5 text-blue-500 mr-2" />
+                    <p className="text-sm text-blue-500">
                       By creating this business, you agree to our terms of
                       service and will need to complete verification to access
                       all features.
@@ -650,28 +623,34 @@ const MyBusinessPage: React.FC = () => {
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-between items-center">
+          <div className="px-4 sm:px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div>
               {currentStep > 1 && (
                 <Button
                   variant="outline"
                   onClick={() => setCurrentStep(currentStep - 1)}
                   disabled={submitting}
+                  className="w-full sm:w-auto border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
                 >
                   Back
                 </Button>
               )}
             </div>
 
-            <div className="flex space-x-3">
-              <Button variant="outline" onClick={onClose} disabled={submitting}>
+            <div className="flex space-x-3 w-full sm:w-auto">
+              <Button
+                variant="outline"
+                onClick={onClose}
+                disabled={submitting}
+                className="w-full sm:w-auto border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
+              >
                 Cancel
               </Button>
 
               {currentStep < 3 ? (
                 <Button
                   onClick={handleNext}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white"
                 >
                   Next
                 </Button>
@@ -679,11 +658,11 @@ const MyBusinessPage: React.FC = () => {
                 <Button
                   onClick={handleSubmit}
                   disabled={submitting}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white"
                 >
                   {submitting ? (
                     <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin text-blue-500" />
                       {business ? "Updating..." : "Creating..."}
                     </>
                   ) : business ? (
@@ -703,7 +682,7 @@ const MyBusinessPage: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
         <p className="ml-2 text-gray-600">Loading your business...</p>
       </div>
     );
@@ -713,25 +692,25 @@ const MyBusinessPage: React.FC = () => {
   if (!hasBusiness) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center mb-12">
-            <Building2 className="w-20 h-20 text-blue-600 mx-auto mb-6" />
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16">
+          <div className="text-center mb-8 sm:mb-12">
+            <Building2 className="w-16 sm:w-20 h-16 sm:h-20 text-blue-500 mx-auto mb-6" />
+            <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-4">
               Welcome to Your Business Dashboard
             </h1>
-            <p className="text-xl text-gray-600">
+            <p className="text-base sm:text-xl text-gray-600">
               Let&apos;s get started by setting up your business profile
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 mb-8">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">
               What you&apos;ll be able to do:
             </h2>
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="flex items-start">
                 <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
-                  <Users className="w-5 h-5 text-blue-600" />
+                  <Users className="w-5 h-5 text-blue-500" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-1">
@@ -791,9 +770,9 @@ const MyBusinessPage: React.FC = () => {
             <Button
               onClick={() => setShowCreateModal(true)}
               size="lg"
-              className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg px-8 py-6 text-lg"
+              className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white shadow-lg px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg"
             >
-              <Plus className="w-6 h-6 mr-2" />
+              <Plus className="w-5 sm:w-6 h-5 sm:h-6 mr-2 text-amber-600" />
               Create Your Business Profile
             </Button>
           </div>
@@ -816,19 +795,19 @@ const MyBusinessPage: React.FC = () => {
   const StatusIcon = verification.icon;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 -mt-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {error && (
           <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
             <div className="flex">
-              <AlertCircle className="h-5 w-5 text-red-400 mr-2" />
+              <AlertCircle className="h-5 w-5 text-red-600 mr-2" />
               <div>
-                <p className="text-sm text-red-800">{error}</p>
+                <p className="text-sm text-red-600">{error}</p>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={clearBusinessError}
-                  className="mt-2"
+                  className="mt-2 border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
                 >
                   Dismiss
                 </Button>
@@ -838,11 +817,11 @@ const MyBusinessPage: React.FC = () => {
         )}
 
         {/* Business Header */}
-        <div className="bg-white rounded-lg border border-gray-200 p-8 mb-8">
-          <div className="flex items-start justify-between mb-6">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-3xl font-bold text-gray-900">
+        <div className="bg-white rounded-lg border border-gray-200 p-6 sm:p-8 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-6">
+            <div className="flex-1 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 truncate">
                   {business.name}
                 </h1>
                 <span
@@ -854,12 +833,12 @@ const MyBusinessPage: React.FC = () => {
                   }
                   ${
                     verification.color === "yellow"
-                      ? "bg-yellow-100 text-yellow-800"
+                      ? "bg-amber-50 text-amber-700"
                       : ""
                   }
                   ${
                     verification.color === "blue"
-                      ? "bg-blue-100 text-blue-800"
+                      ? "bg-blue-50 text-blue-500 border-blue-200"
                       : ""
                   }
                   ${
@@ -873,81 +852,82 @@ const MyBusinessPage: React.FC = () => {
                   {verification.text}
                 </span>
               </div>
-              <p className="text-gray-500 mb-4">{business.business_id}</p>
+              <p className="text-gray-500 text-sm">{business.business_id}</p>
               <p className="text-gray-600">{business.description}</p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex justify-end sm:items-start">
               <Button
                 variant="outline"
                 onClick={() => {
                   selectBusiness(business);
                   setShowCreateModal(true);
                 }}
+                className="w-full sm:w-auto border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
               >
-                <Edit2 className="w-4 h-4 mr-2" />
+                <Edit2 className="w-4 h-4 mr-2 text-blue-500" />
                 Edit Business
               </Button>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-6">
             <div className="flex items-center">
-              <MapPin className="w-5 h-5 text-gray-400 mr-2" />
+              <MapPin className="w-5 h-5 text-amber-600 mr-2" />
               <span className="text-gray-700">
                 {business.city}, {business.country}
               </span>
             </div>
             <div className="flex items-center">
-              <Mail className="w-5 h-5 text-gray-400 mr-2" />
+              <Mail className="w-5 h-5 text-amber-600 mr-2" />
               <span className="text-gray-700">{business.email}</span>
             </div>
             <div className="flex items-center">
-              <Phone className="w-5 h-5 text-gray-400 mr-2" />
+              <Phone className="w-5 h-5 text-amber-600 mr-2" />
               <span className="text-gray-700">{business.phone}</span>
             </div>
           </div>
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">
                   {business.staff_count || 0}
                 </p>
                 <p className="text-gray-600 text-sm">Total Staff</p>
               </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-blue-600" />
+              <div className="w-10 sm:w-12 h-10 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Users className="w-5 sm:w-6 h-5 sm:h-6 text-blue-500" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">
                   {business.active_jobs || 0}
                 </p>
                 <p className="text-gray-600 text-sm">Active Jobs</p>
               </div>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <Briefcase className="w-6 h-6 text-green-600" />
+              <div className="w-10 sm:w-12 h-10 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <Briefcase className="w-5 sm:w-6 h-5 sm:h-6 text-green-600" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">
                   {business.total_applications || 0}
                 </p>
                 <p className="text-gray-600 text-sm">Applications</p>
               </div>
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <BarChart3 className="w-6 h-6 text-purple-600" />
+              <div className="w-10 sm:w-12 h-10 sm:h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <BarChart3 className="w-5 sm:w-6 h-5 sm:h-6 text-purple-600" />
               </div>
             </div>
           </div>
@@ -958,7 +938,7 @@ const MyBusinessPage: React.FC = () => {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Quick Actions
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Link
               href="/staff"
               className="flex items-center p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"

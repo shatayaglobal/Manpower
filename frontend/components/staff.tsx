@@ -139,6 +139,7 @@ const StaffManagementPage: React.FC = () => {
       }
     }
   };
+
   const handleEditStaff = (staff: BusinessStaff) => {
     selectStaff(staff);
     setShowCreateModal(true);
@@ -178,8 +179,8 @@ const StaffManagementPage: React.FC = () => {
         label: "Terminated",
       },
       ON_LEAVE: {
-        bg: "bg-yellow-100",
-        text: "text-yellow-800",
+        bg: "bg-amber-50",
+        text: "text-amber-600",
         label: "On Leave",
       },
     };
@@ -196,10 +197,22 @@ const StaffManagementPage: React.FC = () => {
 
   const getEmploymentTypeBadge = (type: EmploymentType) => {
     const typeConfig = {
-      FULL_TIME: { label: "Full Time", color: "bg-blue-100 text-blue-800" },
-      PART_TIME: { label: "Part Time", color: "bg-purple-100 text-purple-800" },
-      CONTRACT: { label: "Contract", color: "bg-orange-100 text-orange-800" },
-      INTERN: { label: "Intern", color: "bg-pink-100 text-pink-800" },
+      FULL_TIME: {
+        label: "Full Time",
+        color: "bg-blue-50 text-blue-500 border border-blue-200",
+      },
+      PART_TIME: {
+        label: "Part Time",
+        color: "bg-purple-50 text-purple-600 border border-purple-200",
+      },
+      CONTRACT: {
+        label: "Contract",
+        color: "bg-orange-50 text-orange-600 border border-orange-200",
+      },
+      INTERN: {
+        label: "Intern",
+        color: "bg-pink-50 text-pink-600 border border-pink-200",
+      },
     };
 
     const config = typeConfig[type] || typeConfig.FULL_TIME;
@@ -220,7 +233,7 @@ const StaffManagementPage: React.FC = () => {
     children: React.ReactNode;
   }) => (
     <th
-      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+      className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
       onClick={() => handleSort(field)}
     >
       <div className="flex items-center space-x-1">
@@ -382,12 +395,13 @@ const StaffManagementPage: React.FC = () => {
         setSubmitting(false);
       }
     };
+
     return (
       <div className="fixed inset-0 bg-black/20 flex items-center justify-center p-4 z-50">
-        <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden">
-          <div className="p-6 border-b border-gray-200">
+        <div className="bg-white rounded-lg max-w-full w-full sm:max-w-lg md:max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="p-4 sm:p-6 border-b border-gray-200">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-900">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
                 {staff ? "Edit Staff Member" : "Add New Staff Member"}
               </h2>
               <button
@@ -399,7 +413,7 @@ const StaffManagementPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="p-6 overflow-y-auto max-h-[60vh]">
+          <div className="p-4 sm:p-6">
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -417,11 +431,11 @@ const StaffManagementPage: React.FC = () => {
                   placeholder="John Doe"
                 />
                 {errors.name && (
-                  <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+                  <p className="text-red-600 text-sm mt-1">{errors.name}</p>
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Job Title *
@@ -438,7 +452,7 @@ const StaffManagementPage: React.FC = () => {
                     placeholder="Manager"
                   />
                   {errors.job_title && (
-                    <p className="text-red-500 text-sm mt-1">
+                    <p className="text-red-600 text-sm mt-1">
                       {errors.job_title}
                     </p>
                   )}
@@ -460,7 +474,7 @@ const StaffManagementPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Employment Type *
@@ -504,7 +518,7 @@ const StaffManagementPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Email *
@@ -521,7 +535,7 @@ const StaffManagementPage: React.FC = () => {
                     placeholder="john@example.com"
                   />
                   {errors.email && (
-                    <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                    <p className="text-red-600 text-sm mt-1">{errors.email}</p>
                   )}
                 </div>
 
@@ -541,12 +555,12 @@ const StaffManagementPage: React.FC = () => {
                     placeholder="+256-700-000000"
                   />
                   {errors.phone && (
-                    <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+                    <p className="text-red-600 text-sm mt-1">{errors.phone}</p>
                   )}
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Hourly Rate (Optional)
@@ -580,18 +594,23 @@ const StaffManagementPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-end space-x-3">
-            <Button variant="outline" onClick={onClose} disabled={submitting}>
+          <div className="px-4 sm:px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-end space-x-0 sm:space-x-3 gap-4 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={onClose}
+              disabled={submitting}
+              className="w-full sm:w-auto border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600 min-w-[120px]"
+            >
               Cancel
             </Button>
             <Button
               onClick={handleSubmit}
               disabled={submitting}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white min-w-[120px]"
             >
               {submitting ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin text-blue-500" />
                   {staff ? "Updating..." : "Adding..."}
                 </>
               ) : staff ? (
@@ -609,17 +628,17 @@ const StaffManagementPage: React.FC = () => {
   if (!businessLoading && !business) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-          <AlertCircle className="w-20 h-20 text-yellow-500 mx-auto mb-6" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16 text-center">
+          <AlertCircle className="w-16 sm:w-20 h-16 sm:h-20 text-amber-600 mx-auto mb-6" />
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
             No Business Profile Found
           </h2>
-          <p className="text-gray-600 mb-8">
+          <p className="text-base sm:text-lg text-gray-600 mb-8">
             You need to create your business profile before managing staff.
           </p>
           <Button
             onClick={() => router.push("/business")}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white min-w-[160px] py-3"
           >
             Create Business Profile
           </Button>
@@ -632,19 +651,19 @@ const StaffManagementPage: React.FC = () => {
   const onLeaveStaff = staff.filter((s) => s.status === "ON_LEAVE").length;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 -mt-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {staffError && (
           <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-            <div className="flex">
-              <AlertCircle className="h-5 w-5 text-red-400 mr-2" />
+            <div className="flex items-center">
+              <AlertCircle className="h-5 w-5 text-red-600 mr-2" />
               <div>
-                <p className="text-sm text-red-800">{staffError}</p>
+                <p className="text-sm text-red-600">{staffError}</p>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={clearStaffError}
-                  className="mt-2"
+                  className="mt-2 border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
                 >
                   Dismiss
                 </Button>
@@ -654,22 +673,23 @@ const StaffManagementPage: React.FC = () => {
         )}
 
         <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-6">
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                 Staff Management
               </h1>
-              <p className="text-gray-600 mt-1">
+              <p className="text-gray-600 text-sm sm:text-base mt-1">
                 Manage your team members and their information
               </p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto min-w-0">
               <Button
                 variant="outline"
                 onClick={exportToCSV}
                 disabled={staff.length === 0}
+                className="w-full sm:w-auto border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600 min-w-[120px] py-3 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-blue-500"
               >
-                <Download className="w-4 h-4 mr-2" />
+                <Download className="w-4 h-4 mr-2 text-blue-500" />
                 Export CSV
               </Button>
               <Button
@@ -677,23 +697,23 @@ const StaffManagementPage: React.FC = () => {
                   selectStaff(null);
                   setShowCreateModal(true);
                 }}
-                className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+                className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white shadow-sm min-w-[120px] py-3"
               >
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className="w-4 h-4 mr-2 text-amber-600" />
                 Add Staff
               </Button>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
-                <Users className="w-6 h-6 text-blue-600" />
+              <div className="w-10 sm:w-12 h-10 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                <Users className="w-5 sm:w-6 h-5 sm:h-6 text-blue-500" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">
                   {staffPagination.count}
                 </p>
                 <p className="text-gray-600 text-sm">Total Staff</p>
@@ -701,13 +721,13 @@ const StaffManagementPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
-                <Users className="w-6 h-6 text-green-600" />
+              <div className="w-10 sm:w-12 h-10 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                <Users className="w-5 sm:w-6 h-5 sm:h-6 text-green-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">
                   {activeStaff}
                 </p>
                 <p className="text-gray-600 text-sm">Active</p>
@@ -715,13 +735,13 @@ const StaffManagementPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mr-4">
-                <Users className="w-6 h-6 text-yellow-600" />
+              <div className="w-10 sm:w-12 h-10 sm:h-12 bg-amber-50 rounded-lg flex items-center justify-center mr-4">
+                <Users className="w-5 sm:w-6 h-5 sm:h-6 text-amber-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">
                   {onLeaveStaff}
                 </p>
                 <p className="text-gray-600 text-sm">On Leave</p>
@@ -730,10 +750,10 @@ const StaffManagementPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm mb-6">
-          <div className="flex flex-col sm:flex-row gap-4">
+        <div className="bg-white p-4 sm:p-6 rounded-lg border border-gray-200 shadow-sm mb-6">
+          <div className="flex flex-col gap-4">
             <div className="flex-1 relative">
-              <Search className="w-5 h-5 text-gray-400 absolute left-3 top-3" />
+              <Search className="w-5 h-5 text-amber-600 absolute left-3 top-3" />
               <input
                 type="text"
                 placeholder="Search by name, email, or job title..."
@@ -742,23 +762,25 @@ const StaffManagementPage: React.FC = () => {
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
-            <div className="flex items-center gap-3">
-              <Filter className="w-5 h-5 text-gray-400" />
-              <select
-                value={localStatusFilter}
-                onChange={(e) => setLocalStatusFilter(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">All Status</option>
-                <option value="ACTIVE">Active</option>
-                <option value="INACTIVE">Inactive</option>
-                <option value="ON_LEAVE">On Leave</option>
-                <option value="TERMINATED">Terminated</option>
-              </select>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Filter className="w-5 h-5 text-amber-600" />
+                <select
+                  value={localStatusFilter}
+                  onChange={(e) => setLocalStatusFilter(e.target.value)}
+                  className="w-full sm:w-auto px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="all">All Status</option>
+                  <option value="ACTIVE">Active</option>
+                  <option value="INACTIVE">Inactive</option>
+                  <option value="ON_LEAVE">On Leave</option>
+                  <option value="TERMINATED">Terminated</option>
+                </select>
+              </div>
               <select
                 value={localEmploymentTypeFilter}
                 onChange={(e) => setLocalEmploymentTypeFilter(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full sm:w-auto px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="all">All Types</option>
                 <option value="FULL_TIME">Full Time</option>
@@ -772,16 +794,16 @@ const StaffManagementPage: React.FC = () => {
 
         {staffLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
             <p className="ml-2 text-gray-600">Loading staff members...</p>
           </div>
         ) : staff.length === 0 ? (
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-12 text-center">
-            <Users className="w-20 h-20 text-gray-300 mx-auto mb-6" />
-            <h3 className="text-xl font-medium text-gray-900 mb-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 sm:p-12 text-center">
+            <Users className="w-16 sm:w-20 h-16 sm:h-20 text-gray-300 mx-auto mb-6" />
+            <h3 className="text-lg sm:text-xl font-medium text-gray-900 mb-3">
               No staff members yet
             </h3>
-            <p className="text-gray-600 mb-8 max-w-md mx-auto">
+            <p className="text-gray-600 text-sm sm:text-base mb-8 max-w-md mx-auto">
               Start building your team by adding your first staff member.
             </p>
             <Button
@@ -790,9 +812,9 @@ const StaffManagementPage: React.FC = () => {
                 setShowCreateModal(true);
               }}
               size="lg"
-              className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+              className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white shadow-sm min-w-[160px] py-3"
             >
-              <Plus className="w-5 h-5 mr-2" />
+              <Plus className="w-5 h-5 mr-2 text-amber-600" />
               Add Your First Staff Member
             </Button>
           </div>
@@ -817,10 +839,10 @@ const StaffManagementPage: React.FC = () => {
                       <SortableHeader field="hire_date">
                         Hire Date
                       </SortableHeader>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Contact
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
@@ -831,68 +853,68 @@ const StaffManagementPage: React.FC = () => {
                         key={member.id}
                         className="hover:bg-gray-50 transition-colors"
                       >
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold">
+                            <div className="w-8 sm:w-10 h-8 sm:h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 font-semibold">
                               {member.name.charAt(0).toUpperCase()}
                             </div>
                             <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">
+                              <div className="text-sm font-medium text-gray-900 truncate">
                                 {member.name}
                               </div>
-                              <div className="text-sm text-gray-500">
+                              <div className="text-xs sm:text-sm text-gray-500">
                                 {member.staff_id}
                               </div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900 truncate">
                             {member.job_title}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
                           <div className="text-sm text-gray-900">
                             {member.department || "-"}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                           {getEmploymentTypeBadge(member.employment_type)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                           {getStatusBadge(member.status)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
                             {new Date(member.hire_date).toLocaleDateString()}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-500">
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                          <div className="text-xs sm:text-sm text-gray-500">
                             <div className="flex items-center">
-                              <Mail className="w-3 h-3 mr-1" />
-                              <span className="truncate max-w-[150px]">
+                              <Mail className="w-3 h-3 mr-1 text-amber-600" />
+                              <span className="truncate max-w-[120px] sm:max-w-[150px]">
                                 {member.email}
                               </span>
                             </div>
                             <div className="flex items-center mt-1">
-                              <Phone className="w-3 h-3 mr-1" />
+                              <Phone className="w-3 h-3 mr-1 text-amber-600" />
                               <span>{member.phone}</span>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="sm">
-                                <MoreHorizontal className="w-4 h-4" />
+                                <MoreHorizontal className="w-4 h-4 text-blue-500" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem
                                 onClick={() => handleEditStaff(member)}
                               >
-                                <Edit2 className="w-4 h-4 mr-2" />
+                                <Edit2 className="w-4 h-4 mr-2 text-blue-500" />
                                 Edit
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
@@ -902,7 +924,7 @@ const StaffManagementPage: React.FC = () => {
                                   handleDeleteStaff(member.id, member.name)
                                 }
                               >
-                                <Trash2 className="w-4 h-4 mr-2" />
+                                <Trash2 className="w-4 h-4 mr-2 text-red-600" />
                                 Delete
                               </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -917,12 +939,13 @@ const StaffManagementPage: React.FC = () => {
 
             {/* Server-side Pagination */}
             {staffPagination.count > itemsPerPage && (
-              <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-4 rounded-lg">
+              <div className="bg-white px-4 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 sm:px-6 mt-4 rounded-lg gap-4 sm:gap-0">
                 <div className="flex-1 flex justify-between sm:hidden">
                   <Button
                     onClick={handlePreviousPage}
                     disabled={!staffPagination.hasPrevious || staffLoading}
                     variant="outline"
+                    className="w-full sm:w-auto border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600 min-w-[120px] py-3"
                   >
                     Previous
                   </Button>
@@ -933,6 +956,7 @@ const StaffManagementPage: React.FC = () => {
                     onClick={handleNextPage}
                     disabled={!staffPagination.hasNext || staffLoading}
                     variant="outline"
+                    className="w-full sm:w-auto border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600 min-w-[120px] py-3"
                   >
                     Next
                   </Button>
@@ -964,7 +988,7 @@ const StaffManagementPage: React.FC = () => {
                         onClick={handlePreviousPage}
                         disabled={!staffPagination.hasPrevious || staffLoading}
                         variant="outline"
-                        className="rounded-r-none"
+                        className="rounded-r-none border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
                       >
                         Previous
                       </Button>
@@ -989,7 +1013,7 @@ const StaffManagementPage: React.FC = () => {
                                   variant={
                                     currentPage === page ? "default" : "outline"
                                   }
-                                  className="rounded-none"
+                                  className="rounded-none border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
                                   disabled={staffLoading}
                                 >
                                   {page}
@@ -1004,7 +1028,7 @@ const StaffManagementPage: React.FC = () => {
                               variant={
                                 currentPage === page ? "default" : "outline"
                               }
-                              className="rounded-none"
+                              className="rounded-none border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
                               disabled={staffLoading}
                             >
                               {page}
@@ -1016,7 +1040,7 @@ const StaffManagementPage: React.FC = () => {
                         onClick={handleNextPage}
                         disabled={!staffPagination.hasNext || staffLoading}
                         variant="outline"
-                        className="rounded-l-none"
+                        className="rounded-l-none border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
                       >
                         Next
                       </Button>

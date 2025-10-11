@@ -170,7 +170,7 @@ const HoursManagementPage: React.FC = () => {
 
   const getStatusBadge = (status: HoursCardStatus) => {
     const statusConfig = {
-      PENDING: { bg: "bg-yellow-100", text: "text-yellow-800", label: "Pending" },
+      PENDING: { bg: "bg-amber-50", text: "text-amber-700", label: "Pending" },
       APPROVED: { bg: "bg-green-100", text: "text-green-800", label: "Approved" },
       REJECTED: { bg: "bg-red-100", text: "text-red-800", label: "Rejected" },
       REVISED: { bg: "bg-blue-100", text: "text-blue-800", label: "Needs Revision" },
@@ -220,7 +220,7 @@ const HoursManagementPage: React.FC = () => {
     .reduce((sum, h) => sum + (h.total_hours_decimal || 0), 0);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 -mt-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {hoursError && (
           <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
@@ -248,8 +248,8 @@ const HoursManagementPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-lg border border-gray-200 p-6">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mr-4">
-                <Clock className="w-6 h-6 text-yellow-600" />
+              <div className="w-12 h-12 bg-amber-50 rounded-lg flex items-center justify-center mr-4">
+                <Clock className="w-6 h-6 text-amber-600" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-gray-900">{pendingHours}</p>

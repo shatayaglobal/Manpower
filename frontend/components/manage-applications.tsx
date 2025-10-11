@@ -150,9 +150,9 @@ export default function ManageApplicationsPage() {
   const getStatusIcon = (status: string) => {
     switch (status?.toUpperCase()) {
       case "PENDING":
-        return <Clock className="h-4 w-4 text-yellow-600" />;
+        return <Clock className="h-4 w-4 text-amber-600" />;
       case "REVIEWED":
-        return <AlertCircle className="h-4 w-4 text-blue-600" />;
+        return <AlertCircle className="h-4 w-4 text-blue-500" />;
       case "ACCEPTED":
         return <CheckCircle className="h-4 w-4 text-green-600" />;
       case "REJECTED":
@@ -165,15 +165,15 @@ export default function ManageApplicationsPage() {
   const getStatusColor = (status: string) => {
     switch (status?.toUpperCase()) {
       case "PENDING":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+        return "bg-amber-50 text-amber-700 border-amber-200";
       case "REVIEWED":
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return "bg-blue-50 text-blue-500 border-blue-200";
       case "ACCEPTED":
-        return "bg-green-100 text-green-800 border-green-200";
+        return "bg-green-50 text-green-600 border-green-200";
       case "REJECTED":
-        return "bg-red-100 text-red-800 border-red-200";
+        return "bg-red-50 text-red-600 border-red-200";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-gray-50 text-gray-600 border-gray-200";
     }
   };
 
@@ -194,14 +194,16 @@ export default function ManageApplicationsPage() {
   const getUniqueJobs = () => {
     const jobs = applications
       .map((app) => app.job)
-      .filter((job): job is Extract<typeof job, { id: string; title: string }> => {
-        return (
-          job !== null &&
-          job !== undefined &&
-          typeof job === "object" &&
-          "id" in job
-        );
-      })
+      .filter(
+        (job): job is Extract<typeof job, { id: string; title: string }> => {
+          return (
+            job !== null &&
+            job !== undefined &&
+            typeof job === "object" &&
+            "id" in job
+          );
+        }
+      )
       .filter(
         (job, index, self) => self.findIndex((j) => j.id === job.id) === index
       );
@@ -238,7 +240,7 @@ export default function ManageApplicationsPage() {
   if (!isAuthenticated || !user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-700" />
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
       </div>
     );
   }
@@ -246,7 +248,7 @@ export default function ManageApplicationsPage() {
   const stats = getApplicationStats();
 
   return (
-    <div className="min-h-screen bg-white py-8">
+    <div className="min-h-screen bg-white py-8 -mt-7">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-6">
@@ -260,7 +262,7 @@ export default function ManageApplicationsPage() {
             </Button>
 
             <div className="flex items-center gap-3">
-              <Users className="h-8 w-8 text-blue-600" />
+              <Users className="h-8 w-8 text-blue-500" />
               <h1 className="text-3xl font-bold text-gray-900">
                 Manage Applications
               </h1>
@@ -271,8 +273,8 @@ export default function ManageApplicationsPage() {
           </p>
         </div>
 
-        {/* Stats Cards - Minimal */}
-        <div className="grid grid-cols-5 gap-3 mb-2 border-b">
+        {/* Stats Cards - Two Rows on Mobile, Single Row on Desktop */}
+        <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 mb-2 border-b auto-rows-fr">
           <div className="bg-white border rounded p-5 flex items-center justify-between">
             <div>
               <p className="text-xs text-gray-600">Total</p>
@@ -281,27 +283,27 @@ export default function ManageApplicationsPage() {
             <Users className="h-3 w-3 text-gray-600" />
           </div>
 
-          <div className="bg-white border rounded p-2 flex items-center justify-between">
+          <div className="bg-white border rounded p-5 flex items-center justify-between">
             <div>
               <p className="text-xs text-gray-600">Pending</p>
-              <p className="text-sm font-bold text-yellow-600">
+              <p className="text-sm font-bold text-amber-600">
                 {stats.pending}
               </p>
             </div>
-            <Clock className="h-3 w-3 text-yellow-600" />
+            <Clock className="h-3 w-3 text-amber-600" />
           </div>
 
-          <div className="bg-white border rounded p-2 flex items-center justify-between">
+          <div className="bg-white border rounded p-5 flex items-center justify-between">
             <div>
               <p className="text-xs text-gray-600">Reviewed</p>
-              <p className="text-sm font-bold text-blue-600">
+              <p className="text-sm font-bold text-blue-500">
                 {stats.reviewed}
               </p>
             </div>
-            <AlertCircle className="h-3 w-3 text-blue-600" />
+            <AlertCircle className="h-3 w-3 text-blue-500" />
           </div>
 
-          <div className="bg-white border rounded p-2 flex items-center justify-between">
+          <div className="bg-white border rounded p-5 flex items-center justify-between col-start-1 sm:col-start-auto">
             <div>
               <p className="text-xs text-gray-600">Accepted</p>
               <p className="text-sm font-bold text-green-600">
@@ -311,7 +313,7 @@ export default function ManageApplicationsPage() {
             <CheckCircle className="h-3 w-3 text-green-600" />
           </div>
 
-          <div className="bg-white border rounded p-2 flex items-center justify-between">
+          <div className="bg-white border rounded p-5 flex items-center justify-between">
             <div>
               <p className="text-xs text-gray-600">Rejected</p>
               <p className="text-sm font-bold text-red-600">{stats.rejected}</p>
@@ -319,6 +321,7 @@ export default function ManageApplicationsPage() {
             <XCircle className="h-3 w-3 text-red-600" />
           </div>
         </div>
+
         {/* Filters - Compact */}
         <div className="bg-white border rounded p-2 mb-3">
           <div className="flex gap-2 items-center">
@@ -363,7 +366,7 @@ export default function ManageApplicationsPage() {
         {/* Error Message */}
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-red-800 text-sm">{error}</p>
+            <p className="text-red-600 text-sm">{error}</p>
             <Button
               variant="outline"
               size="sm"
@@ -378,7 +381,7 @@ export default function ManageApplicationsPage() {
         {/* Applications Table */}
         {loading ? (
           <div className="flex justify-center items-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-700" />
+            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
           </div>
         ) : (
           <Card>
@@ -419,8 +422,8 @@ export default function ManageApplicationsPage() {
                           >
                             <td className="py-4 px-4">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                  <User className="h-5 w-5 text-blue-600" />
+                                <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
+                                  <User className="h-5 w-5 text-blue-500" />
                                 </div>
                                 <div>
                                   <div className="font-medium text-gray-900">

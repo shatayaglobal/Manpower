@@ -123,7 +123,7 @@ export default function ChatWindow() {
                   <div
                     className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
                       isSystemMessage
-                        ? "bg-yellow-50 border border-yellow-200 text-yellow-900"
+                        ? "bg-yellow-50 border border-amber-200 text-yellow-900"
                         : isOwnMessage
                         ? "bg-blue-600 text-white"
                         : "bg-white border border-gray-200 text-gray-900"

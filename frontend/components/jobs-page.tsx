@@ -77,7 +77,6 @@ export default function Jobs() {
   const [selectedType, setSelectedType] = useState("");
   const [showJobDetail, setShowJobDetail] = useState(false);
   const [filters, setFilters] = useState<PostFilters>({
-    //post_type: 'JOB',
     page: 1,
     ordering: "-created_at",
   });
@@ -124,7 +123,7 @@ export default function Jobs() {
   if (!isAuthenticated || !user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-700" />
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
       </div>
     );
   }
@@ -228,7 +227,7 @@ export default function Jobs() {
           <Button
             variant="outline"
             onClick={closeJobDetails}
-            className="mb-6 border-gray-300 text-blue-700 hover:bg-amber-50 hover:text-amber-600 transition-colors"
+            className="mb-6 border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600 transition-colors"
           >
             ← Back to Jobs
           </Button>
@@ -240,7 +239,7 @@ export default function Jobs() {
                   <CardTitle className="text-2xl font-semibold text-gray-900">
                     {selectedJob.title}
                   </CardTitle>
-                  <CardDescription className="text-lg text-blue-700 mt-1">
+                  <CardDescription className="text-lg text-blue-500 mt-1">
                     {typeof selectedJob.user === "object"
                       ? selectedJob.user.email
                       : selectedJob.user}{" "}
@@ -250,7 +249,7 @@ export default function Jobs() {
                 <Button
                   variant="ghost"
                   onClick={closeJobDetails}
-                  className="p-2 text-blue-700 hover:text-blue-800"
+                  className="p-2 text-blue-500 hover:text-blue-600"
                 >
                   <X className="h-5 w-5" />
                 </Button>
@@ -261,7 +260,7 @@ export default function Jobs() {
               <div className="flex flex-wrap gap-4">
                 <Badge
                   variant="secondary"
-                  className="bg-blue-100 text-blue-800 font-medium"
+                  className="bg-blue-50 text-blue-500 border-blue-200 font-medium"
                 >
                   {formatJobType(selectedJob.priority)}
                 </Badge>
@@ -308,28 +307,39 @@ export default function Jobs() {
               <div className="flex gap-4 pt-6">
                 {!isBusinessUser ? (
                   <>
-                    <Button className="flex-1 bg-blue-700 hover:bg-blue-800 text-white text-base py-6 rounded-md">
+                    <Button
+                      className="flex-1 bg-blue-500 hover:bg-blue-600 text-white text-base py-6 rounded-md"
+                      onClick={() =>
+                        handleApplyWithProfileCheck(
+                          selectedJob.id,
+                          selectedJob.title
+                        )
+                      }
+                    >
                       Apply Now
                     </Button>
                     <Button
                       variant="outline"
                       onClick={() => handleSaveJob(selectedJob.id)}
-                      className="py-6 border-gray-300 text-blue-700 hover:bg-amber-50 hover:text-amber-600 rounded-md"
+                      className="py-6 border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600 rounded-md"
                     >
-                      <Heart className="h-5 w-5 text-blue-700" />
+                      <Heart className="h-5 w-5 text-blue-500" />
                     </Button>
                   </>
                 ) : (
                   <>
                     <Button
                       variant="outline"
-                      className="flex-1 py-6 border-gray-300 text-blue-700 hover:bg-amber-50 hover:text-amber-600 rounded-md"
+                      className="flex-1 py-6 border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600 rounded-md"
+                      onClick={() =>
+                        router.push(`/jobs/${selectedJob.id}/applications`)
+                      }
                     >
                       <Users className="h-5 w-5 mr-2 text-amber-600" />
                       View Applications
                     </Button>
                     <Button
-                      className="flex-1 py-6 bg-blue-700 hover:bg-blue-800 text-white rounded-md"
+                      className="flex-1 py-6 bg-blue-500 hover:bg-blue-600 text-white rounded-md"
                       onClick={() => router.push(`/edit-job/${selectedJob.id}`)}
                     >
                       <Edit className="h-5 w-5 mr-2 text-amber-600" />
@@ -346,12 +356,16 @@ export default function Jobs() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-white">
+    <div className="min-h-screen bg-gray-white -mt-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {error && (
           <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-red-800">{error}</p>
-            <Button variant="outline" onClick={clearPostError} className="mt-2">
+            <p className="text-red-600">{error}</p>
+            <Button
+              variant="outline"
+              onClick={clearPostError}
+              className="mt-2 border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600 rounded-md"
+            >
               Dismiss
             </Button>
           </div>
@@ -372,7 +386,7 @@ export default function Jobs() {
 
             {isBusinessUser && (
               <Button
-                className="bg-blue-700 hover:bg-blue-800 text-white rounded-md shadow-md"
+                className="bg-blue-500 hover:bg-blue-600 text-white rounded-md shadow-md"
                 onClick={() => router.push("/jobs/create")}
               >
                 <Plus className="h-4 w-4 mr-2 text-amber-600" />
@@ -402,7 +416,7 @@ export default function Jobs() {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-                    className="pl-10 border-gray-300 focus:ring-blue-700 bg-white rounded-md text-base"
+                    className="pl-10 border-gray-300 focus:ring-blue-500 bg-white rounded-md text-base"
                   />
                 </div>
               </div>
@@ -411,7 +425,7 @@ export default function Jobs() {
                 <select
                   value={selectedLocation}
                   onChange={(e) => handleLocationChange(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md p-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-700 bg-white shadow-sm"
+                  className="w-full border border-gray-300 rounded-md p-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                 >
                   <option value="">All Locations</option>
                   {getUniqueLocations().map((location) => (
@@ -426,7 +440,7 @@ export default function Jobs() {
                 <select
                   value={selectedType}
                   onChange={(e) => handleTypeChange(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md p-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-700 bg-white shadow-sm"
+                  className="w-full border border-gray-300 rounded-md p-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
                 >
                   <option value="">All Types</option>
                   {jobTypes.map((type) => (
@@ -440,7 +454,7 @@ export default function Jobs() {
               <Button
                 variant="outline"
                 onClick={clearFilters}
-                className="w-full lg:w-auto border-gray-300 text-blue-700 hover:bg-amber-50 hover:text-amber-600 rounded-md"
+                className="w-full lg:w-auto border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600 rounded-md"
               >
                 Clear Filters
               </Button>
@@ -456,7 +470,7 @@ export default function Jobs() {
 
         {loading ? (
           <div className="flex justify-center items-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-700" />
+            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
           </div>
         ) : (
           <>
@@ -469,14 +483,14 @@ export default function Jobs() {
                   <CardHeader className="pb-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-4 flex-1">
-                        <div className="w-12 h-12 bg-blue-100 rounded-md flex items-center justify-center shadow-sm">
-                          <Building className="h-6 w-6 text-blue-700" />
+                        <div className="w-12 h-12 bg-blue-50 rounded-md flex items-center justify-center shadow-sm">
+                          <Building className="h-6 w-6 text-blue-500" />
                         </div>
                         <div className="flex-1">
-                          <CardTitle className="text-xl font-semibold text-gray-900 group-hover:text-blue-700 transition-colors line-clamp-2">
+                          <CardTitle className="text-xl font-semibold text-gray-900 group-hover:text-blue-500 transition-colors line-clamp-2">
                             {job.title}
                           </CardTitle>
-                          <CardDescription className="text-base text-blue-700 mt-1">
+                          <CardDescription className="text-base text-blue-500 mt-1">
                             {typeof job.user === "object"
                               ? `${job.user.first_name || ""} ${
                                   job.user.last_name || ""
@@ -492,7 +506,7 @@ export default function Jobs() {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleSaveJob(job.id)}
-                            className="p-2 text-blue-700 hover:text-amber-600"
+                            className="p-2 text-blue-500 hover:text-blue-600"
                           >
                             <Heart className="h-4 w-4" />
                           </Button>
@@ -505,7 +519,7 @@ export default function Jobs() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="p-2 text-blue-700 hover:text-blue-800"
+                                className="p-2 text-blue-500 hover:text-blue-600"
                                 onClick={() =>
                                   router.push(`/jobs/${job.id}/edit`)
                                 }
@@ -515,7 +529,7 @@ export default function Jobs() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="p-2 text-blue-700 hover:text-amber-600"
+                                className="p-2 text-blue-500 hover:text-blue-600"
                                 onClick={() => handleDeleteJob(job.id)}
                               >
                                 <Trash2 className="h-4 w-4" />
@@ -555,7 +569,7 @@ export default function Jobs() {
                     <div className="flex items-center justify-between">
                       <Badge
                         variant="secondary"
-                        className="bg-blue-100 text-blue-800 font-medium"
+                        className="bg-blue-50 text-blue-500 border-blue-200 font-medium"
                       >
                         {formatJobType(job.priority)}
                       </Badge>
@@ -573,17 +587,16 @@ export default function Jobs() {
                     <div className="pt-4 space-y-2">
                       <Button
                         variant="outline"
-                        className="w-full border-gray-300 text-blue-700 hover:bg-amber-50 hover:text-amber-600 rounded-md"
+                        className="w-full border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600 rounded-md"
                         onClick={() => showJobDetails(job)}
                       >
-                        <Eye className="h-4 w-4 mr-2 text-blue-700" />
+                        <Eye className="h-4 w-4 mr-2 text-blue-500" />
                         View Details
                       </Button>
 
                       {!isBusinessUser && (
                         <Button
-                          className="w-full bg-blue-700 hover:bg-blue-800 text-lg px-8 py-3"
-                          //onClick={() => router.push(`/jobs/${job.id}/apply`)}
+                          className="w-full bg-blue-500 hover:bg-blue-600 text-lg px-8 py-3"
                           onClick={() =>
                             handleApplyWithProfileCheck(job.id, job.title)
                           }
@@ -604,7 +617,7 @@ export default function Jobs() {
                   variant="outline"
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={!hasPreviousPage}
-                  className="border-gray-300 text-blue-700 hover:bg-amber-50 hover:text-amber-600"
+                  className="border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
                 >
                   Previous
                 </Button>
@@ -613,7 +626,7 @@ export default function Jobs() {
                   variant="outline"
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={!hasNextPage}
-                  className="border-gray-300 text-blue-700 hover:bg-amber-50 hover:text-amber-600"
+                  className="border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
                 >
                   Next
                 </Button>
@@ -622,7 +635,7 @@ export default function Jobs() {
 
             {jobs.length === 0 && !loading && (
               <div className="text-center py-12">
-                <Briefcase className="h-12 w-12 text-blue-700 mx-auto mb-4" />
+                <Briefcase className="h-12 w-12 text-blue-500 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
                   No jobs found
                 </h3>
@@ -632,7 +645,7 @@ export default function Jobs() {
                 <Button
                   variant="outline"
                   onClick={clearFilters}
-                  className="border-gray-300 text-blue-700 hover:bg-amber-50 hover:text-amber-600 rounded-md"
+                  className="border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600 rounded-md"
                 >
                   Clear All Filters
                 </Button>

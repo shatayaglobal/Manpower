@@ -137,7 +137,7 @@
 
 //   const getStatusBadge = (status: string) => {
 //     const statusConfig: Record<string, { bg: string; text: string; label: string }> = {
-//       PENDING: { bg: "bg-yellow-100", text: "text-yellow-800", label: "Pending" },
+//       PENDING: { bg: "bg-amber-50", text: "text-amber-700", label: "Pending" },
 //       APPROVED: { bg: "bg-green-100", text: "text-green-800", label: "Approved" },
 //       REJECTED: { bg: "bg-red-100", text: "text-red-800", label: "Rejected" },
 //       REVISED: { bg: "bg-blue-100", text: "text-blue-800", label: "Needs Revision" },
@@ -215,7 +215,7 @@
 //         </div>
 
 //         {/* Current Time Card */}
-//         <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg p-8 text-white mb-8 shadow-lg">
+//         <div className="bg-gradient-to-br from-blue-700 to-blue-800 rounded-lg p-8 text-white mb-8 shadow-lg">
 //           <div className="flex items-center justify-between">
 //             <div>
 //               <div className="text-5xl font-bold mb-2">{formatTime(currentTime)}</div>
@@ -250,15 +250,15 @@
 
 //             {/* Break Status */}
 //             {isOnBreak && (
-//               <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+//               <div className="mb-6 p-4 bg-yellow-50 border border-amber-200 rounded-lg">
 //                 <div className="flex items-center justify-between">
 //                   <div>
-//                     <p className="text-sm text-yellow-800 font-medium">On Break</p>
+//                     <p className="text-sm text-amber-700 font-medium">On Break</p>
 //                     <p className="text-xs text-yellow-700 mt-1">
 //                       Started at {todayHoursCard?.break_start}
 //                     </p>
 //                   </div>
-//                   <Coffee className="w-8 h-8 text-yellow-600" />
+//                   <Coffee className="w-8 h-8 text-amber-600" />
 //                 </div>
 //               </div>
 //             )}

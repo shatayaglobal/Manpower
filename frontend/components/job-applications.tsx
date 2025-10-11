@@ -74,7 +74,7 @@ export default function ApplicationsPage() {
   const getStatusIcon = (status: string) => {
     switch (status?.toUpperCase()) {
       case "PENDING":
-        return <Clock className="h-3 w-3 text-yellow-600" />;
+        return <Clock className="h-3 w-3 text-amber-600" />;
       case "REVIEWED":
         return <AlertCircle className="h-3 w-3 text-blue-600" />;
       case "ACCEPTED":
@@ -89,7 +89,7 @@ export default function ApplicationsPage() {
   const getStatusColor = (status: string) => {
     switch (status?.toUpperCase()) {
       case "PENDING":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+        return "bg-amber-50 text-amber-700 border-amber-200";
       case "REVIEWED":
         return "bg-blue-100 text-blue-800 border-blue-200";
       case "ACCEPTED":
@@ -118,7 +118,7 @@ export default function ApplicationsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-8 -mt-12">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
