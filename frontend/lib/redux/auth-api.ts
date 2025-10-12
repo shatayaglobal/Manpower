@@ -40,7 +40,7 @@ class AuthService {
   async logout() {
     try {
       await axiosInstance.post('logout/')
-    } catch (error) {
+    } catch{
       throw new Error('Logout failed')
     }
   }

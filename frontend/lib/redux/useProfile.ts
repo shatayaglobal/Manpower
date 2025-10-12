@@ -47,8 +47,7 @@ export const useProfile = () => {
     try {
       const result = await dispatch(checkProfileCompletionThunk()).unwrap();
       return result.is_complete;
-    } catch (error) {
-      const errorMessage = getErrorMessage(error, 'Error checking profile completeness');
+    } catch {
       return false;
     }
   }, [dispatch, user, isAuthenticated, getErrorMessage]);
@@ -59,8 +58,7 @@ export const useProfile = () => {
 
     try {
       await dispatch(getProfileThunk()).unwrap();
-    } catch (error) {
-      const errorMessage = getErrorMessage(error, 'Error loading profile');
+    } catch  {
     }
   }, [dispatch, isAuthenticated, getErrorMessage]);
 
@@ -90,10 +88,17 @@ export const useProfile = () => {
     }
   }, [dispatch, getErrorMessage]);
 
-  // Handle apply with profile check - Updated to use Redux
-  const handleApplyWithProfileCheck = useCallback(async (jobId: string, jobTitle?: string): Promise<void> => {
-    if (!user || user.account_type !== 'WORKER') {
-      toast.error('Only workers can apply for jobs');
+
+const handleApplyWithProfileCheck = useCallback(
+  async (jobId: string, jobTitle?: string): Promise<void> => {
+    if (!user || user.account_type !== "WORKER") {
+      toast.error("Only workers can apply for jobs");
+      return;
+    }
+
+    if (!jobId || jobId === "undefined") {
+      console.error("Invalid jobId:", jobId);
+      toast.error("Cannot apply: Invalid job ID");
       return;
     }
 
@@ -101,45 +106,58 @@ export const useProfile = () => {
       const isProfileComplete = await checkProfileComplete();
 
       if (!isProfileComplete) {
-        dispatch(setPendingJobApplication({
-          jobId,
-          jobTitle,
-          timestamp: new Date().toISOString(),
-        }));
-        toast.info('Please complete your profile first to apply for jobs', {
-          description: 'You need to add your personal information, skills, and experience.',
+        dispatch(
+          setPendingJobApplication({
+            jobId,
+            jobTitle,
+            timestamp: new Date().toISOString(),
+          })
+        );
+        toast.info("Please complete your profile first to apply for jobs", {
+          description: "You need to add your personal information, skills, and experience.",
           duration: 4000,
         });
-        router.push('/profile');
+        router.push("/profile");
         return;
       }
 
-      const payload = { job: jobId, user_id: user.id };
-      await dispatch(submitJobApplication(payload)).unwrap();
+      const applicationData = new FormData();
+      applicationData.append("job", jobId);
+      applicationData.append("user_id", user.id);
+      applicationData.append("cover_letter", "Applied via profile check");
+      applicationData.append("additional_info", "");
 
-      toast.success('Successfully applied for the job!', {
-        description: jobTitle ? `Your application for "${jobTitle}" has been submitted.` : 'Your application has been submitted.',
+      console.log("FormData entries:", [...applicationData.entries()]);
+      await dispatch(submitJobApplication(applicationData)).unwrap();
+
+      toast.success("Successfully applied for the job!", {
+        description: jobTitle
+          ? `Your application for "${jobTitle}" has been submitted.`
+          : "Your application has been submitted.",
         duration: 5000,
       });
     } catch (error) {
-      let errorMessage = '';
+      let errorMessage = "";
       if (error instanceof Error) {
         errorMessage = error.message;
-      } else if (typeof error === 'object' && error !== null) {
+      } else if (typeof error === "object" && error !== null) {
         const errorObj = error as { message?: string };
-        errorMessage = errorObj.message || '';
+        errorMessage = errorObj.message || "";
       }
 
-      if (errorMessage === 'You have already applied for this job') {
-        toast.info('You have already applied for this job', {
-          description: 'You can only apply once per job. Check your applications to see the status.',
+      if (errorMessage === "You have already applied for this job") {
+        toast.info("You have already applied for this job", {
+          description: "You can only apply once per job. Check your applications to see the status.",
           duration: 4000,
         });
       } else {
-        toast.error('Failed to submit application. Please try again.');
+        console.error("Application error:", error);
+        toast.error("Failed to submit application. Please try again.");
       }
     }
-  }, [user, checkProfileComplete, router, dispatch]);
+  },
+  [user, checkProfileComplete, router, dispatch]
+);
 
   const handleProfileCompleted = useCallback((): void => {
     if (pendingJobApplication) {
@@ -151,12 +169,11 @@ export const useProfile = () => {
     }
   }, [pendingJobApplication, dispatch, router]);
 
-  // Clear pending job application manually
   const clearPendingApplication = useCallback((): void => {
     dispatch(clearPendingJobApplication());
   }, [dispatch]);
 
-  // Clear error
+
   const clearError = useCallback((): void => {
     dispatch(clearProfileError());
   }, [dispatch]);

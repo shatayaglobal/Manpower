@@ -9,7 +9,6 @@ import {
   Mail,
   Clock,
   CheckCircle,
-  XCircle,
   Plus,
   Edit2,
   Calendar,

@@ -33,6 +33,7 @@ export const useApplications = () => {
     [dispatch]
   );
 
+  
   const loadUserApplications = useCallback(() => {
     return dispatch(fetchUserApplications());
   }, [dispatch]);

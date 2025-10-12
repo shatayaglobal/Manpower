@@ -118,18 +118,18 @@ export default function ApplicationsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-8 ">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-4">
-            {/* <Button
-              variant="outline"
+            <Button
+              variant="ghost"
               onClick={() => router.back()}
               className="flex items-center gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
-            </Button> */}
+            </Button>
           </div>
 
           <div className="flex items-center gap-3 mb-2">
@@ -195,7 +195,7 @@ export default function ApplicationsPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200">
-                        {applications.map((application: JobApplication) => {
+                        {applications.map((application: JobApplication, index: number) => {
                           // Type guard to check if job is an object
                           const job =
                             typeof application.job === "object" &&
@@ -205,7 +205,7 @@ export default function ApplicationsPage() {
 
                           return (
                             <tr
-                              key={application.id}
+                              key={application.id || `temp-app-${index}-${application.created_at}`}
                               className="hover:bg-gray-50 transition-colors"
                             >
                               <td className="py-4 px-4">
@@ -262,14 +262,12 @@ export default function ApplicationsPage() {
                                     application.status || "PENDING"
                                   )}
                                   <span className="text-xs">
-                                    {application.status
-                                      ? application.status
-                                          .charAt(0)
-                                          .toUpperCase() +
-                                        application.status
-                                          .slice(1)
-                                          .toLowerCase()
-                                      : "Pending"}
+                                    {(application.status || "Pending")
+                                      .charAt(0)
+                                      .toUpperCase() +
+                                      (application.status || "Pending")
+                                        .slice(1)
+                                        .toLowerCase()}
                                   </span>
                                 </Badge>
                               </td>

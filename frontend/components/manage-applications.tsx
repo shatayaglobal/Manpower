@@ -462,15 +462,17 @@ export default function ManageApplicationsPage() {
                             <td className="py-4 px-4">
                               <Badge
                                 className={`flex items-center gap-1 border w-fit ${getStatusColor(
-                                  application.status
+                                  application.status || "PENDING"
                                 )}`}
                               >
-                                {getStatusIcon(application.status)}
+                                {getStatusIcon(application.status || "PENDING")}
                                 <span className="text-xs">
-                                  {application.status?.charAt(0).toUpperCase() +
-                                    application.status
-                                      ?.slice(1)
-                                      .toLowerCase() || "Pending"}
+                                  {(application.status || "Pending")
+                                    .charAt(0)
+                                    .toUpperCase() +
+                                    (application.status || "Pending")
+                                      .slice(1)
+                                      .toLowerCase()}
                                 </span>
                               </Badge>
                             </td>

@@ -3,20 +3,21 @@ import { JobApplication, PaginatedResponse } from '@/lib/types';
 
 
 export const applicationsApi = {
-  submitApplication: async (data: { job: string; user_id: string }) => {
+  submitApplication: async (data: FormData) => {
     try {
+      const jobId = data.get("job") as string;
       const response = await axiosInstance.post<JobApplication>(
-        `/posts/jobs/${data.job}/apply/`,
-        data, // Send JSON payload
+        `/posts/jobs/${jobId}/apply/`,
+        data,
         {
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "multipart/form-data",
           },
         }
       );
       return response.data;
     } catch (error) {
-      if (error && typeof error === 'object' && 'response' in error) {
+      if (error && typeof error === "object" && "response" in error) {
         const axiosError = error as { response?: { status?: number; data?: string[] } };
         if (axiosError.response?.status === 400 && Array.isArray(axiosError.response.data)) {
           throw new Error(axiosError.response.data[0]);
