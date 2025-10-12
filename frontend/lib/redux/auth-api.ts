@@ -1,4 +1,5 @@
 import axiosInstance from './axios'
+import axios from 'axios'
 import type {
   LoginCredentials,
   RegisterData,
@@ -9,6 +10,8 @@ import type {
   User,
   UserProfile
 } from '../types'
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 class AuthService {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
@@ -22,9 +25,15 @@ class AuthService {
   }
 
   async refreshToken(refreshToken: string): Promise<RefreshResponse> {
-    const response = await axiosInstance.post<RefreshResponse>('token/refresh/', {
-      refresh: refreshToken
-    })
+    const response = await axios.post<RefreshResponse>(
+      `${API_URL}/token/refresh/`,
+      { refresh: refreshToken },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    )
     return response.data
   }
 
@@ -36,18 +45,15 @@ class AuthService {
     }
   }
 
-async googleAuth(googleData: GoogleAuthData): Promise<AuthResponse> {
-
-  const payload = {
-    google_token: googleData.credential,
-    account_type: 'WORKER'
-  };
-
-  console.log('Auth service sending to Django:', payload);
-
-  const response = await axiosInstance.post<AuthResponse>('google-auth/', payload)
-  return response.data
-}
+  async googleAuth(googleData: GoogleAuthData): Promise<AuthResponse> {
+    const payload = {
+      google_token: googleData.credential,
+      account_type: 'WORKER'
+    };
+    console.log('Auth service sending to Django:', payload);
+    const response = await axiosInstance.post<AuthResponse>('google-auth/', payload)
+    return response.data
+  }
 
   async googleSignIn(credential: string): Promise<AuthResponse> {
     const response = await axiosInstance.post<AuthResponse>('auth/google/verify/', {

@@ -118,19 +118,18 @@ export default function ApplicationsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 -mt-12">
+    <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-4">
-            <Button
+            {/* <Button
               variant="outline"
               onClick={() => router.back()}
               className="flex items-center gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
+            </Button> */}
           </div>
 
           <div className="flex items-center gap-3 mb-2">

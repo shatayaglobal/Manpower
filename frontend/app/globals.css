@@ -1,6 +1,33 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Prevent layout shift when scrollbar appears */
+
+/* Force scrollbar to always be visible */
+html {
+  overflow-y: scroll;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* Prevent layout shift when scrollbar appears */
+html {
+  scrollbar-gutter: stable;
+}
+
+/* Prevent body shift */
+body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Prevent dropdown from causing layout shift */
+[data-radix-popper-content-wrapper] {
+  position: fixed !important;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {

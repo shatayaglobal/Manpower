@@ -356,7 +356,7 @@ export default function Jobs() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-white -mt-10">
+    <div className="min-h-screen bg-gray-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {error && (
           <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">

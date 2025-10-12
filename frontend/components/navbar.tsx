@@ -150,7 +150,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                         <DropdownMenuTrigger asChild>
                           <button className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm flex items-center gap-1">
                             Business
-                            <ChevronDown className="h-3 w-3" />
+                            <ChevronDown className="h-3 w-3 opacity-70" />
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
@@ -214,9 +214,9 @@ export default function AppLayout({ children }: AppLayoutProps) {
                       </Link>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <button className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm flex items-center gap-1">
+                          <button className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm flex items-center gap-1 min-w-fit">
                             Jobs
-                            <ChevronDown className="h-3 w-3" />
+                            <ChevronDown className="h-3 w-3 flex-shrink-0" />
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
