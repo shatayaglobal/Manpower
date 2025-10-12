@@ -47,11 +47,7 @@ export const getProfileThunk = createAsyncThunk(
     try {
       const response = await profileAPI.getProfile();
 
-      // Add debugging
-      console.log('Raw API response:', response);
-      console.log('Response structure:', Object.keys(response));
-
-      return response.profile; // Keep your original code for now
+      return response.profile; 
     } catch (error) {
       return rejectWithValue(getErrorMessage(error, "Failed to get profile"));
     }

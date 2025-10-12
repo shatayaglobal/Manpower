@@ -49,7 +49,6 @@ export const useProfile = () => {
       return result.is_complete;
     } catch (error) {
       const errorMessage = getErrorMessage(error, 'Error checking profile completeness');
-      console.error(errorMessage);
       return false;
     }
   }, [dispatch, user, isAuthenticated, getErrorMessage]);
@@ -62,7 +61,6 @@ export const useProfile = () => {
       await dispatch(getProfileThunk()).unwrap();
     } catch (error) {
       const errorMessage = getErrorMessage(error, 'Error loading profile');
-      console.error(errorMessage);
     }
   }, [dispatch, isAuthenticated, getErrorMessage]);
 
@@ -116,9 +114,7 @@ export const useProfile = () => {
         return;
       }
 
-      // Send JSON payload
-      const payload = { job: jobId, user_id: user.id }; // Add user_id or other required fields
-      console.log('Submitting application with payload:', payload); // Debug payload
+      const payload = { job: jobId, user_id: user.id };
       await dispatch(submitJobApplication(payload)).unwrap();
 
       toast.success('Successfully applied for the job!', {
@@ -140,7 +136,6 @@ export const useProfile = () => {
           duration: 4000,
         });
       } else {
-        console.error('Application error:', error);
         toast.error('Failed to submit application. Please try again.');
       }
     }

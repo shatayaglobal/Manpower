@@ -37,11 +37,9 @@ const processQueue = (error: AxiosError | null, token: string | null = null) => 
 
 export const setupInterceptors = (storeInstance: typeof store) => {
   if (interceptorsSetup) {
-    console.log("Interceptors already setup, skipping...");
     return;
   }
 
-  console.log("Setting up axios interceptors...");
 
   axiosInstance.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
@@ -90,22 +88,18 @@ export const setupInterceptors = (storeInstance: typeof store) => {
         !isExcludedUrl &&
         originalRequest
       ) {
-        console.log("401 detected, attempting token refresh...");
 
         if (isRefreshing) {
-          console.log("Already refreshing, queuing request...");
           return new Promise((resolve, reject) => {
             failedQueue.push({ resolve, reject });
           })
             .then((token) => {
-              console.log("Request dequeued with new token");
               if (originalRequest.headers && token) {
                 originalRequest.headers.Authorization = `Bearer ${token}`;
               }
               return axiosInstance(originalRequest);
             })
             .catch((err) => {
-              console.log("Queued request failed:", err);
               return Promise.reject(err);
             });
         }
@@ -116,7 +110,6 @@ export const setupInterceptors = (storeInstance: typeof store) => {
         const state = storeInstance.getState();
         const refreshToken = state.auth.refreshToken;
         if (!refreshToken) {
-          console.log("No refresh token found, logging out...");
           isRefreshing = false;
           processQueue(error, null);
           await storeInstance.dispatch(logoutThunk());
@@ -127,14 +120,12 @@ export const setupInterceptors = (storeInstance: typeof store) => {
         }
 
         try {
-          console.log("Attempting to refresh token...");
           const result = await storeInstance.dispatch(
             refreshTokenThunk(refreshToken)
           );
 
           if (refreshTokenThunk.fulfilled.match(result)) {
             const { access } = result.payload;
-            console.log("Token refresh successful!");
 
             if (originalRequest.headers) {
               originalRequest.headers.Authorization = `Bearer ${access}`;
@@ -144,11 +135,9 @@ export const setupInterceptors = (storeInstance: typeof store) => {
             isRefreshing = false;
             return axiosInstance(originalRequest);
           } else {
-            console.log("Token refresh failed:", result);
             throw new Error("Token refresh failed");
           }
         } catch (refreshError) {
-          console.log("Token refresh error:", refreshError);
           processQueue(error, null);
           isRefreshing = false;
 
@@ -167,7 +156,6 @@ export const setupInterceptors = (storeInstance: typeof store) => {
   );
 
   interceptorsSetup = true;
-  console.log("Axios interceptors setup complete!");
 };
 
 export default axiosInstance;

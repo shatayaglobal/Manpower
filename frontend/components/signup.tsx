@@ -157,8 +157,8 @@ export default function SignUpPage() {
               width: googleButtonWidth,
             }
           );
-        } catch (error) {
-          console.error("Error initializing Google Sign-In:", error);
+        } catch  {
+          throw new Error("Google Sign-In initialization failed");
         }
       }
     };

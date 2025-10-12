@@ -36,14 +36,11 @@ const websocketMiddleware =
       const token = state.auth.accessToken;
       const isAuthenticated = state.auth.isAuthenticated;
 
-
       if (!token || !isAuthenticated) {
-        console.log("WebSocket: No token or not authenticated");
         return next(action);
       }
 
       if (state.messaging.socket?.readyState === WebSocket.OPEN) {
-        console.log("WebSocket: Already connected");
         return next(action);
       }
 
@@ -51,15 +48,12 @@ const websocketMiddleware =
         clearTimeout(reconnectTimeout);
         reconnectTimeout = null;
       }
-
-      console.log("WebSocket: Connecting...");
       isIntentionalDisconnect = false;
 
       const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000";
       const socket = new WebSocket(`${WS_URL}/ws/chat/?token=${token}`);
 
       socket.onopen = () => {
-        console.log("WebSocket: Connected successfully");
         dispatch(setConnected(true));
         dispatch(setSocket(socket));
         reconnectAttempts = 0;
@@ -100,28 +94,19 @@ const websocketMiddleware =
               break;
 
             case "error":
-              console.error("WebSocket error message:", data.message);
               break;
 
             default:
-              console.log("WebSocket: Unknown message type:", data.type);
               break;
           }
-        } catch (error) {
-          console.error("WebSocket: Error parsing message:", error);
+        } catch {
+          throw new Error("WebSocket: Error parsing message");
         }
       };
 
       socket.onclose = (event: CloseEvent) => {
-        console.log("WebSocket: Disconnected", {
-          code: event.code,
-          reason: event.reason,
-          wasClean: event.wasClean,
-        });
-
         dispatch(setConnected(false));
         dispatch(setSocket(null));
-
 
         if (
           isIntentionalDisconnect ||
@@ -130,7 +115,7 @@ const websocketMiddleware =
           reconnectAttempts >= MAX_RECONNECT_ATTEMPTS
         ) {
           if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-            console.log("WebSocket: Max reconnect attempts reached");
+            throw new Error("WebSocket: Max reconnect attempts reached");
           }
           reconnectAttempts = 0;
           return;
@@ -140,15 +125,13 @@ const websocketMiddleware =
         };
 
         if (!currentState.auth.isAuthenticated) {
-          console.log("WebSocket: Not authenticated, skipping reconnect");
           return;
         }
 
         reconnectAttempts++;
-        const backoffDelay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
-
-        console.log(
-          `WebSocket: Reconnecting in ${backoffDelay}ms (attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`
+        const backoffDelay = Math.min(
+          1000 * Math.pow(2, reconnectAttempts),
+          30000
         );
 
         reconnectTimeout = setTimeout(() => {
@@ -156,12 +139,11 @@ const websocketMiddleware =
         }, backoffDelay);
       };
 
-      socket.onerror = (error: Event) => {
-        console.error("WebSocket error:", error);
+      socket.onerror = () => {
+        throw new Error("WebSocket: An error occurred");
       };
     }
     if (action.type === "websocket/disconnect") {
-      console.log("WebSocket: Intentional disconnect");
       isIntentionalDisconnect = true;
       reconnectAttempts = 0;
 
@@ -171,7 +153,7 @@ const websocketMiddleware =
       }
 
       const state = getState() as {
-        messaging: { socket: WebSocket | null; isConnected: boolean }
+        messaging: { socket: WebSocket | null; isConnected: boolean };
       };
 
       if (state.messaging.socket) {
@@ -202,21 +184,19 @@ const websocketMiddleware =
               message_type: messageType,
             })
           );
-        } catch (error) {
-          console.error("WebSocket: Error sending message:", error);
+        } catch {
+          throw new Error("WebSocket: Failed to send message");
         }
       } else {
-        console.warn("WebSocket: Cannot send message - not connected");
+        throw new Error("WebSocket: Not connected");
       }
     }
 
     if (action.type === "auth/logout/fulfilled") {
-      console.log("WebSocket: Logging out, disconnecting...");
       dispatch({ type: "websocket/disconnect" });
     }
 
     if (action.type === "auth/refreshToken/fulfilled") {
-      console.log("WebSocket: Token refreshed, reconnecting...");
       const state = getState() as {
         messaging: { socket: WebSocket | null };
       };

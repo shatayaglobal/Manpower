@@ -147,8 +147,8 @@ export default function Jobs() {
   const handleSaveJob = async (jobId: string) => {
     try {
       await pokePost(jobId);
-    } catch (error) {
-      console.error("Failed to save job:", error);
+    } catch  {
+      //console.error("Failed to save job:", error);
     }
   };
 
@@ -156,8 +156,8 @@ export default function Jobs() {
     if (window.confirm("Are you sure you want to delete this job?")) {
       try {
         await removePost(jobId);
-      } catch (error) {
-        console.error("Failed to delete job:", error);
+      } catch  {
+        //console.error("Failed to delete job:", error);
       }
     }
   };

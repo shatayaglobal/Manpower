@@ -137,7 +137,7 @@ export const logoutThunk = createAsyncThunk(
         await authService.logout();
       }
     } catch  {
-      console.log('Logout API call failed, but local logout succeeded');
+      throw new Error('Logout failed')
     }
 
     return true;

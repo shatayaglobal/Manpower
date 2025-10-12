@@ -287,7 +287,6 @@ SPECTACULAR_SETTINGS = {
 # CORS settings
 FRONTEND_URL = env('FRONTEND_URL', default='http://localhost:3000')
 
-CORS_ALLOW_ALL_ORIGINS = True 
 # Base CORS origins - always include localhost for development
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",

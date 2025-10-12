@@ -41,7 +41,7 @@ class AuthService {
     try {
       await axiosInstance.post('logout/')
     } catch (error) {
-      console.warn('Logout request failed:', error)
+      throw new Error('Logout failed')
     }
   }
 
@@ -50,7 +50,6 @@ class AuthService {
       google_token: googleData.credential,
       account_type: 'WORKER'
     };
-    console.log('Auth service sending to Django:', payload);
     const response = await axiosInstance.post<AuthResponse>('google-auth/', payload)
     return response.data
   }
