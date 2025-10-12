@@ -145,19 +145,15 @@ export default function SignUpPage() {
             cancel_on_tap_outside: true,
           });
 
-          const googleButtonWidth =
-            window.innerWidth >= 1024
-              ? "100%"
-              : `${Math.min(400, window.innerWidth - 32)}`;
           window.google.accounts.id.renderButton(
             document.getElementById("google-signup-button")!,
             {
               theme: "outline",
               size: "large",
-              width: googleButtonWidth,
+              width: "400", 
             }
           );
-        } catch  {
+        } catch {
           throw new Error("Google Sign-In initialization failed");
         }
       }
@@ -204,10 +200,13 @@ export default function SignUpPage() {
 
               {/* Google Sign Up Button */}
               <div className="space-y-2">
-                <div
-                  id="google-signup-button"
-                  className="w-full max-w-full mx-auto"
-                ></div>
+                <div className="w-full">
+                  <div
+                    id="google-signup-button"
+                    className="w-full"
+                    style={{ minHeight: "40px" }}
+                  ></div>
+                </div>
                 <p className="text-xs sm:text-sm text-gray-500 text-center">
                   Google sign-up creates a Worker account
                 </p>

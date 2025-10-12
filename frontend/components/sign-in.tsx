@@ -162,7 +162,7 @@ export default function SignInPage() {
             {
               theme: "outline",
               size: "large",
-              width: `${Math.min(400, window.innerWidth - 48)}`,
+              width: "400",
             }
           );
         } catch {
@@ -216,10 +216,12 @@ export default function SignInPage() {
 
               {/* Google Sign In Button */}
               <div className="space-y-2">
-                <div
-                  id="google-signin-button"
-                  className="w-full flex justify-center"
-                ></div>
+                <div className="w-full flex justify-center">
+                  <div
+                    id="google-signin-button"
+                    style={{ minHeight: "40px" }}
+                  ></div>
+                </div>
                 <p className="text-xs text-gray-500 text-center px-2">
                   Google sign-in creates a Worker account
                 </p>
