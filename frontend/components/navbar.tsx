@@ -129,7 +129,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                   priority
                 />
               </div>
-              <span className="font-semibold text-base sm:text-lg lg:text-xl text-gray-900 hidden xs:block">
+              <span className="font-semibold text-base sm:text-lg lg:text-xl text-gray-900">
                 ShatayaGlobal Ltd
               </span>
             </Link>
@@ -269,6 +269,12 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 </>
               ) : (
                 <>
+                  <Link
+                    href="/home"
+                    className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm"
+                  >
+                    Home
+                  </Link>
                   <Link
                     href="/about"
                     className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm"
@@ -505,6 +511,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
                       </>
                     ) : (
                       <>
+                        <DropdownMenuItem asChild>
+                          <Link href="/home" className="flex items-center py-2">
+                            Home
+                          </Link>
+                        </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                           <Link
                             href="/about"
