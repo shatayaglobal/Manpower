@@ -64,22 +64,22 @@ const MyBusinessPage: React.FC = () => {
     loadBusinesses();
   }, [loadBusinesses]);
 
-  const getVerificationStatus = (status: string): VerificationStatus => {
-    switch (status) {
-      case "verified":
-        return { text: "Verified", color: "green", icon: CheckCircle };
-      case "documents_pending":
-        return {
-          text: "Documents Required",
-          color: "yellow",
-          icon: AlertCircle,
-        };
-      case "under_review":
-        return { text: "Under Review", color: "blue", icon: Clock };
-      default:
-        return { text: "Not Verified", color: "gray", icon: XCircle };
-    }
-  };
+  // const getVerificationStatus = (status: string): VerificationStatus => {
+  //   switch (status) {
+  //     case "verified":
+  //       return { text: "Verified", color: "green", icon: CheckCircle };
+  //     case "documents_pending":
+  //       return {
+  //         text: "Documents Required",
+  //         color: "yellow",
+  //         icon: AlertCircle,
+  //       };
+  //     case "under_review":
+  //       return { text: "Under Review", color: "blue", icon: Clock };
+  //     default:
+  //       return { text: "Not Verified", color: "gray", icon: XCircle };
+  //   }
+  // };
 
   const BusinessModal: React.FC<BusinessModalProps> = ({
     business,
@@ -802,10 +802,10 @@ const MyBusinessPage: React.FC = () => {
   }
 
   // Business exists - show dashboard
-  const verification = getVerificationStatus(
-    business.verification_status || "not_started"
-  );
-  const StatusIcon = verification.icon;
+  // const verification = getVerificationStatus(
+  //   business.verification_status || "not_started"
+  // );
+  // const StatusIcon = verification.icon;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -837,7 +837,7 @@ const MyBusinessPage: React.FC = () => {
                 <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 truncate">
                   {business.name}
                 </h1>
-                <span
+                {/* <span
                   className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium
                   ${
                     verification.color === "green"
@@ -863,7 +863,7 @@ const MyBusinessPage: React.FC = () => {
                 >
                   <StatusIcon className="w-3 sm:w-4 h-3 sm:h-4 mr-1" />
                   {verification.text}
-                </span>
+                </span> */}
               </div>
               <p className="text-gray-500 text-xs sm:text-sm">
                 {business.business_id}
@@ -906,6 +906,27 @@ const MyBusinessPage: React.FC = () => {
                 {business.phone}
               </span>
             </div>
+          </div>
+
+          {/* After the existing grid with MapPin, Mail, Phone */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 mt-3 sm:mt-4">
+            <div className="flex items-center">
+              <Building2 className="w-4 sm:w-5 h-4 sm:h-5 text-amber-600 mr-2" />
+              <span className="text-gray-700 text-sm sm:text-base">
+                {business.size === "SMALL" && "1-10 employees"}
+                {business.size === "MEDIUM" && "11-50 employees"}
+                {business.size === "LARGE" && "51-200 employees"}
+                {business.size === "ENTERPRISE" && "200+ employees"}
+              </span>
+            </div>
+            {business.service_time && (
+              <div className="flex items-center">
+                <Clock className="w-4 sm:w-5 h-4 sm:h-5 text-amber-600 mr-2" />
+                <span className="text-gray-700 text-sm sm:text-base">
+                  {business.service_time}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -995,7 +1016,7 @@ const MyBusinessPage: React.FC = () => {
             </Link>
 
             <Link
-              href="/post-job"
+              href="/jobs/create"
               className="flex items-center p-3 sm:p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors"
             >
               <div className="w-8 sm:w-10 h-8 sm:h-10 bg-purple-500 rounded-lg flex items-center justify-center mr-3">

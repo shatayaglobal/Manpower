@@ -52,14 +52,19 @@ const ShiftManagementPage: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
   const [localSearchTerm, setLocalSearchTerm] = useState<string>("");
   const [localDayFilter, setLocalDayFilter] = useState<string>("all");
-  const [localShiftTypeFilter, setLocalShiftTypeFilter] = useState<string>("all");
+  const [localShiftTypeFilter, setLocalShiftTypeFilter] =
+    useState<string>("all");
   const [localStaffFilter, setLocalStaffFilter] = useState<string>("all");
   const [sortField, setSortField] = useState<SortField>("day_of_week");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const { businesses, loading: businessLoading, loadBusinesses } = useBusiness();
+  const {
+    businesses,
+    loading: businessLoading,
+    loadBusinesses,
+  } = useBusiness();
   const {
     shifts,
     selectedShift,
@@ -93,8 +98,12 @@ const ShiftManagementPage: React.FC = () => {
       loadShifts({
         page: currentPage,
         search: localSearchTerm,
-        day_of_week: localDayFilter === "all" ? "" : (localDayFilter as DayOfWeek),
-        shift_type: localShiftTypeFilter === "all" ? "" : (localShiftTypeFilter as ShiftType),
+        day_of_week:
+          localDayFilter === "all" ? "" : (localDayFilter as DayOfWeek),
+        shift_type:
+          localShiftTypeFilter === "all"
+            ? ""
+            : (localShiftTypeFilter as ShiftType),
         staff: localStaffFilter === "all" ? "" : localStaffFilter,
         ordering: sortDirection === "desc" ? `-${sortField}` : sortField,
       });
@@ -116,15 +125,21 @@ const ShiftManagementPage: React.FC = () => {
   }, [localSearchTerm, localDayFilter, localShiftTypeFilter, localStaffFilter]);
 
   const handleDeleteShift = async (shiftId: string, shiftName: string) => {
-    if (window.confirm(`Are you sure you want to delete shift: ${shiftName}?`)) {
+    if (
+      window.confirm(`Are you sure you want to delete shift: ${shiftName}?`)
+    ) {
       try {
         await removeShift(shiftId);
         toast.success("Shift deleted successfully");
         loadShifts({
           page: currentPage,
           search: localSearchTerm,
-          day_of_week: localDayFilter === "all" ? "" : (localDayFilter as DayOfWeek),
-          shift_type: localShiftTypeFilter === "all" ? "" : (localShiftTypeFilter as ShiftType),
+          day_of_week:
+            localDayFilter === "all" ? "" : (localDayFilter as DayOfWeek),
+          shift_type:
+            localShiftTypeFilter === "all"
+              ? ""
+              : (localShiftTypeFilter as ShiftType),
           staff: localStaffFilter === "all" ? "" : localStaffFilter,
           ordering: sortDirection === "desc" ? `-${sortField}` : sortField,
         });
@@ -165,11 +180,26 @@ const ShiftManagementPage: React.FC = () => {
 
   const getShiftTypeBadge = (type: ShiftType) => {
     const typeConfig = {
-      MORNING: { label: "Morning", color: "bg-amber-50 text-amber-600 border border-amber-200" },
-      AFTERNOON: { label: "Afternoon", color: "bg-orange-50 text-orange-600 border border-orange-200" },
-      EVENING: { label: "Evening", color: "bg-purple-50 text-purple-600 border border-purple-200" },
-      NIGHT: { label: "Night", color: "bg-blue-50 text-blue-500 border border-blue-200" },
-      FULL_DAY: { label: "Full Day", color: "bg-green-50 text-green-600 border border-green-200" },
+      MORNING: {
+        label: "Morning",
+        color: "bg-amber-50 text-amber-600 border border-amber-200",
+      },
+      AFTERNOON: {
+        label: "Afternoon",
+        color: "bg-orange-50 text-orange-600 border border-orange-200",
+      },
+      EVENING: {
+        label: "Evening",
+        color: "bg-purple-50 text-purple-600 border border-purple-200",
+      },
+      NIGHT: {
+        label: "Night",
+        color: "bg-blue-50 text-blue-500 border border-blue-200",
+      },
+      FULL_DAY: {
+        label: "Full Day",
+        color: "bg-green-50 text-green-600 border border-green-200",
+      },
     };
 
     const config = typeConfig[type] || typeConfig.MORNING;
@@ -302,8 +332,12 @@ const ShiftManagementPage: React.FC = () => {
         loadShifts({
           page: currentPage,
           search: localSearchTerm,
-          day_of_week: localDayFilter === "all" ? "" : (localDayFilter as DayOfWeek),
-          shift_type: localShiftTypeFilter === "all" ? "" : (localShiftTypeFilter as ShiftType),
+          day_of_week:
+            localDayFilter === "all" ? "" : (localDayFilter as DayOfWeek),
+          shift_type:
+            localShiftTypeFilter === "all"
+              ? ""
+              : (localShiftTypeFilter as ShiftType),
           staff: localStaffFilter === "all" ? "" : localStaffFilter,
           ordering: sortDirection === "desc" ? `-${sortField}` : sortField,
         });
@@ -452,7 +486,9 @@ const ShiftManagementPage: React.FC = () => {
                     }`}
                   />
                   {errors.start_time && (
-                    <p className="text-red-600 text-sm mt-1">{errors.start_time}</p>
+                    <p className="text-red-600 text-sm mt-1">
+                      {errors.start_time}
+                    </p>
                   )}
                 </div>
 
@@ -471,7 +507,9 @@ const ShiftManagementPage: React.FC = () => {
                     }`}
                   />
                   {errors.end_time && (
-                    <p className="text-red-600 text-sm mt-1">{errors.end_time}</p>
+                    <p className="text-red-600 text-sm mt-1">
+                      {errors.end_time}
+                    </p>
                   )}
                 </div>
               </div>
@@ -570,7 +608,7 @@ const ShiftManagementPage: React.FC = () => {
   const activeShifts = shifts.filter((s) => s.is_active).length;
 
   return (
-    <div className="min-h-screen bg-gray-50 -mt-12">
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {shiftError && (
           <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
@@ -770,7 +808,9 @@ const ShiftManagementPage: React.FC = () => {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {shifts.map((shift) => {
-                      const staffMember = staff.find((s) => s.id === shift.staff);
+                      const staffMember = staff.find(
+                        (s) => s.id === shift.staff
+                      );
                       return (
                         <tr
                           key={shift.id}
@@ -781,12 +821,17 @@ const ShiftManagementPage: React.FC = () => {
                               {shift.name}
                             </div>
                             <div className="text-xs text-gray-500 sm:hidden">
-                              {staffMember?.name || "N/A"} - {staffMember?.job_title || ""}
+                              {staffMember?.name || "N/A"} -{" "}
+                              {staffMember?.job_title || ""}
                             </div>
                           </td>
                           <td className="px-4 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
-                            <div className="text-sm text-gray-900">{staffMember?.name || "N/A"}</div>
-                            <div className="text-sm text-gray-500">{staffMember?.job_title}</div>
+                            <div className="text-sm text-gray-900">
+                              {staffMember?.name || "N/A"}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {staffMember?.job_title}
+                            </div>
                           </td>
                           <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                             {getDayBadge(shift.day_of_week)}
@@ -823,14 +868,18 @@ const ShiftManagementPage: React.FC = () => {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => handleEditShift(shift)}>
+                                <DropdownMenuItem
+                                  onClick={() => handleEditShift(shift)}
+                                >
                                   <Edit2 className="w-4 h-4 mr-2 text-blue-500" />
                                   Edit
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
                                   className="text-red-600"
-                                  onClick={() => handleDeleteShift(shift.id, shift.name)}
+                                  onClick={() =>
+                                    handleDeleteShift(shift.id, shift.name)
+                                  }
                                 >
                                   <Trash2 className="w-4 h-4 mr-2 text-red-600" />
                                   Delete
@@ -878,10 +927,15 @@ const ShiftManagementPage: React.FC = () => {
                       </span>{" "}
                       -{" "}
                       <span className="font-medium">
-                        {Math.min(currentPage * itemsPerPage, shiftPagination.count)}
+                        {Math.min(
+                          currentPage * itemsPerPage,
+                          shiftPagination.count
+                        )}
                       </span>{" "}
                       of{" "}
-                      <span className="font-medium">{shiftPagination.count}</span>{" "}
+                      <span className="font-medium">
+                        {shiftPagination.count}
+                      </span>{" "}
                       results
                     </p>
                   </div>
@@ -912,7 +966,9 @@ const ShiftManagementPage: React.FC = () => {
                                 </span>
                                 <Button
                                   onClick={() => setCurrentPage(page)}
-                                  variant={currentPage === page ? "default" : "outline"}
+                                  variant={
+                                    currentPage === page ? "default" : "outline"
+                                  }
                                   className="rounded-none border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
                                   disabled={shiftLoading}
                                 >
@@ -925,7 +981,9 @@ const ShiftManagementPage: React.FC = () => {
                             <Button
                               key={page}
                               onClick={() => setCurrentPage(page)}
-                              variant={currentPage === page ? "default" : "outline"}
+                              variant={
+                                currentPage === page ? "default" : "outline"
+                              }
                               className="rounded-none border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
                               disabled={shiftLoading}
                             >

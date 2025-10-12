@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -15,8 +16,7 @@ import ChatWindow from "@/components/chat-window";
 export default function MessagesPage() {
   const dispatch = useDispatch();
   const { user } = useAuthState();
-  const { selectedUser, loadConversations, loading, selectUser } =
-    useMessaging();
+  const { selectedUser, loadConversations, loading, selectUser } = useMessaging();
   const [showMobileChat, setShowMobileChat] = useState(false);
 
   useEffect(() => {
@@ -24,7 +24,6 @@ export default function MessagesPage() {
       dispatch(setCurrentUserId(user.id));
       loadConversations();
       dispatch(websocketActions.connect());
-
       return () => {
         dispatch(websocketActions.disconnect());
       };
@@ -45,31 +44,26 @@ export default function MessagesPage() {
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-[60vh] px-4">
-        <Card className="p-8 text-center max-w-md w-full">
-          <p className="text-gray-500">Please sign in to access messages</p>
+        <Card className="p-8 text-center max-w-md w-full bg-white border-gray-200 shadow-sm">
+          <p className="text-gray-500 text-sm">Please sign in to access messages</p>
         </Card>
       </div>
     );
   }
 
   return (
-    <div className="h-[calc(100vh-4rem)] bg-gray-50 -mt-12">
+    <div className="h-[calc(100vh-4rem)] bg-gray-100">
       <div className="max-w-7xl mx-auto h-full">
-        <div className="h-full flex border-x border-gray-200">
+        <div className="h-full flex border-x border-gray-200 shadow-sm">
           {/* Sidebar - Conversation List */}
           <div
-            className={`
-              w-full md:w-80 lg:w-96 bg-white border-r border-gray-200 flex flex-col
-              ${showMobileChat ? "hidden md:flex" : "flex"}
-            `}
+            className={`w-full md:w-80 bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ${
+              showMobileChat ? "hidden md:flex" : "flex"
+            }`}
           >
-            <div className="p-4 border-b border-gray-200 bg-white">
-              <div className="flex items-center gap-2">
-                <MessageCircle className="h-5 w-5 text-blue-600" />
-                <h1 className="text-lg font-semibold text-gray-900">
-                  Messages
-                </h1>
-              </div>
+            <div className="p-4 border-b border-gray-200 bg-white flex items-center gap-2">
+              <MessageCircle className="h-5 w-5 text-blue-500" />
+              <h1 className="text-lg font-semibold text-gray-800">Messages</h1>
             </div>
             {loading.conversations ? (
               <div className="flex-1 flex items-center justify-center">
@@ -82,37 +76,32 @@ export default function MessagesPage() {
 
           {/* Main Chat Area */}
           <div
-            className={`
-              flex-1 flex flex-col bg-white
-              ${showMobileChat ? "flex" : "hidden md:flex"}
-            `}
+            className={`flex-1 flex flex-col bg-white transition-all duration-300 ${
+              showMobileChat ? "flex" : "hidden md:flex"
+            }`}
           >
             {selectedUser ? (
               <>
-                {/* Mobile back button */}
-                <div className="md:hidden p-4 border-b border-gray-200 bg-white">
+                <div className="md:hidden p-3 border-b border-gray-200 bg-white">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={handleBackToList}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 text-gray-600 hover:text-blue-500"
                   >
                     <ArrowLeft className="h-4 w-4" />
-                    Back to conversations
+                    Back
                   </Button>
                 </div>
                 <ChatWindow />
               </>
             ) : (
-              <div className="flex-1 flex items-center justify-center bg-gray-50 p-4">
+              <div className="flex-1 flex items-center justify-center bg-gray-100 p-4">
                 <div className="text-center max-w-sm">
-                  <MessageCircle className="h-12 w-12 md:h-16 md:w-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-base md:text-lg font-medium text-gray-900 mb-2">
-                    Select a conversation
-                  </h3>
-                  <p className="text-sm md:text-base text-gray-500">
-                    Choose a conversation from the sidebar to start messaging or
-                    view your notifications
+                  <MessageCircle className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-base font-medium text-gray-800">Select a conversation</h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Choose a conversation to start messaging
                   </p>
                 </div>
               </div>

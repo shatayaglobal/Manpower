@@ -108,31 +108,25 @@ export const useProfile = () => {
           jobTitle,
           timestamp: new Date().toISOString(),
         }));
-
         toast.info('Please complete your profile first to apply for jobs', {
           description: 'You need to add your personal information, skills, and experience.',
           duration: 4000,
         });
-
         router.push('/profile');
         return;
       }
 
-      // Profile is complete - submit application
-      const formData = new FormData();
-      formData.append('job', jobId);
-
-      await dispatch(submitJobApplication(formData)).unwrap();
+      // Send JSON payload
+      const payload = { job: jobId, user_id: user.id }; // Add user_id or other required fields
+      console.log('Submitting application with payload:', payload); // Debug payload
+      await dispatch(submitJobApplication(payload)).unwrap();
 
       toast.success('Successfully applied for the job!', {
         description: jobTitle ? `Your application for "${jobTitle}" has been submitted.` : 'Your application has been submitted.',
         duration: 5000,
       });
-
-    }  catch (error) {
-      // Extract error message from different possible error structures
+    } catch (error) {
       let errorMessage = '';
-
       if (error instanceof Error) {
         errorMessage = error.message;
       } else if (typeof error === 'object' && error !== null) {
@@ -146,11 +140,11 @@ export const useProfile = () => {
           duration: 4000,
         });
       } else {
+        console.error('Application error:', error);
         toast.error('Failed to submit application. Please try again.');
       }
     }
   }, [user, checkProfileComplete, router, dispatch]);
-
 
   const handleProfileCompleted = useCallback((): void => {
     if (pendingJobApplication) {

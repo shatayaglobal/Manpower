@@ -220,7 +220,7 @@ const HoursManagementPage: React.FC = () => {
     .reduce((sum, h) => sum + (h.total_hours_decimal || 0), 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 -mt-12">
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {hoursError && (
           <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">

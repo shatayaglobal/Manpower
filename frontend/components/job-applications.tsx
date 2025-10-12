@@ -255,15 +255,21 @@ export default function ApplicationsPage() {
                               <td className="py-4 px-4">
                                 <Badge
                                   className={`flex items-center gap-1 border w-fit ${getStatusColor(
-                                    application.status
+                                    application.status || "PENDING"
                                   )}`}
                                 >
-                                  {getStatusIcon(application.status)}
+                                  {getStatusIcon(
+                                    application.status || "PENDING"
+                                  )}
                                   <span className="text-xs">
                                     {application.status
-                                      .charAt(0)
-                                      .toUpperCase() +
-                                      application.status.slice(1).toLowerCase()}
+                                      ? application.status
+                                          .charAt(0)
+                                          .toUpperCase() +
+                                        application.status
+                                          .slice(1)
+                                          .toLowerCase()
+                                      : "Pending"}
                                   </span>
                                 </Badge>
                               </td>

@@ -32,13 +32,12 @@ const initialState: ApplicationsState = {
   },
 };
 
-export const submitJobApplication = createAsyncThunk<JobApplication, FormData>(
-  "applications/submitApplication",
-  async (formData) => {
-    return await applicationsApi.submitApplication(formData);
-  }
-);
-
+export const submitJobApplication = createAsyncThunk<
+  JobApplication,
+  { job: string; user_id: string }
+>('applications/submitApplication', async (payload) => {
+  return await applicationsApi.submitApplication(payload);
+});
 export const fetchUserApplications = createAsyncThunk<JobApplication[], void>(
   "applications/fetchUserApplications",
   async () => {

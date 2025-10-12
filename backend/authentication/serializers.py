@@ -48,11 +48,18 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         """Create user with hashed password"""
         validated_data.pop('password_confirm')
         password = validated_data.pop('password')
-        user = User.objects.create_user(**validated_data)
-        user.set_password(password)
-        user.save()
-        return user
+        email = validated_data.pop('email')
+        # Create user with all fields
+        user = User.objects.create_user(
+            email=email,
+            password=password,
+            is_verified=True,
+            is_google_user=False,
+            **validated_data
+        )
 
+
+        return user
 
 class LoginSerializer(serializers.Serializer):
     """Serializer for user login"""
@@ -177,7 +184,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
-        
+
 class UserSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(read_only=True)
     full_name = serializers.SerializerMethodField()

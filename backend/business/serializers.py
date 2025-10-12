@@ -36,8 +36,11 @@ class BusinessListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Business
         fields = [
-            'id', 'user_name', 'name', 'business_id', 'category', 'size',
-            'city', 'country', 'is_verified', 'total_staff', 'created_at'
+            'id', 'user', 'user_name', 'name', 'business_id', 'slug',
+            'category', 'size', 'description', 'email', 'phone', 'website',
+            'address', 'city', 'country', 'postal_code', 'service_time',
+            'is_verified', 'is_active', 'total_staff',
+            'created_at', 'updated_at'
         ]
 
     @extend_schema_field(serializers.IntegerField)

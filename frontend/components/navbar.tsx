@@ -3,6 +3,7 @@
 import type React from "react";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/lib/redux/store";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -33,6 +34,7 @@ import { useRouter } from "next/navigation";
 import { useMessaging } from "@/lib/redux/use-messaging";
 import { websocketActions } from "@/lib/redux/websocket-actions";
 import Image from "next/image";
+import { getCurrentUserThunk } from "@/lib/redux/authSlice";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -42,7 +44,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const { isAuthenticated, user } = useAuthState();
   const { logout } = useAuthSlice();
   const router = useRouter();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { unreadCount, getUnreadCount } = useMessaging();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -97,16 +99,25 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const isBusinessUser = user?.account_type === "BUSINESS";
   const isWorkerUser = user?.account_type === "WORKER";
 
-  useEffect(() => {
-    if (isAuthenticated && user) {
+
+useEffect(() => {
+  if (isAuthenticated) {
+    dispatch(getCurrentUserThunk());
+  }
+}, [isAuthenticated, dispatch]);
+
+useEffect(() => {
+  if (isAuthenticated && user) {
+    getUnreadCount();
+    dispatch(websocketActions.connect());
+
+    const interval = setInterval(() => {
       getUnreadCount();
-      dispatch(websocketActions.connect());
-      const interval = setInterval(() => {
-        getUnreadCount();
-      }, 300000); // 5 minutes
-      return () => clearInterval(interval);
-    }
-  }, [isAuthenticated, user?.id, dispatch, user, getUnreadCount]);
+    }, 300000);
+    return () => clearInterval(interval);
+  }
+}, [isAuthenticated, user?.id, dispatch, getUnreadCount, user]);
+
 
   return (
     <div className="min-h-screen bg-white">

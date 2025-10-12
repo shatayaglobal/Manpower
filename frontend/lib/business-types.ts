@@ -67,6 +67,7 @@ export interface Business {
     country: string;
     postal_code: string;
     service_time: string;
+    is_verified?: boolean;
   }
 
   // API Request/Response interfaces

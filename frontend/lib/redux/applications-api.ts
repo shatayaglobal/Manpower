@@ -3,11 +3,17 @@ import { JobApplication, PaginatedResponse } from '@/lib/types';
 
 
 export const applicationsApi = {
-  submitApplication: async (data: FormData) => {
+  submitApplication: async (data: { job: string; user_id: string }) => {
     try {
-      const jobId = data.get('job') as string;
-      data.delete('job');
-      const response = await axiosInstance.post<JobApplication>(`posts/jobs/${jobId}/apply/`, data);
+      const response = await axiosInstance.post<JobApplication>(
+        `/posts/jobs/${data.job}/apply/`,
+        data, // Send JSON payload
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
       return response.data;
     } catch (error) {
       if (error && typeof error === 'object' && 'response' in error) {
@@ -21,35 +27,35 @@ export const applicationsApi = {
   },
 
   getUserApplications: async () => {
-    const response = await axiosInstance.get<PaginatedResponse<JobApplication>>('posts/applications/user/');
+    const response = await axiosInstance.get<PaginatedResponse<JobApplication>>('/posts/applications/user/');
     return response.data.results;
   },
 
   getApplication: async (id: string) => {
-    const response = await axiosInstance.get<JobApplication>(`applications/${id}/`);
+    const response = await axiosInstance.get<JobApplication>(`/applications/${id}/`);
     return response.data;
   },
 
 
   getJobApplications: async (jobId: string, page: number = 1) => {
-    const response = await axiosInstance.get<PaginatedResponse<JobApplication>>(`posts/jobs/${jobId}/applications/`, {
+    const response = await axiosInstance.get<PaginatedResponse<JobApplication>>(`/posts/jobs/${jobId}/applications/`, {
       params: { page }
     });
     return response.data;
   },
 
   updateApplication: async (id: string, data: { status: string }) => {
-    const response = await axiosInstance.patch<JobApplication>(`applications/${id}/update/`, data);
+    const response = await axiosInstance.patch<JobApplication>(`/applications/${id}/update/`, data);
     return response.data;
   },
 
   getBusinessApplications: async () => {
-    const response = await axiosInstance.get<PaginatedResponse<JobApplication>>('posts/business/applications/');
+    const response = await axiosInstance.get<PaginatedResponse<JobApplication>>('/posts/business/applications/');
     return response.data.results;
   },
 
   updateApplicationStatus: async (applicationId: string, status: string) => {
-    const response = await axiosInstance.patch(`posts/applications/${applicationId}/status/`, {
+    const response = await axiosInstance.patch(`/posts/applications/${applicationId}/status/`, {
       status: status
     });
     return response.data;
