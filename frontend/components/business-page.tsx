@@ -261,7 +261,7 @@ const MyBusinessPage: React.FC = () => {
               <div className="space-y-3 sm:space-y-4">
                 <div>
                   <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                    Business Name *
+                    Business Name/Company Name *
                   </label>
                   <input
                     type="text"
@@ -375,7 +375,7 @@ const MyBusinessPage: React.FC = () => {
 
                 <div>
                   <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                    Website
+                    Website(Optional)
                   </label>
                   <input
                     type="url"

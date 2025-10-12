@@ -490,13 +490,13 @@ export default function Jobs() {
                           <CardTitle className="text-xl font-semibold text-gray-900 group-hover:text-blue-500 transition-colors line-clamp-2">
                             {job.title}
                           </CardTitle>
-                          <CardDescription className="text-base text-blue-500 mt-1">
+                          {/* <CardDescription className="text-base text-blue-500 mt-1">
                             {typeof job.user === "object"
                               ? `${job.user.first_name || ""} ${
                                   job.user.last_name || ""
                                 }`.trim() || job.user.email
                               : job.user}
-                          </CardDescription>
+                          </CardDescription> */}
                         </div>
                       </div>
 

@@ -141,19 +141,27 @@ export default function AppLayout({ children }: AppLayoutProps) {
                   {isBusinessUser && (
                     <>
                       <Link
-                        href="/jobs"
-                        className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm"
+                        href="/business"
+                        className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm flex items-center gap-1"
                       >
-                        Manage Jobs
+                        <Building className="h-4 w-4" />
+                        My Business
                       </Link>
+
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm flex items-center gap-1">
-                            Business
+                            Jobs
                             <ChevronDown className="h-3 w-3 opacity-70" />
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
+                          <DropdownMenuItem asChild>
+                            <Link href="/jobs" className="flex items-center">
+                              <Briefcase className="mr-2 h-4 w-4" />
+                              Manage Jobs
+                            </Link>
+                          </DropdownMenuItem>
                           <DropdownMenuItem asChild>
                             <Link
                               href="/jobs/create"
@@ -172,15 +180,17 @@ export default function AppLayout({ children }: AppLayoutProps) {
                               Manage Applications
                             </Link>
                           </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link
-                              href="/business"
-                              className="flex items-center"
-                            >
-                              <Building className="mr-2 h-4 w-4" />
-                              My Business
-                            </Link>
-                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm flex items-center gap-1">
+                            Workforce
+                            <ChevronDown className="h-3 w-3 opacity-70" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
                           <DropdownMenuItem asChild>
                             <Link href="/staff" className="flex items-center">
                               <UserCheck className="mr-2 h-4 w-4" />
@@ -381,70 +391,89 @@ export default function AppLayout({ children }: AppLayoutProps) {
                       <>
                         {isBusinessUser && (
                           <>
-                            <DropdownMenuItem asChild>
-                              <Link
-                                href="/jobs"
-                                className="flex items-center py-2"
-                              >
-                                <Briefcase className="mr-2 h-4 w-4" />
-                                Manage Jobs
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem asChild>
-                              <Link
-                                href="/jobs/create"
-                                className="flex items-center py-2"
-                              >
-                                <Briefcase className="mr-2 h-4 w-4" />
-                                Post New Job
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <Link
-                                href="/manage-applications"
-                                className="flex items-center py-2"
-                              >
-                                <UserCheck className="mr-2 h-4 w-4" />
-                                Manage Applications
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <Link
-                                href="/business"
-                                className="flex items-center py-2"
-                              >
-                                <Building className="mr-2 h-4 w-4" />
-                                My Business
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <Link
-                                href="/staff"
-                                className="flex items-center py-2"
-                              >
-                                <UserCheck className="mr-2 h-4 w-4" />
-                                Staff Management
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <Link
-                                href="/shifts"
-                                className="flex items-center py-2"
-                              >
-                                <Calendar className="mr-2 h-4 w-4" />
-                                Shift Scheduling
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <Link
-                                href="/hours"
-                                className="flex items-center py-2"
-                              >
-                                <Clock className="mr-2 h-4 w-4" />
-                                Hours & Attendance
-                              </Link>
-                            </DropdownMenuItem>
+                            <Link
+                              href="/business"
+                              className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm flex items-center gap-1"
+                            >
+                              <Building className="h-4 w-4" />
+                              My Business
+                            </Link>
+
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <button className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm flex items-center gap-1">
+                                  Jobs
+                                  <ChevronDown className="h-3 w-3 opacity-70" />
+                                </button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent>
+                                <DropdownMenuItem asChild>
+                                  <Link
+                                    href="/jobs"
+                                    className="flex items-center"
+                                  >
+                                    <Briefcase className="mr-2 h-4 w-4" />
+                                    Manage Jobs
+                                  </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                  <Link
+                                    href="/jobs/create"
+                                    className="flex items-center"
+                                  >
+                                    <Briefcase className="mr-2 h-4 w-4" />
+                                    Post New Job
+                                  </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                  <Link
+                                    href="/manage-applications"
+                                    className="flex items-center"
+                                  >
+                                    <UserCheck className="mr-2 h-4 w-4" />
+                                    Manage Applications
+                                  </Link>
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <button className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm flex items-center gap-1">
+                                  Workforce
+                                  <ChevronDown className="h-3 w-3 opacity-70" />
+                                </button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent>
+                                <DropdownMenuItem asChild>
+                                  <Link
+                                    href="/staff"
+                                    className="flex items-center"
+                                  >
+                                    <UserCheck className="mr-2 h-4 w-4" />
+                                    Staff Management
+                                  </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                  <Link
+                                    href="/shifts"
+                                    className="flex items-center"
+                                  >
+                                    <Calendar className="mr-2 h-4 w-4" />
+                                    Shift Scheduling
+                                  </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                  <Link
+                                    href="/hours"
+                                    className="flex items-center"
+                                  >
+                                    <Clock className="mr-2 h-4 w-4" />
+                                    Hours & Attendance
+                                  </Link>
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </>
                         )}
                         {isWorkerUser && (

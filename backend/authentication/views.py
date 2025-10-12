@@ -116,6 +116,10 @@ class UserRegistrationView(APIView):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
+
+            user.is_verified = True
+            user.is_google_user = False
+            user.save()
             # Create user profile
             UserProfile.objects.create(user=user)
 
