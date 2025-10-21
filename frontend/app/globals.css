@@ -28,7 +28,60 @@ body {
   position: fixed !important;
 }
 
-@custom-variant dark (&:is(.dark *));
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(40px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 1s ease-out;
+  }
+
+  .animate-fade-in-delay {
+    animation: fadeIn 1s ease-out 0.3s both;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 1s ease-out 0.6s both, pulse-glow 2s ease-in-out 1.6s infinite;
+  }
+
+  .animate-slide-up-delay {
+    animation: slideUp 1s ease-out 0.8s both, pulse-glow 2s ease-in-out 1.8s infinite;
+  }
+}
 
 :root {
   --background: oklch(1 0 0);

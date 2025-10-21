@@ -117,6 +117,7 @@ export default function SignInPage() {
   const handleCredentialResponse = useCallback(
     async (response: GoogleCredentialResponse) => {
       try {
+        console.log("Google credential received:", response.credential);
         const result = await googleAuth({
           credential: response.credential,
           token: "",

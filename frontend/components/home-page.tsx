@@ -17,47 +17,170 @@ import {
   ArrowRight,
   TrendingUp,
   CheckCircle,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useAuthState } from "@/lib/redux/redux";
+import { useState } from "react";
 
 export default function HomePage() {
+  const router = useRouter();
+  const { isAuthenticated, user } = useAuthState();
+  const [expandedCard, setExpandedCard] = useState<number | null>(null);
+
+  const handleFeatureClick = (featurePath: string) => {
+    if (isAuthenticated && user) {
+      if (user.account_type === "BUSINESS") {
+        router.push(`/business${featurePath}`);
+      } else if (user.account_type === "WORKER") {
+        router.push(`/profile`);
+      } else {
+        router.push(`/profile`);
+      }
+    } else {
+      router.push("/login");
+    }
+  };
+
+  const features = [
+    {
+      icon: Users,
+      title: "Talent Management",
+      description:
+        "Connect with qualified professionals through advanced matching.",
+      color: "bg-blue-500",
+      path: "/talent-management",
+      fullDescription:
+        "Effective talent management is key to every successful manpower organization. Modern manpower applications are revolutionizing how companies recruit and manage skilled workers. Through advanced matching technology, employers can easily connect with qualified professionals based on their experience and skills. This smart system streamlines recruitment, improves worker performance, and strengthens engagement between employees and employers saving time, reducing turnover, and enhancing overall workforce quality.",
+    },
+    {
+      icon: Briefcase,
+      title: "Job Placement",
+      description:
+        "Smart algorithms that match skills with opportunities perfectly.",
+      color: "bg-yellow-400",
+      path: "/job-placement",
+      fullDescription:
+        "Digital applications make hiring faster, smarter, and more transparent. With smart algorithms, they instantly match workers' skills and experience with the right job opportunities, ensuring the best fit for both sides. This technology saves time, improves candidate quality, and gives workers quick access to suitable jobs. It also enables real-time communication and performance tracking, creating a smooth and efficient connection between workers and businesses.",
+    },
+    {
+      icon: Calendar,
+      title: "Shift Scheduling",
+      description:
+        "Intelligent workforce scheduling with real-time optimization.",
+      color: "bg-blue-500",
+      path: "/shift-scheduling",
+      fullDescription:
+        "The application provides businesses with a powerful tool to efficiently manage their workforce and daily operations. Through its smart management features, companies can easily schedule shifts, assign specific tasks or missions, and monitor working hours — from the exact time employees start their job until they finish. This system helps businesses maintain clear organization, avoid scheduling conflicts, and ensure that every task is completed on time. It also allows managers to track attendance, performance, and productivity in real time, giving them valuable insights for better decision-making. Overall, the application creates a seamless workflow that enhances communication, boosts efficiency, and supports a more reliable and well-coordinated workforce.",
+    },
+    {
+      icon: TrendingUp,
+      title: "Analytics",
+      description: "Data-driven insights for better workforce decisions.",
+      color: "bg-yellow-400",
+      path: "/analytics",
+      fullDescription:
+        "The application also includes an advanced analysis system that helps businesses understand and improve their overall performance. It can analyze working hours, job efficiency, and individual worker performance, providing valuable insights into how each team member is contributing. Through detailed reports and data visualization, managers can identify strengths, detect challenges, and make smarter decisions to enhance productivity. This powerful analytical feature allows businesses to continuously improve operations, optimize workforce performance, and strengthen their overall growth and success.",
+    },
+  ];
+
+  const toggleCard = (index: number) => {
+    setExpandedCard(expandedCard === index ? null : index);
+  };
+
   return (
     <div>
       {/* Hero Section - FULL WIDTH */}
       <section className="w-full pt-12 sm:pt-20 lg:pt-24 pb-16 sm:pb-24 lg:pb-32 bg-gradient-to-br from-blue-50 via-white to-yellow-50/20 -mt-8 sm:-mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-4xl mx-auto space-y-6 sm:space-y-8">
-            <h1 className="font-bold text-3xl sm:text-4xl md:text-5xl lg:text-7xl text-gray-900 leading-tight tracking-tight">
+            <h1 className="font-bold text-3xl sm:text-4xl md:text-5xl lg:text-7xl text-gray-900 leading-tight tracking-tight animate-fade-in">
               Connect Talent with{" "}
               <span className="bg-gradient-to-r from-blue-500 to-yellow-400 bg-clip-text text-transparent">
                 Opportunity
               </span>
             </h1>
-            <p className="text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto px-4">
+            <p className="text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto px-4 animate-fade-in-delay">
               Professional workforce solutions that bring the right people
               together with precision and purpose.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-2 sm:pt-4 px-4">
-              <Button
-                size="lg"
-                className="bg-blue-500 hover:bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium shadow-lg hover:shadow-xl transition-all w-full sm:w-auto"
-              >
-                Find Jobs
-                <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-2 border-blue-500 text-blue-600 hover:bg-blue-50 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium bg-white w-full sm:w-auto"
-              >
-                Post Jobs
-              </Button>
+              {isAuthenticated && user ? (
+                // Logged in users see "Find Jobs" or "Post Jobs" based on account type
+                <>
+                  {user.account_type === "WORKER" ? (
+                    <Button
+                      size="lg"
+                      onClick={() => router.push("/jobs")}
+                      className="group relative bg-blue-500 hover:bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-110 hover:-translate-y-2 w-full sm:w-auto animate-slide-up overflow-hidden"
+                    >
+                      <span className="relative z-10 flex items-center justify-center">
+                        Find Jobs
+                        <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-hover:translate-x-2" />
+                      </span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    </Button>
+                  ) : (
+                    <Button
+                      size="lg"
+                      onClick={() => router.push("/jobs/create")}
+                      className="group relative bg-blue-500 hover:bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-110 hover:-translate-y-2 w-full sm:w-auto animate-slide-up overflow-hidden"
+                    >
+                      <span className="relative z-10 flex items-center justify-center">
+                        Post a Job
+                        <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-hover:translate-x-2" />
+                      </span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    </Button>
+                  )}
+
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={() => router.push("/profile")}
+                    className="group relative border-2 border-blue-500 text-blue-600 hover:text-white hover:border-blue-600 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium bg-white w-full sm:w-auto transition-all duration-500 hover:scale-110 hover:-translate-y-2 hover:shadow-2xl animate-slide-up-delay overflow-hidden"
+                  >
+                    <span className="relative z-10 flex items-center justify-center">
+                      My Profile
+                      <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-hover:translate-x-2" />
+                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    size="lg"
+                    onClick={() => router.push("/login")}
+                    className="group relative bg-blue-500 hover:bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-110 hover:-translate-y-2 w-full sm:w-auto animate-slide-up overflow-hidden"
+                  >
+                    <span className="relative z-10 flex items-center justify-center">
+                      Sign In
+                      <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-hover:translate-x-2" />
+                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={() => router.push("/signup")}
+                    className="group relative border-2 border-blue-500 text-blue-600 hover:text-white hover:border-blue-600 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium bg-white w-full sm:w-auto transition-all duration-500 hover:scale-110 hover:-translate-y-2 hover:shadow-2xl animate-slide-up-delay overflow-hidden"
+                  >
+                    <span className="relative z-10 flex items-center justify-center">
+                      Sign Up
+                      <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-hover:translate-x-2" />
+                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
       </section>
-
       {/* Features Grid - CONSTRAINED */}
-      <section className="py-12 sm:py-16 lg:py-24 bg-white">
+      <section className="py-12 sm:py-16 lg:py-24 bg-white -mt-18">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 sm:mb-12 lg:mb-16 space-y-3 sm:space-y-4">
             <h2 className="font-bold text-2xl sm:text-3xl lg:text-4xl text-gray-900 px-4">
@@ -70,47 +193,26 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-            {[
-              {
-                icon: Users,
-                title: "Talent Management",
-                description:
-                  "Connect with qualified professionals through advanced matching.",
-                color: "bg-blue-500",
-              },
-              {
-                icon: Briefcase,
-                title: "Job Placement",
-                description:
-                  "Smart algorithms that match skills with opportunities perfectly.",
-                color: "bg-yellow-400",
-              },
-              {
-                icon: Calendar,
-                title: "Shift Scheduling",
-                description:
-                  "Intelligent workforce scheduling with real-time optimization.",
-                color: "bg-blue-500",
-              },
-              {
-                icon: TrendingUp,
-                title: "Analytics",
-                description:
-                  "Data-driven insights for better workforce decisions.",
-                color: "bg-yellow-400",
-              },
-            ].map((feature, index) => (
+            {features.map((feature, index) => (
               <Card
                 key={index}
                 className="group border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-lg transition-all duration-300 bg-white"
               >
-                <CardContent className="p-6 sm:p-8 text-center space-y-3 sm:space-y-4">
+                <CardContent className="p-6 sm:p-8 space-y-3 sm:space-y-4">
+                  {/* Icon - Clickable */}
                   <div
-                    className={`w-12 h-12 sm:w-14 sm:h-14 ${feature.color} rounded-xl flex items-center justify-center mx-auto group-hover:scale-105 transition-transform duration-300`}
+                    className="text-center cursor-pointer"
+                    onClick={() => handleFeatureClick(feature.path)}
                   >
-                    <feature.icon className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
+                    <div
+                      className={`w-12 h-12 sm:w-14 sm:h-14 ${feature.color} rounded-xl flex items-center justify-center mx-auto group-hover:scale-105 transition-transform duration-300`}
+                    >
+                      <feature.icon className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
+                    </div>
                   </div>
-                  <div className="space-y-2">
+
+                  {/* Title and Description */}
+                  <div className="space-y-2 text-center">
                     <h3 className="font-semibold text-base sm:text-lg text-gray-900">
                       {feature.title}
                     </h3>
@@ -118,13 +220,39 @@ export default function HomePage() {
                       {feature.description}
                     </p>
                   </div>
+
+                  {/* Expanded Content */}
+                  {expandedCard === index && (
+                    <div className="pt-3 border-t border-gray-200 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <p className="text-xs sm:text-sm text-gray-700 leading-relaxed text-left">
+                        {feature.fullDescription}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-col gap-2 pt-2">
+                    <button
+                      onClick={() => toggleCard(index)}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2 text-xs sm:text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200"
+                    >
+                      {expandedCard === index ? (
+                        <>
+                          Show Less <ChevronUp className="h-4 w-4" />
+                        </>
+                      ) : (
+                        <>
+                          Read More <ChevronDown className="h-4 w-4" />
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </CardContent>
               </Card>
             ))}
           </div>
         </div>
       </section>
-
       {/* Core Benefits - FULL WIDTH */}
       <section className="w-full py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-gray-50 to-blue-50/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -81,7 +81,7 @@ const ContactPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-12">
+      <div className="max-w-7xl mx-auto px-4 py-12">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Contact Us</h1>
@@ -98,7 +98,7 @@ const ContactPage: React.FC = () => {
                 <Mail className="w-5 h-5 text-blue-600 mr-3" />
                 <div>
                   <p className="font-medium">Email</p>
-                  <p className="text-gray-600">support@shatayaglobal.com</p>
+                  <p className="text-gray-600">info@shatayaglobal.com</p>
                 </div>
               </div>
 
@@ -106,7 +106,7 @@ const ContactPage: React.FC = () => {
                 <Phone className="w-5 h-5 text-green-600 mr-3" />
                 <div>
                   <p className="font-medium">Phone</p>
-                  <p className="text-gray-600">+256 700 000 000</p>
+                  <p className="text-gray-600">+972 54-612-6874</p>
                 </div>
               </div>
 
@@ -114,7 +114,7 @@ const ContactPage: React.FC = () => {
                 <MapPin className="w-5 h-5 text-purple-600 mr-3" />
                 <div>
                   <p className="font-medium">Address</p>
-                  <p className="text-gray-600">Kampala, Uganda</p>
+                  <p className="text-gray-600">Hapalekh Street 7, Tel Aviv, Israel</p>
                 </div>
               </div>
             </div>

@@ -36,6 +36,7 @@ import { websocketActions } from "@/lib/redux/websocket-actions";
 import Image from "next/image";
 import { getCurrentUserThunk } from "@/lib/redux/authSlice";
 
+
 interface AppLayoutProps {
   children: React.ReactNode;
 }
