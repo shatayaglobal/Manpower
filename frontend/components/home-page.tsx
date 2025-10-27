@@ -16,7 +16,6 @@ import {
   Clock,
   ArrowRight,
   TrendingUp,
-  CheckCircle,
   ChevronUp,
   ChevronDown,
 } from "lucide-react";
@@ -101,9 +100,11 @@ export default function HomePage() {
                 Opportunity
               </span>
             </h1>
-            <p className="text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto px-4 animate-fade-in-delay">
-              Professional workforce solutions that bring the right people
-              together with precision and purpose.
+            <p className="text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto px-4 animate-fade-in-delay">
+              At Shataya Global, our mission is simple: connect talent with
+              opportunity. We believe every skilled worker deserves a chance to
+              grow, and every business deserves the right people to succeed.
+              Together, we build stronger communities, one job at a time.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-2 sm:pt-4 px-4">
               {isAuthenticated && user ? (
@@ -260,37 +261,30 @@ export default function HomePage() {
             <div className="space-y-6 sm:space-y-8 order-2 lg:order-1">
               <div className="space-y-4 sm:space-y-6">
                 <h2 className="font-bold text-2xl sm:text-3xl lg:text-4xl xl:text-5xl text-gray-900 leading-tight">
-                  Professional workforce solutions for{" "}
-                  <span className="text-blue-500">modern businesses</span>
+                  Building Stronger Teams.{" "}
+                  <span className="text-blue-500">
+                    Creating Brighter Futures.
+                  </span>
                 </h2>
                 <p className="text-sm sm:text-base lg:text-lg text-gray-600 leading-relaxed">
-                  Streamline your workforce management with our comprehensive
-                  platform designed for today&apos;s professional environment.
+                  At Shataya Global, we connect skilled and motivated
+                  individuals with companies that need dependable manpower.
+                  Whether you&apos;re an employer searching for reliable staff
+                  or a worker ready to start your next opportunity, we make
+                  hiring simple, fast, and effective.
                 </p>
-              </div>
-              <div className="space-y-3 sm:space-y-4">
-                {[
-                  "Advanced matching algorithms",
-                  "Enterprise-grade security",
-                  "Real-time analytics and reporting",
-                  "24/7 customer support",
-                ].map((benefit, index) => (
-                  <div key={index} className="flex items-center space-x-3">
-                    <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-yellow-400 flex items-center justify-center">
-                      <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-white fill-current" />
-                    </div>
-                    <span className="text-sm sm:text-base text-gray-700 font-medium">
-                      {benefit}
-                    </span>
-                  </div>
-                ))}
+                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                  From construction sites to luxury hotels, from logistics hubs
+                  to security services — we power industries with people who get
+                  the job done.
+                </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2 sm:pt-4">
                 <Button
                   size="lg"
                   className="bg-blue-500 hover:bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 shadow-lg hover:shadow-xl transition-all w-full sm:w-auto"
                 >
-                  Start Free Trial
+                  Find Your Workforce
                   <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
                 <Button
@@ -298,7 +292,7 @@ export default function HomePage() {
                   variant="outline"
                   className="border-2 border-yellow-400 text-yellow-600 hover:bg-yellow-50 px-6 sm:px-8 py-3 sm:py-4 bg-white w-full sm:w-auto"
                 >
-                  Schedule Demo
+                  Find a Job
                 </Button>
               </div>
             </div>
@@ -344,10 +338,10 @@ export default function HomePage() {
                 </div>
                 <div className="mt-6 sm:mt-8 text-center border-t border-gray-200 pt-4 sm:pt-6">
                   <div className="text-xs sm:text-sm font-semibold text-gray-900">
-                    Enterprise-Grade Platform
+                    Trusted Across Industries
                   </div>
                   <div className="text-gray-600 text-xs mt-1">
-                    Trusted by leading organizations
+                    Construction • Hospitality • Logistics • Security
                   </div>
                 </div>
               </div>
@@ -357,6 +351,7 @@ export default function HomePage() {
       </section>
 
       {/* Featured Jobs - CONSTRAINED */}
+      {/* Featured Opportunities - CONSTRAINED */}
       <section className="py-12 sm:py-16 lg:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 sm:mb-12 lg:mb-16 space-y-3 sm:space-y-4">
@@ -364,65 +359,56 @@ export default function HomePage() {
               Featured Opportunities
             </h2>
             <p className="text-sm sm:text-base lg:text-lg text-gray-600 px-4">
-              Discover career opportunities from top companies
+              Find your next opportunity across multiple industries
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             {[
               {
-                title: "Hotel Manager",
-                company: "Grand Plaza Hotel",
-                location: "Miami, FL",
-                type: "Full-time",
-                salary: "$65,000 - $85,000",
-                posted: "2 days ago",
+                title: "Construction",
+                company: "Skilled trades & site workers",
+                location: "Multiple Locations",
+                type: "Various",
+                salary: "Competitive rates",
+                posted: "Active",
+                industry: "Construction",
+              },
+              {
+                title: "Cleaning & Maintenance",
+                company: "Residential, commercial & industrial",
+                location: "Multiple Locations",
+                type: "Various",
+                salary: "Competitive rates",
+                posted: "Active",
+                industry: "Cleaning",
+              },
+              {
+                title: "Hospitality",
+                company: "Hotels, restaurants & service staff",
+                location: "Multiple Locations",
+                type: "Various",
+                salary: "Competitive rates",
+                posted: "Active",
                 industry: "Hospitality",
               },
               {
-                title: "Restaurant Supervisor",
-                company: "Bella Vista Restaurant",
-                location: "Chicago, IL",
-                type: "Full-time",
-                salary: "$45,000 - $55,000",
-                posted: "1 day ago",
-                industry: "Food Service",
+                title: "Logistics & Transport",
+                company: "Drivers, warehouse & delivery",
+                location: "Multiple Locations",
+                type: "Various",
+                salary: "Competitive rates",
+                posted: "Active",
+                industry: "Logistics",
               },
               {
-                title: "Store Manager",
-                company: "Fresh Market Supermarket",
-                location: "Houston, TX",
-                type: "Full-time",
-                salary: "$50,000 - $65,000",
-                posted: "3 days ago",
-                industry: "Retail",
-              },
-              {
-                title: "Event Coordinator",
-                company: "Elegant Events Hall",
-                location: "Las Vegas, NV",
-                type: "Full-time",
-                salary: "$40,000 - $50,000",
-                posted: "1 day ago",
-                industry: "Events",
-              },
-              {
-                title: "Production Supervisor",
-                company: "Metro Manufacturing",
-                location: "Detroit, MI",
-                type: "Full-time",
-                salary: "$55,000 - $70,000",
-                posted: "4 days ago",
-                industry: "Manufacturing",
-              },
-              {
-                title: "Kitchen Manager",
-                company: "Ocean View Resort",
-                location: "San Diego, CA",
-                type: "Full-time",
-                salary: "$48,000 - $62,000",
-                posted: "2 days ago",
-                industry: "Hospitality",
+                title: "Security",
+                company: "Guards, supervisors & monitoring staff",
+                location: "Multiple Locations",
+                type: "Various",
+                salary: "Competitive rates",
+                posted: "Active",
+                industry: "Security",
               },
             ].map((job, index) => (
               <Card
@@ -463,7 +449,7 @@ export default function HomePage() {
                       size="sm"
                       className="w-full bg-blue-500 hover:bg-blue-600 text-white text-xs sm:text-sm py-2"
                     >
-                      Apply Now
+                      View Opportunities
                     </Button>
                   </div>
                 </CardContent>
@@ -530,25 +516,38 @@ export default function HomePage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6 sm:space-y-8">
           <div className="space-y-3 sm:space-y-4">
             <h2 className="font-bold text-2xl sm:text-3xl lg:text-4xl text-gray-900">
-              Ready to get started?
+              Ready to Get Started?
             </h2>
-            <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto">
-              Join thousands of professionals and companies who trust
-              ShatayaGlobal Ltd to connect talent with opportunity.
+            <h3 className="font-semibold text-xl sm:text-2xl lg:text-3xl text-blue-500">
+              Let&apos;s Build Success Together!
+            </h3>
+          </div>
+          <div className="space-y-4 sm:space-y-6 max-w-3xl mx-auto">
+            <p className="text-sm sm:text-base lg:text-lg text-gray-700 leading-relaxed">
+              <strong className="text-gray-900">Employers:</strong> Post your
+              job openings and find qualified candidates fast.
+            </p>
+            <p className="text-sm sm:text-base lg:text-lg text-gray-700 leading-relaxed">
+              <strong className="text-gray-900">Job Seekers:</strong> Register
+              now and get matched with employers who value your skills.
+            </p>
+            <p className="text-sm sm:text-base lg:text-lg text-gray-600 leading-relaxed pt-2">
+              Start today and experience the Shataya Global difference — where
+              opportunity meets dedication.
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-2 sm:pt-4">
             <Button
               size="lg"
               className="bg-blue-500 hover:bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 shadow-lg hover:shadow-xl transition-all w-full sm:w-auto"
             >
-              Find Your Dream Job
+              Post a Job
             </Button>
             <Button
               size="lg"
               className="bg-yellow-400 hover:bg-yellow-500 text-white px-6 sm:px-8 py-3 sm:py-4 shadow-lg hover:shadow-xl transition-all w-full sm:w-auto"
             >
-              Hire Top Talent
+              Apply for Work
             </Button>
           </div>
         </div>
