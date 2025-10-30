@@ -299,7 +299,10 @@ export default function ProfilePage() {
                     <Image
                       src={URL.createObjectURL(files.avatar)}
                       alt="Profile"
+                      width={96}
+                      height={96}
                       className="w-full h-full object-cover"
+                      unoptimized
                     />
                   ) : profile?.avatar ? (
                     <Image
