@@ -17,6 +17,13 @@ const nextConfig: NextConfig = {
         port: "8000",
         pathname: "/media/**",
       },
+      // Production - API Domain (ADD THIS)
+      {
+        protocol: "https",
+        hostname: "api.shatayaglobal.com",
+        port: "",
+        pathname: "/media/**",
+      },
       // Production - ShatayaGlobal
       {
         protocol: "https",
