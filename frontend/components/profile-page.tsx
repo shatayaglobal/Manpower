@@ -28,6 +28,7 @@ import {
 import { useProfile } from "@/lib/redux/useProfile";
 import type { RootState } from "@/lib/redux/store";
 import Image from "next/image";
+import imageCompression from 'browser-image-compression';
 
 interface FormData {
   first_name: string;
@@ -172,18 +173,44 @@ export default function ProfilePage() {
     }));
   };
 
-  const handleFileChange = (
+  const handleFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
     fileType: "avatar" | "resume"
   ) => {
     const file = e.target.files?.[0];
-    if (file) {
+    if (file && fileType === "avatar") {
+      try {
+        // Compress image before setting it
+        const options = {
+          maxSizeMB: 1, // Max 1MB
+          maxWidthOrHeight: 800, // Max dimension
+          useWebWorker: true,
+        };
+        const compressedFile = await imageCompression(file, options);
+
+        // Convert compressed blob to File object with proper name
+        const convertedFile = new File(
+          [compressedFile],
+          file.name,
+          { type: compressedFile.type }
+        );
+
+        setFiles((prev) => ({
+          ...prev,
+          [fileType]: convertedFile,
+        }));
+        toast.success("Image selected");
+      } catch (error) {
+        toast.error("Error compressing image");
+      }
+    } else if (file) {
       setFiles((prev) => ({
         ...prev,
         [fileType]: file,
       }));
     }
   };
+
 
   const handleSectionEdit = (section: string) => {
     setEditingSection(section);
