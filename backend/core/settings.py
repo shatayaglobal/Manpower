@@ -242,23 +242,27 @@ AUTH_USER_MODEL = 'authentication.User'
 
 
 
-# Media files configuration
 MEDIA_URL = '/media/'
-
 
 if os.getenv('RENDER'):
     MEDIA_ROOT = '/app/media'
 
-    # ONLY create subfolders — /app is mounted by Render
-    avatars_path = os.path.join(MEDIA_ROOT, 'avatars')
-    resumes_path = os.path.join(MEDIA_ROOT, 'resumes')  # if used
-
-    os.makedirs(avatars_path, exist_ok=True)
-    os.makedirs(resumes_path, exist_ok=True)
+    # CRITICAL: Only create avatars/ if /app/media exists
+    if os.path.exists(MEDIA_ROOT):
+        avatars_path = os.path.join(MEDIA_ROOT, 'avatars')
+        resumes_path = os.path.join(MEDIA_ROOT, 'resumes')
+        os.makedirs(avatars_path, exist_ok=True)
+        os.makedirs(resumes_path, exist_ok=True)
+    else:
+        # Disk not mounted yet — skip (will be created on first upload)
+        pass
 else:
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    # Create local media folder
+    os.makedirs(MEDIA_ROOT, exist_ok=True)
+    os.makedirs(os.path.join(MEDIA_ROOT, 'avatars'), exist_ok=True)
 
-    
+
 # Static files configuration (if not already set)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
