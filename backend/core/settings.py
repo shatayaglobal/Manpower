@@ -249,13 +249,16 @@ MEDIA_URL = '/media/'
 if os.getenv('RENDER'):
     MEDIA_ROOT = '/app/media'
 
-    # CRITICAL: Create folders on startup
-    os.makedirs(MEDIA_ROOT, exist_ok=True)
-    os.makedirs(os.path.join(MEDIA_ROOT, 'avatars'), exist_ok=True)
-    os.makedirs(os.path.join(MEDIA_ROOT, 'resumes'), exist_ok=True)  # if used
+    # ONLY create subfolders — /app is mounted by Render
+    avatars_path = os.path.join(MEDIA_ROOT, 'avatars')
+    resumes_path = os.path.join(MEDIA_ROOT, 'resumes')  # if used
+
+    os.makedirs(avatars_path, exist_ok=True)
+    os.makedirs(resumes_path, exist_ok=True)
 else:
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+    
 # Static files configuration (if not already set)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
