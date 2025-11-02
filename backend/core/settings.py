@@ -244,7 +244,17 @@ AUTH_USER_MODEL = 'authentication.User'
 
 # Media files configuration
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+if os.getenv('RENDER'):
+    MEDIA_ROOT = '/app/media'
+
+    # CRITICAL: Create folders on startup
+    os.makedirs(MEDIA_ROOT, exist_ok=True)
+    os.makedirs(os.path.join(MEDIA_ROOT, 'avatars'), exist_ok=True)
+    os.makedirs(os.path.join(MEDIA_ROOT, 'resumes'), exist_ok=True)  # if used
+else:
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Static files configuration (if not already set)
 STATIC_URL = '/static/'
