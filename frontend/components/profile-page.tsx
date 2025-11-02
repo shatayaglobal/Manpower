@@ -241,6 +241,8 @@ export default function ProfilePage() {
         setIsEditing(false);
         setEditingSection(null);
         setFiles({ avatar: null, resume: null });
+
+        await loadProfile();
       }
     } catch {
       toast.error("Failed to update profile. Please try again.");
@@ -330,7 +332,7 @@ export default function ProfilePage() {
                     />
                   ) : profile?.avatar ? (
                     <Image
-                      src={profile.avatar}
+                      src={`${profile.avatar}?v=${Date.now()}`}
                       alt="Profile"
                       fill
                       className="object-cover"
