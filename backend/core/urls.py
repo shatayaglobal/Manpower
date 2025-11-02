@@ -33,4 +33,6 @@ urlpatterns = [
     path('workforce/', include('workforce.urls')),
     path('business/', include('business.urls')),
     path('messaging/', include('messaging.urls')),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
+if settings.DEBUG or os.getenv('RENDER'):
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

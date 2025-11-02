@@ -243,7 +243,6 @@ export default function ProfilePage() {
         setFiles({ avatar: null, resume: null });
 
         await loadProfile();
-        window.location.reload();
       }
     } catch {
       toast.error("Failed to update profile. Please try again.");
