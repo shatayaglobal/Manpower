@@ -243,6 +243,7 @@ export default function ProfilePage() {
         setFiles({ avatar: null, resume: null });
 
         await loadProfile();
+        window.location.reload();
       }
     } catch {
       toast.error("Failed to update profile. Please try again.");
@@ -332,6 +333,7 @@ export default function ProfilePage() {
                     />
                   ) : profile?.avatar ? (
                     <Image
+                      key={profile.avatar}
                       src={`${profile.avatar}?v=${Date.now()}`}
                       alt="Profile"
                       fill
