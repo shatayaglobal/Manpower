@@ -28,7 +28,7 @@ import {
 import { useProfile } from "@/lib/redux/useProfile";
 import type { RootState } from "@/lib/redux/store";
 import Image from "next/image";
-import imageCompression from 'browser-image-compression';
+import imageCompression from "browser-image-compression";
 
 interface FormData {
   first_name: string;
@@ -189,11 +189,9 @@ export default function ProfilePage() {
         const compressedFile = await imageCompression(file, options);
 
         // Convert compressed blob to File object with proper name
-        const convertedFile = new File(
-          [compressedFile],
-          file.name,
-          { type: compressedFile.type }
-        );
+        const convertedFile = new File([compressedFile], file.name, {
+          type: compressedFile.type,
+        });
 
         setFiles((prev) => ({
           ...prev,
@@ -210,7 +208,6 @@ export default function ProfilePage() {
       }));
     }
   };
-
 
   const handleSectionEdit = (section: string) => {
     setEditingSection(section);
@@ -338,6 +335,7 @@ export default function ProfilePage() {
                       fill
                       className="object-cover"
                       sizes="96px"
+                      unoptimized
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-blue-50">
