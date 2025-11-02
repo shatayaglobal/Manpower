@@ -1,3 +1,4 @@
+import uuid
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
@@ -151,6 +152,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
     user_email = serializers.EmailField(source='user.email', read_only=True)
     user_name = serializers.CharField(source='user.full_name', read_only=True)
     account_type = serializers.CharField(source='user.account_type', read_only=True)
+
+
+    def validate_avatar(self, value):
+        if value:
+            # FORCE lowercase .jpg
+            value.name = f"{uuid.uuid4()}.jpg"
+        return value
 
     class Meta:
         model = UserProfile
