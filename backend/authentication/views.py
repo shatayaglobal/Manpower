@@ -185,7 +185,7 @@ class GoogleAuthView(APIView):
         serializer = GoogleAuthSerializer(data=request.data)
         if serializer.is_valid():
             token = serializer.validated_data["google_token"]
-            account_type = serializer.validated_data["account_type"]
+            account_type = serializer.validated_data.get("account_type")
 
             try:
                 from google.auth.transport import requests
@@ -213,7 +213,17 @@ class GoogleAuthView(APIView):
                         user.save()
                     created = False
                 else:
-                    # Create brand new user
+                    # NEW USER - account_type is REQUIRED
+                    if not account_type:
+                        return Response(
+                            {
+                                "error": "Account not found. Please sign up first.",
+                                "requires_signup": True
+                            },
+                            status=status.HTTP_404_NOT_FOUND,
+                        )
+
+                    # Create brand new user with selected account_type
                     user = User.objects.create(
                         google_id=google_id,
                         email=email,

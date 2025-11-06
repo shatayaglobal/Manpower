@@ -54,10 +54,14 @@ class AuthService {
   async googleAuth(
     googleData: GoogleAuthData & { account_type?: string }
   ): Promise<AuthResponse> {
-    const payload = {
+    const payload: { google_token: string; account_type?: string } = {
       google_token: googleData.credential,
-      account_type: googleData.account_type || "WORKER",
     };
+
+    if (googleData.account_type) {
+      payload.account_type = googleData.account_type;
+    }
+
     const response = await axiosInstance.post<AuthResponse>(
       "google-auth/",
       payload

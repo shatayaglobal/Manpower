@@ -12,27 +12,19 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import dj_database_url
 from datetime import timedelta
 from pathlib import Path
-import environ # type: ignore
+import environ
 import os
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 env = environ.Env(
-    # Set default values and casting
     DEBUG=(bool, False)
 )
 
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG', default=False)
 
 ALLOWED_HOSTS_STR = env('ALLOWED_HOSTS', default='localhost,127.0.0.1')
@@ -43,8 +35,6 @@ GOOGLE_OAUTH2_CLIENT_ID = env("GOOGLE_OAUTH2_CLIENT_ID")
 GOOGLE_OAUTH2_CLIENT_SECRET = env("GOOGLE_OAUTH2_CLIENT_SECRET")
 GOOGLE_OAUTH2_REDIRECT_URI = env("GOOGLE_OAUTH2_REDIRECT_URI")
 
-
-# Application definition
 
 INSTALLED_APPS = [
     'jazzmin',
@@ -101,11 +91,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'core.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 if env('DATABASE_URL', default=''):
-    # Production: Use DATABASE_URL from Render
     DATABASES = {
         'default': dj_database_url.config(
             default=env('DATABASE_URL'),
@@ -114,7 +101,6 @@ if env('DATABASE_URL', default=''):
         )
     }
 else:
-    # Development: Use individual DB variables
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -138,8 +124,6 @@ CHANNEL_LAYERS = {
     },
 }
 
-# Password validation
-# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -157,8 +141,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.1/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
@@ -169,13 +151,9 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# Brevo SMTP Configuration
 EMAIL_HOST = 'smtp-relay.brevo.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = env('EMAIL_HOST_USER')
@@ -188,7 +166,7 @@ DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',  # Keep for admin
+        'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
@@ -237,9 +215,7 @@ SIMPLE_JWT = {
 
 
 
-
 AUTH_USER_MODEL = 'authentication.User'
-
 
 
 MEDIA_URL = '/media/'
@@ -247,45 +223,36 @@ MEDIA_URL = '/media/'
 if os.getenv('RENDER'):
     MEDIA_ROOT = '/app/media'
 
-    # CRITICAL: Only create avatars/ if /app/media exists
     if os.path.exists(MEDIA_ROOT):
         avatars_path = os.path.join(MEDIA_ROOT, 'avatars')
         resumes_path = os.path.join(MEDIA_ROOT, 'resumes')
         os.makedirs(avatars_path, exist_ok=True)
         os.makedirs(resumes_path, exist_ok=True)
     else:
-        # Disk not mounted yet — skip (will be created on first upload)
         pass
 else:
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-    # Create local media folder
     os.makedirs(MEDIA_ROOT, exist_ok=True)
     os.makedirs(os.path.join(MEDIA_ROOT, 'avatars'), exist_ok=True)
 
 
-# Static files configuration (if not already set)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
 
-# File upload settings
-FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
-DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024   # 10MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
 
-# Allowed file extensions for uploads
 ALLOWED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
 ALLOWED_DOCUMENT_EXTENSIONS = ['.pdf', '.doc', '.docx', '.txt']
 ALLOWED_RESUME_EXTENSIONS = ['.pdf', '.doc', '.docx']
 ALLOWED_PORTFOLIO_EXTENSIONS = ['.pdf', '.zip', '.rar']
 
-# Maximum file sizes (in bytes)
-MAX_AVATAR_SIZE = 5 * 1024 * 1024      # 5MB
-MAX_RESUME_SIZE = 10 * 1024 * 1024     # 10MB
-MAX_PORTFOLIO_SIZE = 50 * 1024 * 1024  # 50MB
+MAX_AVATAR_SIZE = 5 * 1024 * 1024
+MAX_RESUME_SIZE = 10 * 1024 * 1024
+MAX_PORTFOLIO_SIZE = 50 * 1024 * 1024
 
-
-# settings.py - UPDATE SPECTACULAR_SETTINGS:
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Manpower Application API',
     'DESCRIPTION': 'API for managing workforce, businesses, and job postings',
@@ -295,29 +262,22 @@ SPECTACULAR_SETTINGS = {
     'COMPONENT_SPLIT_REQUEST': True,
     'SORT_OPERATIONS': False,
     'OPERATION_ID_GENERATOR': 'drf_spectacular.utils.camelize_operation_id_generator',
-    # REMOVE the ENUM_NAME_OVERRIDES section
 }
 
 
-# CORS settings
-# CORS settings
-# CORS settings
 FRONTEND_URL = env('FRONTEND_URL', default='http://localhost:3000')
 
-# Base CORS origins - always include localhost for development
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
 
-# Add production URLs
 if not DEBUG:
     CORS_ALLOWED_ORIGINS.extend([
         "https://www.shatayaglobal.com",
         "https://shatayaglobal.com",
     ])
 
-# Also add FRONTEND_URL if it's different
 if FRONTEND_URL and FRONTEND_URL not in CORS_ALLOWED_ORIGINS:
     CORS_ALLOWED_ORIGINS.append(FRONTEND_URL)
 
@@ -344,7 +304,6 @@ CORS_ALLOW_METHODS = [
     'POST',
     'PUT',
 ]
-# Security settings for production
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
@@ -356,13 +315,10 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
 
-    # Trust Render's proxy headers
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# ASGI Configuration
 ASGI_APPLICATION = 'core.asgi.application'
 
-# Static files configuration (DEFINED ONCE)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

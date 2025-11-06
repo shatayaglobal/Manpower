@@ -21,6 +21,7 @@ import { useAuthSlice } from "@/lib/redux/use-auth";
 import { useAuthState } from "@/lib/redux/redux";
 import { toast } from "sonner";
 import { AuthError, Google, GoogleCredentialResponse } from "@/lib/types";
+import AccountTypeModal from "@/components/account-type-modal";
 
 declare global {
   interface Window {
@@ -34,6 +35,11 @@ export default function SignInPage() {
   const { login, googleAuth, clearAuthError, resetLoading } = useAuthSlice();
   const { isLoginLoading, error, isAuthenticated, isGoogleAuthLoading } =
     useAuthState();
+  const [showAccountTypeModal, setShowAccountTypeModal] = useState(false);
+  const [pendingGoogleCredential, setPendingGoogleCredential] = useState<
+    string | null
+  >(null);
+
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -117,29 +123,71 @@ export default function SignInPage() {
   const handleCredentialResponse = useCallback(
     async (response: GoogleCredentialResponse) => {
       try {
-        console.log("Google credential received:", response.credential);
         const result = await googleAuth({
           credential: response.credential,
           token: "",
         });
 
         if (result.success) {
-          toast.success(
-            "Google sign-in successful! Welcome to your Worker account.",
-            {}
-          );
+          toast.success("Login successful! Welcome back.");
           setTimeout(() => {
             router.push("/home");
           }, 100);
         } else {
-          toast.error("Google sign-in failed. Please try again.", {});
+          const errorData = result.error as AuthError;
+
+          if (errorData?.status === 404) {
+            setPendingGoogleCredential(response.credential);
+            setShowAccountTypeModal(true);
+          } else {
+            toast.error(errorData?.message || "Google sign-in failed. Please try again.");
+          }
         }
       } catch {
-        toast.error("An error occurred during Google sign-in.", {});
+        toast.error("An error occurred during Google sign-in.");
       }
     },
     [googleAuth, router]
   );
+
+
+  const handleAccountTypeSelect = async (accountType: "WORKER" | "BUSINESS") => {
+    if (!pendingGoogleCredential) return;
+
+    try {
+      const result = await googleAuth({
+        credential: pendingGoogleCredential,
+        token: "",
+        account_type: accountType,
+      });
+
+      if (result.success) {
+        setShowAccountTypeModal(false);
+        setPendingGoogleCredential(null);
+
+        const accountTypeName = accountType === "WORKER" ? "Worker" : "Business";
+        toast.success(`Account created! Welcome to your ${accountTypeName} account.`);
+
+        setTimeout(() => {
+          router.push("/home");
+        }, 100);
+      } else {
+        toast.error("Account creation failed. Please try again.");
+        setShowAccountTypeModal(false);
+        setPendingGoogleCredential(null);
+      }
+    } catch {
+      toast.error("An error occurred during account creation.");
+      setShowAccountTypeModal(false);
+      setPendingGoogleCredential(null);
+    }
+  };
+
+  const handleAccountTypeCancel = () => {
+    setShowAccountTypeModal(false);
+    setPendingGoogleCredential(null);
+    toast.info("Sign-in cancelled.");
+  };
 
   useEffect(() => {
     const script = document.createElement("script");
@@ -180,6 +228,13 @@ export default function SignInPage() {
   }, [handleCredentialResponse]);
 
   return (
+    <>
+    <AccountTypeModal
+      open={showAccountTypeModal}
+      onSelect={handleAccountTypeSelect}
+      onCancel={handleAccountTypeCancel}
+      isLoading={isGoogleAuthLoading}
+    />
     <div className="bg-gradient-to-br from-white via-slate-50/20 to-amber-50/15 min-h-screen">
       <div className="flex items-center justify-center min-h-screen py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-md space-y-4 sm:space-y-6 lg:space-y-8">
@@ -372,5 +427,6 @@ export default function SignInPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

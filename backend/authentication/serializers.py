@@ -93,10 +93,10 @@ class GoogleAuthSerializer(serializers.Serializer):
     google_token = serializers.CharField(help_text="Google OAuth access token")
     account_type = serializers.ChoiceField(
         choices=User.ACCOUNT_TYPES,
-        default='WORKER',
-        help_text="Account type: WORKER or BUSINESS"
+        required=False,
+        allow_null=True,  
+        help_text="Account type: WORKER or BUSINESS (required for signup)"
     )
-
 
 class ChangePasswordSerializer(serializers.Serializer):
     """Serializer for changing password"""
