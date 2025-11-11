@@ -39,7 +39,7 @@ export default function SignInPage() {
   const [pendingGoogleCredential, setPendingGoogleCredential] = useState<
     string | null
   >(null);
-
+  const [isGoogleButtonReady, setIsGoogleButtonReady] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -140,7 +140,9 @@ export default function SignInPage() {
             setPendingGoogleCredential(response.credential);
             setShowAccountTypeModal(true);
           } else {
-            toast.error(errorData?.message || "Google sign-in failed. Please try again.");
+            toast.error(
+              errorData?.message || "Google sign-in failed. Please try again."
+            );
           }
         }
       } catch {
@@ -150,8 +152,9 @@ export default function SignInPage() {
     [googleAuth, router]
   );
 
-
-  const handleAccountTypeSelect = async (accountType: "WORKER" | "BUSINESS") => {
+  const handleAccountTypeSelect = async (
+    accountType: "WORKER" | "BUSINESS"
+  ) => {
     if (!pendingGoogleCredential) return;
 
     try {
@@ -165,8 +168,11 @@ export default function SignInPage() {
         setShowAccountTypeModal(false);
         setPendingGoogleCredential(null);
 
-        const accountTypeName = accountType === "WORKER" ? "Worker" : "Business";
-        toast.success(`Account created! Welcome to your ${accountTypeName} account.`);
+        const accountTypeName =
+          accountType === "WORKER" ? "Worker" : "Business";
+        toast.success(
+          `Account created! Welcome to your ${accountTypeName} account.`
+        );
 
         setTimeout(() => {
           router.push("/home");
@@ -206,16 +212,21 @@ export default function SignInPage() {
             cancel_on_tap_outside: true,
           });
 
-          window.google.accounts.id.renderButton(
-            document.getElementById("google-signin-button")!,
-            {
+          const buttonContainer = document.getElementById("google-signin-button");
+          if (buttonContainer) {
+            // REMOVED Math.min(700, ...) → now uses full container width
+            const containerWidth = buttonContainer.parentElement?.offsetWidth || 400;
+
+            window.google.accounts.id.renderButton(buttonContainer, {
               theme: "outline",
               size: "large",
-              width: "400",
-            }
-          );
+              width: containerWidth.toString(),
+            });
+
+            setIsGoogleButtonReady(true);
+          }
         } catch {
-          //console.error('Error initializing Google Sign-In:', error);
+          setIsGoogleButtonReady(true);
         }
       }
     };
@@ -229,204 +240,214 @@ export default function SignInPage() {
 
   return (
     <>
-    <AccountTypeModal
-      open={showAccountTypeModal}
-      onSelect={handleAccountTypeSelect}
-      onCancel={handleAccountTypeCancel}
-      isLoading={isGoogleAuthLoading}
-    />
-    <div className="bg-gradient-to-br from-white via-slate-50/20 to-amber-50/15 min-h-screen">
-      <div className="flex items-center justify-center min-h-screen py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
-        <div className="w-full max-w-md space-y-4 sm:space-y-6 lg:space-y-8">
-          {/* Header */}
-          <div className="text-center space-y-2 sm:space-y-3 lg:space-y-4">
-            <h1 className="font-bold text-2xl sm:text-3xl lg:text-4xl text-gray-900">
-              Welcome Back
-            </h1>
-            <p className="text-gray-600 text-sm sm:text-base px-2">
-              Sign in to your account to continue connecting talent with
-              opportunity
-            </p>
-          </div>
+      <AccountTypeModal
+        open={showAccountTypeModal}
+        onSelect={handleAccountTypeSelect}
+        onCancel={handleAccountTypeCancel}
+        isLoading={isGoogleAuthLoading}
+      />
+      <div className="bg-gradient-to-br from-white via-slate-50/20 to-amber-50/15 min-h-screen -mt-15">
+        <div className="flex items-center justify-center min-h-screen py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
+          <div className="w-full max-w-md space-y-4 sm:space-y-6 lg:space-y-8">
+            {/* Header */}
+            <div className="text-center space-y-2 sm:space-y-3 lg:space-y-4">
+              <h1 className="font-bold text-2xl sm:text-3xl lg:text-4xl text-gray-900">
+                Welcome Back
+              </h1>
+              <p className="text-gray-600 text-sm sm:text-base px-2">
+                Sign in to your account to continue connecting talent with
+                opportunity
+              </p>
+            </div>
 
-          {/* Sign In Card */}
-          <Card className="border-0 shadow-lg bg-white">
-            <CardHeader className="space-y-2 sm:space-y-3 lg:space-y-4 pb-3 sm:pb-4 lg:pb-6 px-4 sm:px-6 pt-4 sm:pt-6">
-              <CardTitle className="text-xl sm:text-2xl font-semibold text-center text-gray-900">
-                Sign In
-              </CardTitle>
-              <CardDescription className="text-center text-gray-600 text-xs sm:text-sm lg:text-base">
-                Access your account with email or Google
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4 sm:space-y-5 lg:space-y-6 px-4 sm:px-6 pb-4 sm:pb-6">
-              {/* Error Display */}
-              {error && (
-                <Alert variant="destructive" className="py-2 sm:py-3">
-                  <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <AlertDescription className="text-xs sm:text-sm">
-                    {error.message}
-                  </AlertDescription>
-                </Alert>
-              )}
+            {/* Sign In Card */}
+            <Card className="border-0 shadow-lg bg-white">
+              <CardHeader className="space-y-2 sm:space-y-3 lg:space-y-4 pb-3 sm:pb-4 lg:pb-6 px-4 sm:px-6 pt-4 sm:pt-6">
+                <CardTitle className="text-xl sm:text-2xl font-semibold text-center text-gray-900">
+                  Sign In
+                </CardTitle>
+                <CardDescription className="text-center text-gray-600 text-xs sm:text-sm lg:text-base">
+                  Access your account with email or Google
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4 sm:space-y-5 lg:space-y-6 px-4 sm:px-6 pb-4 sm:pb-6">
+                {/* Error Display */}
+                {error && (
+                  <Alert variant="destructive" className="py-2 sm:py-3">
+                    <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <AlertDescription className="text-xs sm:text-sm">
+                      {error.message}
+                    </AlertDescription>
+                  </Alert>
+                )}
 
-              {/* Google Sign In Button */}
-              <div className="space-y-2">
-                <div className="w-full flex justify-center">
-                  <div
-                    id="google-signin-button"
-                    style={{ minHeight: "40px" }}
-                  ></div>
-                </div>
-                <p className="text-xs text-gray-500 text-center px-2">
-                  Google sign-in creates a Worker account
-                </p>
-              </div>
-
-              {/* Divider */}
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <Separator className="w-full" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-2 text-gray-500">
-                    Or continue with email
-                  </span>
-                </div>
-              </div>
-
-              {/* Sign In Form */}
-              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-                {/* Email Field */}
-                <div className="space-y-1.5 sm:space-y-2">
-                  <Label
-                    htmlFor="email"
-                    className="text-xs sm:text-sm font-medium text-gray-700"
-                  >
-                    Email Address
-                  </Label>
-                  <div className="relative">
-                    <Mail className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="john.doe@example.com"
-                      value={formData.email}
-                      onChange={(e) =>
-                        handleInputChange("email", e.target.value)
-                      }
-                      className={`pl-8 sm:pl-10 h-10 sm:h-11 text-sm sm:text-base ${
-                        error?.errors?.email ? "border-red-300" : ""
-                      }`}
-                      required
-                      disabled={isLoginLoading || isGoogleAuthLoading}
-                    />
+                {/* Google Sign In Button */}
+                <div className="space-y-2">
+                  <div className="w-full flex justify-center px-4">
+                    <div className="w-full max-w-full sm:max-w-[650px] lg:max-w-[1000px] min-h-[44px] flex items-center justify-center">
+                      {!isGoogleButtonReady ? (
+                        <div className="w-full h-11 bg-gray-50 border border-gray-200 rounded flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                        </div>
+                      ) : null}
+                      <div
+                        id="google-signin-button"
+                        className={!isGoogleButtonReady ? "opacity-0" : ""}
+                      ></div>
+                    </div>
                   </div>
-                  {error?.errors?.email && (
-                    <p className="text-xs text-red-600">
-                      {error.errors.email[0]}
-                    </p>
-                  )}
+                  <p className="text-xs text-gray-500 text-center px-2">
+                    Google sign-in creates a Worker account
+                  </p>
                 </div>
 
-                {/* Password Field */}
-                <div className="space-y-1.5 sm:space-y-2">
-                  <div className="flex items-center justify-between">
+                {/* Divider */}
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <Separator className="w-full" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-white px-2 text-gray-500">
+                      Or continue with email
+                    </span>
+                  </div>
+                </div>
+
+                {/* Sign In Form */}
+                <form
+                  onSubmit={handleSubmit}
+                  className="space-y-3 sm:space-y-4"
+                >
+                  {/* Email Field */}
+                  <div className="space-y-1.5 sm:space-y-2">
                     <Label
-                      htmlFor="password"
+                      htmlFor="email"
                       className="text-xs sm:text-sm font-medium text-gray-700"
                     >
-                      Password
+                      Email Address
                     </Label>
-                    <Link
-                      href="/forgot-password"
-                      className="text-xs text-blue-500 hover:text-blue-600 underline"
-                    >
-                      Forgot password?
-                    </Link>
+                    <div className="relative">
+                      <Mail className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="john.doe@example.com"
+                        value={formData.email}
+                        onChange={(e) =>
+                          handleInputChange("email", e.target.value)
+                        }
+                        className={`pl-8 sm:pl-10 h-10 sm:h-11 text-sm sm:text-base ${
+                          error?.errors?.email ? "border-red-300" : ""
+                        }`}
+                        required
+                        disabled={isLoginLoading || isGoogleAuthLoading}
+                      />
+                    </div>
+                    {error?.errors?.email && (
+                      <p className="text-xs text-red-600">
+                        {error.errors.email[0]}
+                      </p>
+                    )}
                   </div>
-                  <div className="relative">
-                    <Lock className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password"
-                      value={formData.password}
-                      onChange={(e) =>
-                        handleInputChange("password", e.target.value)
-                      }
-                      className={`pl-8 sm:pl-10 pr-9 sm:pr-10 h-10 sm:h-11 text-sm sm:text-base ${
-                        error?.errors?.password ? "border-red-300" : ""
-                      }`}
-                      required
-                      disabled={isLoginLoading || isGoogleAuthLoading}
-                    />
-                    <button
-                      type="button"
-                      className="absolute right-2.5 sm:right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 touch-manipulation"
-                      onClick={() => setShowPassword(!showPassword)}
-                      disabled={isLoginLoading || isGoogleAuthLoading}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                      ) : (
-                        <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                      )}
-                    </button>
-                  </div>
-                  {error?.errors?.password && (
-                    <p className="text-xs text-red-600">
-                      {error.errors.password[0]}
-                    </p>
-                  )}
-                </div>
 
-                {/* Submit Button */}
-                <Button
-                  type="submit"
-                  className="w-full bg-blue-500 hover:bg-blue-600 text-white h-10 sm:h-11 text-sm sm:text-base shadow-sm mt-4 sm:mt-6"
-                  disabled={isLoginLoading || isGoogleAuthLoading}
+                  {/* Password Field */}
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label
+                        htmlFor="password"
+                        className="text-xs sm:text-sm font-medium text-gray-700"
+                      >
+                        Password
+                      </Label>
+                      <Link
+                        href="/forgot-password"
+                        className="text-xs text-blue-500 hover:text-blue-600 underline"
+                      >
+                        Forgot password?
+                      </Link>
+                    </div>
+                    <div className="relative">
+                      <Lock className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter your password"
+                        value={formData.password}
+                        onChange={(e) =>
+                          handleInputChange("password", e.target.value)
+                        }
+                        className={`pl-8 sm:pl-10 pr-9 sm:pr-10 h-10 sm:h-11 text-sm sm:text-base ${
+                          error?.errors?.password ? "border-red-300" : ""
+                        }`}
+                        required
+                        disabled={isLoginLoading || isGoogleAuthLoading}
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-2.5 sm:right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 touch-manipulation"
+                        onClick={() => setShowPassword(!showPassword)}
+                        disabled={isLoginLoading || isGoogleAuthLoading}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                        ) : (
+                          <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                        )}
+                      </button>
+                    </div>
+                    {error?.errors?.password && (
+                      <p className="text-xs text-red-600">
+                        {error.errors.password[0]}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Submit Button */}
+                  <Button
+                    type="submit"
+                    className="w-full bg-blue-500 hover:bg-blue-600 text-white h-10 sm:h-11 text-sm sm:text-base shadow-sm mt-4 sm:mt-6"
+                    disabled={isLoginLoading || isGoogleAuthLoading}
+                  >
+                    {isLoginLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Signing In...
+                      </>
+                    ) : (
+                      <>
+                        Sign In
+                        <ArrowRight className="ml-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      </>
+                    )}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+
+            {/* Additional Links */}
+            <div className="text-center space-y-2 sm:space-y-3 px-2">
+              <p className="text-xs sm:text-sm text-gray-600">
+                Don&apos;t have an account?{" "}
+                <Link
+                  href="/signup"
+                  className="text-blue-500 hover:text-blue-600 underline font-medium"
                 >
-                  {isLoginLoading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Signing In...
-                    </>
-                  ) : (
-                    <>
-                      Sign In
-                      <ArrowRight className="ml-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    </>
-                  )}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-
-          {/* Additional Links */}
-          <div className="text-center space-y-2 sm:space-y-3 px-2">
-            <p className="text-xs sm:text-sm text-gray-600">
-              Don&apos;t have an account?{" "}
-              <Link
-                href="/signup"
-                className="text-blue-500 hover:text-blue-600 underline font-medium"
-              >
-                Sign up here
-              </Link>
-            </p>
-            <p className="text-xs sm:text-sm text-gray-600">
-              Need help?{" "}
-              <Link
-                href="/contact"
-                className="text-blue-500 hover:text-blue-600 underline"
-              >
-                Contact Support
-              </Link>
-            </p>
+                  Sign up here
+                </Link>
+              </p>
+              <p className="text-xs sm:text-sm text-gray-600">
+                Need help?{" "}
+                <Link
+                  href="/contact"
+                  className="text-blue-500 hover:text-blue-600 underline"
+                >
+                  Contact Support
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
     </>
   );
 }

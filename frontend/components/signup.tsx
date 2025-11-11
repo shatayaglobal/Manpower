@@ -39,6 +39,17 @@ import { toast } from "sonner";
 import { GoogleCredentialResponse } from "@/lib/types";
 import AccountTypeModal from "@/components/account-type-modal";
 
+interface GoogleIdentityButtonOptions {
+  theme?: "outline" | "filled_blue" | "filled_black";
+  size?: "large" | "medium" | "small";
+  text?: "signin_with" | "signup_with" | "continue_with" | "signin";
+  type?: "standard" | "icon";
+  shape?: "rectangular" | "pill" | "circle" | "square";
+  logo_alignment?: "left" | "center";
+  width?: string;
+  locale?: string;
+}
+
 export default function SignUpPage() {
   const router = useRouter();
   const { register, googleAuth, clearAuthError, clearAuthSuccessStates } =
@@ -184,18 +195,47 @@ export default function SignUpPage() {
             cancel_on_tap_outside: true,
           });
 
-          setTimeout(() => {
-            if (window.google) {
-              window.google.accounts.id.renderButton(
-                document.getElementById("google-signup-button")!,
-                {
-                  theme: "outline",
-                  size: "large",
-                  width: "100%",
-                }
-              );
-            }
-          }, 100);
+          // Render mobile button
+          const mobileButtonContainer = document.getElementById(
+            "google-signup-button-mobile"
+          );
+          if (mobileButtonContainer) {
+            const containerWidth =
+              mobileButtonContainer.parentElement?.offsetWidth || 400;
+
+            (
+              window.google.accounts.id.renderButton as (
+                element: HTMLElement,
+                options: GoogleIdentityButtonOptions
+              ) => void
+            )(mobileButtonContainer, {
+              theme: "outline",
+              size: "large",
+              width: containerWidth.toString(),
+              text: "signup_with",
+            });
+          }
+
+          // Render desktop button
+          const desktopButtonContainer = document.getElementById(
+            "google-signup-button-desktop"
+          );
+          if (desktopButtonContainer) {
+            const containerWidth =
+              desktopButtonContainer.parentElement?.offsetWidth || 400;
+
+            (
+              window.google.accounts.id.renderButton as (
+                element: HTMLElement,
+                options: GoogleIdentityButtonOptions
+              ) => void
+            )(desktopButtonContainer, {
+              theme: "outline",
+              size: "large",
+              width: containerWidth.toString(),
+              text: "signup_with",
+            });
+          }
         } catch {
           throw new Error("Google Sign-In initialization failed");
         }
@@ -252,19 +292,31 @@ export default function SignUpPage() {
 
                 {/* Google Sign Up Button */}
                 <div className="space-y-2">
-                  <div className="w-full">
-                    <div
-                      id="google-signup-button"
-                      className="w-full"
-                      style={{ minHeight: "40px" }}
-                    ></div>
+                  {/* Mobile: Full width, safe padding */}
+                  <div className="px-4 lg:hidden">
+                    <div className="w-full min-h-[44px] flex items-center justify-center">
+                      <div
+                        id="google-signup-button-mobile"
+                        className="w-full"
+                      ></div>
+                    </div>
                   </div>
-                  <p className="text-xs sm:text-sm text-gray-500 text-center">
+
+                  {/* Desktop: Centered + nudged right */}
+                  <div className="hidden lg:block px-0">
+                    <div className="mx-auto max-w-lg xl:max-w-xl min-h-[44px] flex items-center justify-center translate-x-20">
+                      <div
+                        id="google-signup-button-desktop"
+                        className="w-full"
+                      ></div>
+                    </div>
+                  </div>
+
+                  <p className="text-center text-xs sm:text-sm text-gray-500 px-4 lg:px-0">
                     You&apos;ll choose your account type after signing in with
                     Google
                   </p>
                 </div>
-
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
                     <Separator className="w-full" />
