@@ -1,10 +1,8 @@
-import { useDispatch, useSelector } from 'react-redux'
-import type { AppDispatch, RootState } from './store'
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "./store";
 
-
-export const useAppDispatch = useDispatch.withTypes<AppDispatch>()
-export const useAppSelector = useSelector.withTypes<RootState>()
-
+export const useAppDispatch = useDispatch.withTypes<AppDispatch>();
+export const useAppSelector = useSelector.withTypes<RootState>();
 
 export const useAuthState = () => {
   return useAppSelector((state) => {
@@ -26,7 +24,11 @@ export const useAuthState = () => {
       passwordResetSuccess: authState.passwordResetSuccess,
       changePasswordSuccess: authState.changePasswordSuccess,
       googleAuthSuccess: authState.googleAuthSuccess,
-      registerSuccess: authState.registerSuccess
+      registerSuccess: authState.registerSuccess,
+      isVerifyEmailLoading: authState.isVerifyEmailLoading,
+      isResendVerificationLoading: authState.isResendVerificationLoading,
+      verifyEmailSuccess: authState.verifyEmailSuccess,
+      resendVerificationSuccess: authState.resendVerificationSuccess,
     };
   });
-}
+};

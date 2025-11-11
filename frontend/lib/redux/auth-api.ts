@@ -9,6 +9,8 @@ import type {
   ChangePasswordData,
   User,
   UserProfile,
+  VerifyEmailResponse,
+  ResendVerificationResponse,
 } from "../types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -131,6 +133,21 @@ class AuthService {
 
   async deleteUserById(userId: string) {
     const response = await axiosInstance.delete(`users/${userId}/`);
+    return response.data;
+  }
+
+  async verifyEmail(token: string): Promise<VerifyEmailResponse> {
+    const response = await axiosInstance.get<VerifyEmailResponse>(
+      `verify-email/?token=${token}`
+    );
+    return response.data;
+  }
+
+  async resendVerification(email: string): Promise<ResendVerificationResponse> {
+    const response = await axiosInstance.post<ResendVerificationResponse>(
+      "resend-verification/",
+      { email }
+    );
     return response.data;
   }
 }

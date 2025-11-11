@@ -8,6 +8,8 @@ import type {
   RegisterData,
   GoogleAuthData,
   ChangePasswordData,
+  VerifyEmailResponse,
+  ResendVerificationResponse,
 } from "@/lib/types";
 
 interface ApiErrorResponse {
@@ -40,7 +42,8 @@ const extractErrorInfo = (error: unknown): AuthError => {
     status: axiosError?.response?.status || 500,
     errors: axiosError?.response?.data?.errors || {},
     errorType: axiosError?.response?.data?.error_type,
-    googleLoginRequired: axiosError?.response?.data?.google_login_required || false,
+    googleLoginRequired:
+      axiosError?.response?.data?.google_login_required || false,
   };
 };
 
@@ -62,6 +65,10 @@ const initialState: AuthState = {
   changePasswordSuccess: false,
   googleAuthSuccess: false,
   registerSuccess: false,
+  isVerifyEmailLoading: false,
+  isResendVerificationLoading: false,
+  verifyEmailSuccess: false,
+  resendVerificationSuccess: false,
 };
 
 export const loginThunk = createAsyncThunk(
@@ -136,8 +143,8 @@ export const logoutThunk = createAsyncThunk(
       if (token) {
         await authService.logout();
       }
-    } catch  {
-      throw new Error('Logout failed')
+    } catch {
+      throw new Error("Logout failed");
     }
 
     return true;
@@ -179,12 +186,35 @@ export const changePasswordThunk = createAsyncThunk(
   }
 );
 
-
 export const googleSignInThunk = createAsyncThunk(
   "auth/googleSignIn",
   async (credential: string, { rejectWithValue }) => {
     try {
       const result = await authService.googleSignIn(credential);
+      return result;
+    } catch (error: unknown) {
+      return rejectWithValue(extractErrorInfo(error));
+    }
+  }
+);
+
+export const verifyEmailThunk = createAsyncThunk(
+  "auth/verifyEmail",
+  async (token: string, { rejectWithValue }) => {
+    try {
+      const result = await authService.verifyEmail(token);
+      return result;
+    } catch (error: unknown) {
+      return rejectWithValue(extractErrorInfo(error));
+    }
+  }
+);
+
+export const resendVerificationThunk = createAsyncThunk(
+  "auth/resendVerification",
+  async (email: string, { rejectWithValue }) => {
+    try {
+      const result = await authService.resendVerification(email);
       return result;
     } catch (error: unknown) {
       return rejectWithValue(extractErrorInfo(error));
@@ -214,6 +244,8 @@ const authSlice = createSlice({
       state.changePasswordSuccess = false;
       state.googleAuthSuccess = false;
       state.registerSuccess = false;
+      state.verifyEmailSuccess = false;
+      state.resendVerificationSuccess = false;
     },
     updateUser: (state, action: PayloadAction<Partial<User>>) => {
       if (state.user) {
@@ -352,6 +384,40 @@ const authSlice = createSlice({
       .addCase(changePasswordThunk.rejected, (state, action) => {
         state.isChangePasswordLoading = false;
         state.changePasswordSuccess = false;
+        state.error = action.payload as AuthError;
+      })
+      .addCase(verifyEmailThunk.pending, (state) => {
+        state.isVerifyEmailLoading = true;
+        state.error = null;
+        state.verifyEmailSuccess = false;
+      })
+      .addCase(verifyEmailThunk.fulfilled, (state, action) => {
+        state.isVerifyEmailLoading = false;
+        state.verifyEmailSuccess = true;
+        state.error = null;
+        // Optionally update user if returned
+        if (action.payload.user) {
+          state.user = action.payload.user;
+        }
+      })
+      .addCase(verifyEmailThunk.rejected, (state, action) => {
+        state.isVerifyEmailLoading = false;
+        state.verifyEmailSuccess = false;
+        state.error = action.payload as AuthError;
+      })
+      .addCase(resendVerificationThunk.pending, (state) => {
+        state.isResendVerificationLoading = true;
+        state.error = null;
+        state.resendVerificationSuccess = false;
+      })
+      .addCase(resendVerificationThunk.fulfilled, (state) => {
+        state.isResendVerificationLoading = false;
+        state.resendVerificationSuccess = true;
+        state.error = null;
+      })
+      .addCase(resendVerificationThunk.rejected, (state, action) => {
+        state.isResendVerificationLoading = false;
+        state.resendVerificationSuccess = false;
         state.error = action.payload as AuthError;
       });
   },

@@ -54,7 +54,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(
             email=email,
             password=password,
-            is_verified=True,
+            is_verified=False,
             is_google_user=False,
             **validated_data
         )
@@ -94,7 +94,7 @@ class GoogleAuthSerializer(serializers.Serializer):
     account_type = serializers.ChoiceField(
         choices=User.ACCOUNT_TYPES,
         required=False,
-        allow_null=True,  
+        allow_null=True,
         help_text="Account type: WORKER or BUSINESS (required for signup)"
     )
 

@@ -1,4 +1,3 @@
-
 export interface LoginCredentials {
   email: string;
   password: string;
@@ -79,6 +78,12 @@ export interface AuthState {
   changePasswordSuccess: boolean;
   googleAuthSuccess: boolean;
   registerSuccess: boolean;
+
+  isVerifyEmailLoading: boolean;
+  isResendVerificationLoading: boolean;
+  verifyEmailSuccess: boolean;
+  resendVerificationSuccess: boolean;
+  
 }
 
 export interface GoogleCredentialResponse {
@@ -359,7 +364,6 @@ export const ACCOUNT_TYPES = {
   BUSINESS: "BUSINESS",
 } as const;
 
-
 export interface Job {
   id: string;
   title: string;
@@ -567,4 +571,21 @@ export interface ProfileState {
   error: string | null;
   completionStatus: ProfileCheckResponse | null;
   pendingJobApplication: PendingJobApplication | null;
+}
+
+export interface VerifyEmailData {
+  token: string;
+}
+
+export interface ResendVerificationData {
+  email: string;
+}
+
+export interface VerifyEmailResponse {
+  message: string;
+  user?: User;
+}
+
+export interface ResendVerificationResponse {
+  message: string;
 }

@@ -19,7 +19,7 @@ from django.conf import settings
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.openapi import OpenApiResponse
 from rest_framework.decorators import api_view, permission_classes
-
+from authentication.utils.email import send_verification_email
 from .models import User, UserProfile
 from .serializers import (
     LogoutSerializer, UserSerializer, UserListSerializer, UserRegistrationSerializer,
@@ -28,6 +28,12 @@ from .serializers import (
 )
 from . import serializers
 from rest_framework.decorators import api_view
+from authentication.models import EmailVerificationToken
+from django.utils import timezone
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, inline_serializer
+from rest_framework import serializers
+import logging
+logger = logging.getLogger(__name__)
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -89,47 +95,86 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         return super().post(request, *args, **kwargs)
 
 
+# class UserRegistrationView(APIView):
+#     """User registration with JWT tokens"""
+#     permission_classes = [AllowAny]
+
+#     @extend_schema(
+#         summary="Register new user",
+#         description="Create account and get JWT tokens",
+#         request=UserRegistrationSerializer,
+#         responses={201: {"type": "object"}},
+#         examples=[
+#             OpenApiExample(
+#                 "Registration example",
+#                 value={
+#                     "email": "user@example.com",
+#                     "first_name": "John",
+#                     "last_name": "Doe",
+#                     "password": "securepassword123",
+#                     "password_confirm": "securepassword123",
+#                     "account_type": "WORKER"
+#                 }
+#             )
+#         ]
+#     )
+#     def post(self, request):
+#         serializer = UserRegistrationSerializer(data=request.data)
+#         if serializer.is_valid():
+#             user = serializer.save()
+#             # Create user profile
+#             UserProfile.objects.create(user=user)
+
+#             # Generate JWT tokens
+#             refresh = RefreshToken.for_user(user)
+
+#             return Response({
+#                 'user': UserSerializer(user).data,
+#                 'access': str(refresh.access_token),
+#                 'refresh': str(refresh),
+#                 'message': 'User registered successfully'
+#             }, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+logger = logging.getLogger(__name__)
+
 class UserRegistrationView(APIView):
-    """User registration with JWT tokens"""
+    """User registration with email verification"""
     permission_classes = [AllowAny]
 
     @extend_schema(
         summary="Register new user",
-        description="Create account and get JWT tokens",
+        description="Create account and send verification email",
         request=UserRegistrationSerializer,
         responses={201: {"type": "object"}},
-        examples=[
-            OpenApiExample(
-                "Registration example",
-                value={
-                    "email": "user@example.com",
-                    "first_name": "John",
-                    "last_name": "Doe",
-                    "password": "securepassword123",
-                    "password_confirm": "securepassword123",
-                    "account_type": "WORKER"
-                }
-            )
-        ]
     )
     def post(self, request):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
+
             # Create user profile
             UserProfile.objects.create(user=user)
 
-            # Generate JWT tokens
-            refresh = RefreshToken.for_user(user)
+            # Send verification email BEFORE returning response
+            logger.info(f"Attempting to send verification email to {user.email}")
+            email_sent = send_verification_email(user)
+            logger.info(f"Email sent status: {email_sent}")
+
+            if not email_sent:
+                logger.error(f"Failed to send verification email to {user.email}")
+                # You can choose to still return success but inform user
+                # Or return an error - your choice
 
             return Response({
                 'user': UserSerializer(user).data,
-                'access': str(refresh.access_token),
-                'refresh': str(refresh),
-                'message': 'User registered successfully'
+                'message': 'Registration successful. Please check your email to verify your account.',
+                'email_sent': email_sent,
+                'requires_verification': True
             }, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @extend_schema(
     summary="Logout",
@@ -551,3 +596,121 @@ def check_profile_complete(request):
         'missing_fields': profile.missing_application_fields,  # Use new property
         'message': 'Profile completion status retrieved successfully'
     }, status=status.HTTP_200_OK)
+
+
+
+class VerifyEmailView(APIView):
+    """Verify email with token"""
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        summary="Verify email address",
+        description="Verify user's email using verification token",
+        parameters=[
+            OpenApiParameter(
+                name='token',
+                type=str,
+                location=OpenApiParameter.QUERY,
+                description='Email verification token',
+                required=True
+            )
+        ],
+        responses={
+            200: {"type": "object", "properties": {"message": {"type": "string"}}},
+            400: {"type": "object", "properties": {"error": {"type": "string"}}}
+        }
+    )
+    def get(self, request):
+        try:
+            token_str = request.query_params.get('token')
+
+            if not token_str:
+                return Response(
+                    {'error': 'Token is required'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            token = EmailVerificationToken.objects.get(token=token_str)
+
+            if not token.is_valid():
+                if token.user.is_verified:
+                    return Response({
+                        'message': 'Email already verified! You can now login.',
+                        'user': UserSerializer(token.user).data
+                    }, status=status.HTTP_200_OK)
+
+                return Response(
+                    {'error': 'Token is invalid or has expired'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            user = token.user
+            user.is_verified = True
+            user.save()
+            token.mark_as_used()
+
+            return Response({
+                'message': 'Email verified successfully! You can now login.',
+                'user': UserSerializer(user).data
+            }, status=status.HTTP_200_OK)
+
+        except EmailVerificationToken.DoesNotExist:
+            return Response(
+                {'error': 'Invalid verification token'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {'error': 'Verification failed. Please try again.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+class ResendVerificationEmailView(APIView):
+    """Resend verification email"""
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        summary="Resend verification email",
+        description="Resend verification email to user",
+        request=inline_serializer(
+            name='ResendVerificationEmail',
+            fields={'email': serializers.EmailField()}
+        ),
+        responses={200: {"type": "object"}}
+    )
+    def post(self, request):
+        email = request.data.get('email')
+
+        if not email:
+            return Response(
+                {'error': 'Email is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            user = User.objects.get(email=email)
+
+            if user.is_verified:
+                return Response(
+                    {'message': 'Email is already verified'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Send new verification email
+            email_sent = send_verification_email(user)
+
+            if email_sent:
+                return Response({
+                    'message': 'Verification email sent successfully'
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response(
+                    {'error': 'Failed to send email'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+
+        except User.DoesNotExist:
+            # Don't reveal if email exists or not for security
+            return Response({
+                'message': 'If this email is registered, a verification email will be sent'
+            }, status=status.HTTP_200_OK)

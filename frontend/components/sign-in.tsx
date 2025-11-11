@@ -35,6 +35,7 @@ export default function SignInPage() {
   const { login, googleAuth, clearAuthError, resetLoading } = useAuthSlice();
   const { isLoginLoading, error, isAuthenticated, isGoogleAuthLoading } =
     useAuthState();
+
   const [showAccountTypeModal, setShowAccountTypeModal] = useState(false);
   const [pendingGoogleCredential, setPendingGoogleCredential] = useState<
     string | null
@@ -50,10 +51,8 @@ export default function SignInPage() {
     const registered = searchParams.get("registered");
     if (registered === "true") {
       toast.success(
-        "Registration successful! Please sign in with your credentials.",
-        {}
+        "Registration successful! Please sign in with your credentials."
       );
-
       if (typeof window !== "undefined") {
         const url = new URL(window.location.href);
         url.searchParams.delete("registered");
@@ -63,8 +62,7 @@ export default function SignInPage() {
 
     const loginSuccess = searchParams.get("loginSuccess");
     if (loginSuccess === "true") {
-      toast.success("Login successful! Welcome back.", {});
-
+      toast.success("Login successful! Welcome back.");
       if (typeof window !== "undefined") {
         const url = new URL(window.location.href);
         url.searchParams.delete("loginSuccess");
@@ -93,26 +91,19 @@ export default function SignInPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!formData.email || !formData.password) {
-      return;
-    }
+    if (!formData.email || !formData.password) return;
 
     const result = await login(formData);
 
     if (result.success) {
       toast.success("Login successful! Welcome back.");
-      setTimeout(() => {
-        router.push("/home");
-      }, 100);
+      setTimeout(() => router.push("/home"), 100);
     } else {
       const error = result.error as AuthError;
       if (error?.googleLoginRequired) {
         toast.error(
           "This account was created with Google. Please use the 'Continue with Google' button above.",
-          {
-            duration: 6000,
-          }
+          { duration: 6000 }
         );
       } else {
         toast.error(error?.message || "Login failed. Please try again.");
@@ -130,12 +121,9 @@ export default function SignInPage() {
 
         if (result.success) {
           toast.success("Login successful! Welcome back.");
-          setTimeout(() => {
-            router.push("/home");
-          }, 100);
+          setTimeout(() => router.push("/home"), 100);
         } else {
           const errorData = result.error as AuthError;
-
           if (errorData?.status === 404) {
             setPendingGoogleCredential(response.credential);
             setShowAccountTypeModal(true);
@@ -167,16 +155,12 @@ export default function SignInPage() {
       if (result.success) {
         setShowAccountTypeModal(false);
         setPendingGoogleCredential(null);
-
         const accountTypeName =
           accountType === "WORKER" ? "Worker" : "Business";
         toast.success(
           `Account created! Welcome to your ${accountTypeName} account.`
         );
-
-        setTimeout(() => {
-          router.push("/home");
-        }, 100);
+        setTimeout(() => router.push("/home"), 100);
       } else {
         toast.error("Account creation failed. Please try again.");
         setShowAccountTypeModal(false);
@@ -196,11 +180,40 @@ export default function SignInPage() {
   };
 
   useEffect(() => {
+    const getButtonWidth = () => {
+      if (typeof window === "undefined") return "312";
+      const maxWidth = window.innerWidth < 640 ? 350 : 400;
+      return Math.max(312, maxWidth).toString();
+    };
+
+    if (window.google) {
+      try {
+        window.google.accounts.id.initialize({
+          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
+          callback: handleCredentialResponse,
+          auto_select: false,
+          cancel_on_tap_outside: true,
+        });
+
+        const buttonContainer = document.getElementById("google-signin-button");
+        if (buttonContainer) {
+          window.google.accounts.id.renderButton(buttonContainer, {
+            theme: "outline",
+            size: "large",
+            width: getButtonWidth(),
+          });
+        }
+        setIsGoogleButtonReady(true);
+      } catch  {
+        setIsGoogleButtonReady(true);
+      }
+      return;
+    }
+
     const script = document.createElement("script");
     script.src = "https://accounts.google.com/gsi/client";
     script.async = true;
     script.defer = true;
-    document.head.appendChild(script);
 
     script.onload = () => {
       if (window.google) {
@@ -212,32 +225,37 @@ export default function SignInPage() {
             cancel_on_tap_outside: true,
           });
 
-          const buttonContainer = document.getElementById("google-signin-button");
+          const buttonContainer = document.getElementById(
+            "google-signin-button"
+          );
           if (buttonContainer) {
-            // REMOVED Math.min(700, ...) → now uses full container width
-            const containerWidth = buttonContainer.parentElement?.offsetWidth || 400;
-
             window.google.accounts.id.renderButton(buttonContainer, {
               theme: "outline",
               size: "large",
-              width: containerWidth.toString(),
+              width: getButtonWidth(),
             });
-
-            setIsGoogleButtonReady(true);
           }
-        } catch {
+          setIsGoogleButtonReady(true);
+        } catch  {
           setIsGoogleButtonReady(true);
         }
+      } else {
+        setIsGoogleButtonReady(true);
       }
     };
+
+    script.onerror = () => {
+      setIsGoogleButtonReady(true);
+    };
+
+    document.head.appendChild(script);
 
     return () => {
       if (document.head.contains(script)) {
         document.head.removeChild(script);
       }
     };
-  }, [handleCredentialResponse]);
-
+  }, []);
   return (
     <>
       <AccountTypeModal
@@ -246,7 +264,7 @@ export default function SignInPage() {
         onCancel={handleAccountTypeCancel}
         isLoading={isGoogleAuthLoading}
       />
-      <div className="bg-gradient-to-br from-white via-slate-50/20 to-amber-50/15 min-h-screen -mt-15">
+      <div className="bg-gradient-to-br from-white via-slate-50/20 to-amber-50/15 min-h-screen sm:py-4 lg:py-12">
         <div className="flex items-center justify-center min-h-screen py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
           <div className="w-full max-w-md space-y-4 sm:space-y-6 lg:space-y-8">
             {/* Header */}
@@ -283,18 +301,16 @@ export default function SignInPage() {
 
                 {/* Google Sign In Button */}
                 <div className="space-y-2">
-                  <div className="w-full flex justify-center px-4">
-                    <div className="w-full max-w-full sm:max-w-[650px] lg:max-w-[1000px] min-h-[44px] flex items-center justify-center">
-                      {!isGoogleButtonReady ? (
-                        <div className="w-full h-11 bg-gray-50 border border-gray-200 rounded flex items-center justify-center">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-                        </div>
-                      ) : null}
-                      <div
-                        id="google-signin-button"
-                        className={!isGoogleButtonReady ? "opacity-0" : ""}
-                      ></div>
-                    </div>
+                  <div className="w-full max-w-[400px] h-[48px] flex items-center justify-center">
+                    {!isGoogleButtonReady ? (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-50 border border-gray-200 rounded-md">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                      </div>
+                    ) : null}
+                    <div
+                      id="google-signin-button"
+                      className={!isGoogleButtonReady ? "opacity-0" : "w-full"}
+                    ></div>
                   </div>
                   <p className="text-xs text-gray-500 text-center px-2">
                     Google sign-in creates a Worker account
@@ -384,7 +400,7 @@ export default function SignInPage() {
                       />
                       <button
                         type="button"
-                        className="absolute right-2.5 sm:right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 touch-manipulation"
+                        className="absolute right-2.5 sm:right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                         onClick={() => setShowPassword(!showPassword)}
                         disabled={isLoginLoading || isGoogleAuthLoading}
                       >

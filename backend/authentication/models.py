@@ -6,6 +6,11 @@ from core.models import UUIDModel, TimeStampedModel
 from .managers import CustomUserManager
 import os
 from uuid import uuid4
+from django.contrib.auth import get_user_model
+from django.utils import timezone
+from datetime import timedelta
+import secrets
+
 
 def avatar_upload_path(instance, filename):
     """Generate upload path for avatar files"""
@@ -360,3 +365,42 @@ class UserProfile(UUIDModel):
             missing.append('resume')
 
         return missing
+
+
+
+
+User = get_user_model()
+
+class EmailVerificationToken(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='verification_tokens')
+    token = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_used = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = 'email_verification_tokens'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Token for {self.user.email}"
+
+    @classmethod
+    def create_token(cls, user):
+        """Create a new verification token"""
+        token = secrets.token_urlsafe(32)
+        expires_at = timezone.now() + timedelta(hours=24)
+        return cls.objects.create(
+            user=user,
+            token=token,
+            expires_at=expires_at
+        )
+
+    def is_valid(self):
+        """Check if token is still valid"""
+        return not self.is_used and timezone.now() < self.expires_at
+
+    def mark_as_used(self):
+        """Mark token as used"""
+        self.is_used = True
+        self.save()

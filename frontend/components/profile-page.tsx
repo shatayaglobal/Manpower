@@ -180,15 +180,13 @@ export default function ProfilePage() {
     const file = e.target.files?.[0];
     if (file && fileType === "avatar") {
       try {
-        // Compress image before setting it
         const options = {
-          maxSizeMB: 1, // Max 1MB
-          maxWidthOrHeight: 800, // Max dimension
+          maxSizeMB: 1,
+          maxWidthOrHeight: 800,
           useWebWorker: true,
         };
         const compressedFile = await imageCompression(file, options);
 
-        // Convert compressed blob to File object with proper name
         const convertedFile = new File([compressedFile], file.name, {
           type: compressedFile.type,
         });

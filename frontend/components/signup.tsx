@@ -103,6 +103,7 @@ export default function SignUpPage() {
       toast.error("Please select an account type");
       return;
     }
+
     const submitData = {
       first_name: formData.first_name,
       last_name: formData.last_name,
@@ -115,15 +116,16 @@ export default function SignUpPage() {
     const result = await register(submitData);
 
     if (result.success) {
-      router.push("/login?registered=true");
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("verification_email", formData.email);
+      }
+      router.push("/verify-email-sent");
     }
   };
 
-  // Handle the initial Google credential response
   const handleCredentialResponse = useCallback(
     async (response: GoogleCredentialResponse) => {
       try {
-        // Store the credential and show account type modal
         setPendingGoogleCredential(response.credential);
         setShowAccountTypeModal(true);
       } catch {
@@ -133,7 +135,6 @@ export default function SignUpPage() {
     []
   );
 
-  // Handle account type selection from modal
   const handleAccountTypeSelect = async (
     accountType: "WORKER" | "BUSINESS"
   ) => {
