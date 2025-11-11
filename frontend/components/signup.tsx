@@ -36,7 +36,7 @@ import Link from "next/link";
 import { useAuthSlice } from "@/lib/redux/use-auth";
 import { useAuthState } from "@/lib/redux/redux";
 import { toast } from "sonner";
-import { GoogleCredentialResponse } from "@/lib/types";
+import { AuthError, GoogleCredentialResponse } from "@/lib/types";
 import AccountTypeModal from "@/components/account-type-modal";
 
 interface GoogleIdentityButtonOptions {
@@ -120,6 +120,15 @@ export default function SignUpPage() {
         sessionStorage.setItem("verification_email", formData.email);
       }
       router.push("/verify-email-sent");
+    } else {
+      const authError = result.error as AuthError;
+      if (authError?.errors?.email) {
+        toast.error(authError.errors.email[0]);
+      } else if (authError?.message) {
+        toast.error(authError.message);
+      } else {
+        toast.error("Registration failed. Please try again.");
+      }
     }
   };
 
