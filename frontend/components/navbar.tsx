@@ -40,6 +40,61 @@ interface AppLayoutProps {
   children: React.ReactNode;
 }
 
+type MobileNavAccordionProps = {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+};
+
+function MobileNavAccordion({
+  title,
+  icon,
+  children,
+}: MobileNavAccordionProps) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="border-b border-gray-100">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between py-3 px-4 text-sm font-medium text-gray-800 hover:bg-gray-50 transition"
+      >
+        <div className="flex items-center gap-2">
+          {icon}
+          {title}
+        </div>
+        <ChevronDown
+          className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      <div
+        className={`overflow-hidden transition-all duration-200 ${
+          open ? "max-h-96" : "max-h-0"
+        }`}
+      >
+        <div className="pb-2">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+type MobileNavItemProps = {
+  href: string;
+  children: React.ReactNode;
+};
+
+function MobileNavItem({ href, children }: MobileNavItemProps) {
+  return (
+    <Link
+      href={href}
+      className="flex items-center gap-2 py-2 px-8 text-sm text-gray-600 hover:text-blue-500 transition"
+    >
+      {children}
+    </Link>
+  );
+}
+
 export default function AppLayout({ children }: AppLayoutProps) {
   const { isAuthenticated, user } = useAuthState();
   const { logout } = useAuthSlice();
@@ -395,169 +450,157 @@ export default function AppLayout({ children }: AppLayoutProps) {
                       <Menu className="h-5 w-5" />
                     </Button>
                   </DropdownMenuTrigger>
+
                   <DropdownMenuContent align="end" className="w-64">
                     {isAuthenticated ? (
                       <>
+                        {/* USER PROFILE HEADER */}
+                        <div className="px-4 py-2 border-b border-gray-100">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {getUserDisplayName()}
+                          </p>
+                          <p className="text-xs text-gray-500 truncate">
+                            {user?.email || "No email"}
+                          </p>
+                        </div>
+
+                        {/* BUSINESS USER: My Business */}
                         {isBusinessUser && (
-                          <>
+                          <DropdownMenuItem asChild>
                             <Link
                               href="/business"
-                              className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm flex items-center gap-1"
+                              className="flex items-center gap-2 py-2 px-4 text-sm"
                             >
                               <Building className="h-4 w-4" />
                               My Business
                             </Link>
-
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <button className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm flex items-center gap-1">
-                                  Jobs
-                                  <ChevronDown className="h-3 w-3 opacity-70" />
-                                </button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent>
-                                <DropdownMenuItem asChild>
-                                  <Link
-                                    href="/jobs"
-                                    className="flex items-center"
-                                  >
-                                    <Briefcase className="mr-2 h-4 w-4" />
-                                    Manage Jobs
-                                  </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                  <Link
-                                    href="/jobs/create"
-                                    className="flex items-center"
-                                  >
-                                    <Briefcase className="mr-2 h-4 w-4" />
-                                    Post New Job
-                                  </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                  <Link
-                                    href="/manage-applications"
-                                    className="flex items-center"
-                                  >
-                                    <UserCheck className="mr-2 h-4 w-4" />
-                                    Manage Applications
-                                  </Link>
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <button className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm flex items-center gap-1">
-                                  Workforce
-                                  <ChevronDown className="h-3 w-3 opacity-70" />
-                                </button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent>
-                                <DropdownMenuItem asChild>
-                                  <Link
-                                    href="/staff"
-                                    className="flex items-center"
-                                  >
-                                    <UserCheck className="mr-2 h-4 w-4" />
-                                    Staff Management
-                                  </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                  <Link
-                                    href="/shifts"
-                                    className="flex items-center"
-                                  >
-                                    <Calendar className="mr-2 h-4 w-4" />
-                                    Shift Scheduling
-                                  </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                  <Link
-                                    href="/hours"
-                                    className="flex items-center"
-                                  >
-                                    <Clock className="mr-2 h-4 w-4" />
-                                    Hours & Attendance
-                                  </Link>
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </>
+                          </DropdownMenuItem>
                         )}
-                        {isWorkerUser && (
-                          <>
-                            <DropdownMenuItem asChild>
-                              <Link
-                                href="/companies"
-                                className="flex items-center py-2"
-                              >
-                                <Building className="mr-2 h-4 w-4" />
-                                Browse Companies
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem asChild>
-                              <Link
-                                href="/jobs"
-                                className="flex items-center py-2"
-                              >
-                                <Search className="mr-2 h-4 w-4" />
+
+                        {/* JOBS SECTION (accordion) */}
+                        <MobileNavAccordion
+                          title="Jobs"
+                          icon={<Briefcase className="h-4 w-4" />}
+                        >
+                          {isBusinessUser && (
+                            <>
+                              <MobileNavItem href="/jobs">
+                                Manage Jobs
+                              </MobileNavItem>
+                              <MobileNavItem href="/jobs/create">
+                                Post New Job
+                              </MobileNavItem>
+                              <MobileNavItem href="/manage-applications">
+                                Manage Applications
+                              </MobileNavItem>
+                            </>
+                          )}
+                          {isWorkerUser && (
+                            <>
+                              <MobileNavItem href="/jobs">
                                 Search All Jobs
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <Link
-                                href="/jobs/job-applications"
-                                className="flex items-center py-2"
-                              >
-                                <Briefcase className="mr-2 h-4 w-4" />
+                              </MobileNavItem>
+                              <MobileNavItem href="/jobs/job-applications">
                                 My Applications
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <Link
-                                href="/jobs/saved"
-                                className="flex items-center py-2"
-                              >
-                                <UserCheck className="mr-2 h-4 w-4" />
+                              </MobileNavItem>
+                              <MobileNavItem href="/jobs/saved">
                                 Saved Jobs
-                              </Link>
-                            </DropdownMenuItem>
-                          </>
+                              </MobileNavItem>
+                            </>
+                          )}
+                        </MobileNavAccordion>
+
+                        {/* WORKFORCE SECTION (only business) */}
+                        {isBusinessUser && (
+                          <MobileNavAccordion
+                            title="Workforce"
+                            icon={<UserCheck className="h-4 w-4" />}
+                          >
+                            <MobileNavItem href="/staff">
+                              Staff Management
+                            </MobileNavItem>
+                            <MobileNavItem href="/shifts">
+                              Shift Scheduling
+                            </MobileNavItem>
+                            <MobileNavItem href="/hours">
+                              Hours & Attendance
+                            </MobileNavItem>
+                          </MobileNavAccordion>
                         )}
-                        <DropdownMenuSeparator />
+
+                        {/* MESSAGES */}
                         <DropdownMenuItem asChild>
                           <Link
                             href="/messages"
-                            className="flex items-center relative py-2"
+                            className="flex items-center justify-between py-2 px-4 text-sm"
                           >
-                            <MessageCircle className="mr-2 h-4 w-4" />
-                            Messages
+                            <div className="flex items-center gap-2">
+                              <MessageCircle className="h-4 w-4" />
+                              Messages
+                            </div>
                             {unreadCount > 0 && (
-                              <span className="ml-auto bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                              <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                                 {unreadCount > 99 ? "99+" : unreadCount}
                               </span>
                             )}
                           </Link>
                         </DropdownMenuItem>
+
+                        {/* BLOG */}
                         <DropdownMenuItem asChild>
-                          <Link href="/blog" className="flex items-center py-2">
+                          <Link
+                            href="/blog"
+                            className="flex items-center gap-2 py-2 px-4 text-sm"
+                          >
                             Blog
                           </Link>
+                        </DropdownMenuItem>
+
+                        <DropdownMenuSeparator />
+
+                        {/* PROFILE & SETTINGS */}
+                        <DropdownMenuItem asChild>
+                          <Link
+                            href="/profile"
+                            className="flex items-center gap-2 py-2 px-4 text-sm"
+                          >
+                            <User className="h-4 w-4" />
+                            Profile
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link
+                            href="/settings"
+                            className="flex items-center gap-2 py-2 px-4 text-sm"
+                          >
+                            <Settings className="h-4 w-4" />
+                            Settings
+                          </Link>
+                        </DropdownMenuItem>
+
+                        {/* LOGOUT */}
+                        <DropdownMenuItem
+                          onClick={handleLogout}
+                          className="flex items-center gap-2 py-2 px-4 text-sm text-red-600"
+                        >
+                          <LogOut className="h-4 w-4" />
+                          Sign Out
                         </DropdownMenuItem>
                       </>
                     ) : (
                       <>
                         <DropdownMenuItem asChild>
-                          <Link href="/home" className="flex items-center py-2">
+                          <Link
+                            href="/home"
+                            className="flex items-center py-2 px-4 text-sm"
+                          >
                             Home
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                           <Link
                             href="/about"
-                            className="flex items-center py-2"
+                            className="flex items-center py-2 px-4 text-sm"
                           >
                             About
                           </Link>
@@ -565,7 +608,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                         <DropdownMenuItem asChild>
                           <Link
                             href="/contact"
-                            className="flex items-center py-2"
+                            className="flex items-center py-2 px-4 text-sm"
                           >
                             Contact
                           </Link>
@@ -574,7 +617,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                         <DropdownMenuItem asChild>
                           <Link
                             href="/login"
-                            className="flex items-center py-2"
+                            className="flex items-center py-2 px-4 text-sm"
                           >
                             Sign In
                           </Link>
@@ -582,7 +625,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                         <DropdownMenuItem asChild>
                           <Link
                             href="/signup"
-                            className="flex items-center py-2 text-blue-500 font-medium"
+                            className="flex items-center py-2 px-4 text-sm text-blue-500 font-medium"
                           >
                             Get Started
                           </Link>

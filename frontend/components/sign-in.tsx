@@ -180,40 +180,11 @@ export default function SignInPage() {
   };
 
   useEffect(() => {
-    const getButtonWidth = () => {
-      if (typeof window === "undefined") return "312";
-      const maxWidth = window.innerWidth < 640 ? 350 : 400;
-      return Math.max(312, maxWidth).toString();
-    };
-
-    if (window.google) {
-      try {
-        window.google.accounts.id.initialize({
-          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
-          callback: handleCredentialResponse,
-          auto_select: false,
-          cancel_on_tap_outside: true,
-        });
-
-        const buttonContainer = document.getElementById("google-signin-button");
-        if (buttonContainer) {
-          window.google.accounts.id.renderButton(buttonContainer, {
-            theme: "outline",
-            size: "large",
-            width: getButtonWidth(),
-          });
-        }
-        setIsGoogleButtonReady(true);
-      } catch  {
-        setIsGoogleButtonReady(true);
-      }
-      return;
-    }
-
     const script = document.createElement("script");
     script.src = "https://accounts.google.com/gsi/client";
     script.async = true;
     script.defer = true;
+    document.head.appendChild(script);
 
     script.onload = () => {
       if (window.google) {
@@ -225,22 +196,40 @@ export default function SignInPage() {
             cancel_on_tap_outside: true,
           });
 
-          const buttonContainer = document.getElementById(
-            "google-signin-button"
+          // Render mobile button
+          const mobileButtonContainer = document.getElementById(
+            "google-signin-button-mobile"
           );
-          if (buttonContainer) {
-            window.google.accounts.id.renderButton(buttonContainer, {
+          if (mobileButtonContainer) {
+            const containerWidth =
+              mobileButtonContainer.parentElement?.offsetWidth || 400;
+
+            window.google.accounts.id.renderButton(mobileButtonContainer, {
               theme: "outline",
               size: "large",
-              width: getButtonWidth(),
+              width: containerWidth.toString(),
             });
           }
+
+          // Render desktop button
+          const desktopButtonContainer = document.getElementById(
+            "google-signin-button-desktop"
+          );
+          if (desktopButtonContainer) {
+            const containerWidth =
+              desktopButtonContainer.parentElement?.offsetWidth || 400;
+
+            window.google.accounts.id.renderButton(desktopButtonContainer, {
+              theme: "outline",
+              size: "large",
+              width: containerWidth.toString(),
+            });
+          }
+
           setIsGoogleButtonReady(true);
-        } catch  {
+        } catch {
           setIsGoogleButtonReady(true);
         }
-      } else {
-        setIsGoogleButtonReady(true);
       }
     };
 
@@ -248,14 +237,13 @@ export default function SignInPage() {
       setIsGoogleButtonReady(true);
     };
 
-    document.head.appendChild(script);
-
     return () => {
       if (document.head.contains(script)) {
         document.head.removeChild(script);
       }
     };
-  }, []);
+  }, [handleCredentialResponse]);
+
   return (
     <>
       <AccountTypeModal
@@ -298,25 +286,46 @@ export default function SignInPage() {
                     </AlertDescription>
                   </Alert>
                 )}
-
                 {/* Google Sign In Button */}
                 <div className="space-y-2">
-                  <div className="w-full max-w-[400px] h-[48px] flex items-center justify-center">
-                    {!isGoogleButtonReady ? (
-                      <div className="w-full h-full flex items-center justify-center bg-gray-50 border border-gray-200 rounded-md">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-                      </div>
-                    ) : null}
-                    <div
-                      id="google-signin-button"
-                      className={!isGoogleButtonReady ? "opacity-0" : "w-full"}
-                    ></div>
+                  {/* Mobile: Full width, safe padding */}
+                  <div className="px-4 lg:hidden">
+                    <div className="w-full min-h-[44px] flex items-center justify-center">
+                      {!isGoogleButtonReady ? (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-50 border border-gray-200 rounded-md">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                        </div>
+                      ) : null}
+                      <div
+                        id="google-signin-button-mobile"
+                        className={
+                          !isGoogleButtonReady ? "opacity-0" : "w-full"
+                        }
+                      ></div>
+                    </div>
                   </div>
+
+                  {/* Desktop: Centered */}
+                  <div className="hidden lg:block px-0">
+                    <div className="mx-auto max-w-lg xl:max-w-xl min-h-[44px] flex items-center justify-center">
+                      {!isGoogleButtonReady ? (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-50 border border-gray-200 rounded-md">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                        </div>
+                      ) : null}
+                      <div
+                        id="google-signin-button-desktop"
+                        className={
+                          !isGoogleButtonReady ? "opacity-0" : "w-full"
+                        }
+                      ></div>
+                    </div>
+                  </div>
+
                   <p className="text-xs text-gray-500 text-center px-2">
                     Google sign-in creates a Worker account
                   </p>
                 </div>
-
                 {/* Divider */}
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
