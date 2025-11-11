@@ -66,7 +66,7 @@ The Shataya Global Team
             <p>If you didn't create an account, please ignore this email.</p>
         </div>
         <div class="footer">
-            <p>© 2024 Shataya Global. All rights reserved.</p>
+            <p>© 2025 Shataya Global. All rights reserved.</p>
         </div>
     </div>
 </body>
