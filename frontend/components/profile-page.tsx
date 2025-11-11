@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
@@ -60,12 +59,10 @@ export default function ProfilePage() {
   );
   const { profile, loading, loadProfile, updateProfile, completionStatus } =
     useProfile();
-
   const [isEditing, setIsEditing] = useState(false);
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const [isNewProfile, setIsNewProfile] = useState(false);
   const [activeTab, setActiveTab] = useState("personal");
-
   const [formData, setFormData] = useState<FormData>({
     first_name: user?.first_name || "",
     last_name: user?.last_name || "",
@@ -88,7 +85,6 @@ export default function ProfilePage() {
     emergency_contact_relationship: "",
     skills: "",
   });
-
   const [files, setFiles] = useState({
     avatar: null as File | null,
     resume: null as File | null,
@@ -105,7 +101,6 @@ export default function ProfilePage() {
       router.push("/login");
       return;
     }
-
     loadProfile();
   }, [isAuthenticated, user, router, loadProfile]);
 
@@ -186,11 +181,9 @@ export default function ProfilePage() {
           useWebWorker: true,
         };
         const compressedFile = await imageCompression(file, options);
-
         const convertedFile = new File([compressedFile], file.name, {
           type: compressedFile.type,
         });
-
         setFiles((prev) => ({
           ...prev,
           [fileType]: convertedFile,
@@ -219,7 +212,6 @@ export default function ProfilePage() {
         .split(",")
         .map((skill) => skill.trim())
         .filter((skill) => skill.length > 0);
-
       const profileData = {
         ...formData,
         skills: skillsArray,
@@ -231,15 +223,12 @@ export default function ProfilePage() {
           : null,
         ...files,
       };
-
       const success = await updateProfile(profileData);
-
       if (success) {
         toast.success("Profile updated successfully!");
         setIsEditing(false);
         setEditingSection(null);
         setFiles({ avatar: null, resume: null });
-
         await loadProfile();
       }
     } catch {
@@ -292,14 +281,12 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-6 ">
+    <div className="min-h-screen bg-gray-50 py-6">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
             Profile
           </h1>
-
-          {/* Welcome Message for New Users */}
           {isNewProfile && (
             <div className="mb-4">
               <p className="text-base sm:text-lg text-gray-700 font-medium">
@@ -313,7 +300,7 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {/* Compact Profile Header */}
+        {/* Profile Header */}
         <Card className="mb-6">
           <CardContent className="p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
@@ -363,7 +350,6 @@ export default function ProfilePage() {
                   className="hidden"
                 />
               </div>
-
               <div className="flex-1">
                 <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
                   {user.first_name} {user.last_name}
@@ -384,7 +370,6 @@ export default function ProfilePage() {
                   </span>
                 </div>
               </div>
-
               <div className="flex items-center gap-3">
                 {completionStatus && (
                   <Badge
@@ -441,7 +426,6 @@ export default function ProfilePage() {
                       );
                     })}
                   </div>
-
                   {!isEditing && (
                     <Button
                       variant="ghost"
@@ -453,8 +437,13 @@ export default function ProfilePage() {
                   )}
                 </div>
               </CardHeader>
-
-              <CardContent className="p-4 sm:p-6 max-h-[70vh] sm:max-h-[80vh] overflow-y-auto">
+              <CardContent
+                className={`p-4 sm:p-6 max-h-[70vh] sm:max-h-[80vh] overflow-y-auto ${
+                  isEditing && editingSection === activeTab
+                    ? "pb-32 lg:pb-6"
+                    : ""
+                }`}
+              >
                 {/* Personal Info Tab */}
                 {activeTab === "personal" && (
                   <div className="space-y-4">
@@ -559,7 +548,8 @@ export default function ProfilePage() {
                             <option value="WIDOWED">Widowed</option>
                           </select>
                         </div>
-                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
+                        {/* Desktop buttons */}
+                        <div className="hidden lg:flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
                           <Button
                             onClick={handleSectionSave}
                             disabled={loading}
@@ -717,7 +707,8 @@ export default function ProfilePage() {
                             className="w-full"
                           />
                         </div>
-                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
+                        {/* Desktop buttons */}
+                        <div className="hidden lg:flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
                           <Button
                             onClick={handleSectionSave}
                             disabled={loading}
@@ -866,7 +857,6 @@ export default function ProfilePage() {
                         </>
                       )}
                     </div>
-
                     <div>
                       <h3 className="text-base sm:text-lg font-medium mb-4">
                         Documents
@@ -991,9 +981,8 @@ export default function ProfilePage() {
                         </>
                       )}
                     </div>
-
                     {isEditing && editingSection === "skills" && (
-                      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
+                      <div className="hidden lg:flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
                         <Button
                           onClick={handleSectionSave}
                           disabled={loading}
@@ -1018,7 +1007,7 @@ export default function ProfilePage() {
             </Card>
           </div>
 
-          {/* Sidebar - Profile Status */}
+          {/* Sidebar */}
           <div>
             <Card>
               <CardHeader className="p-4 sm:p-6 pb-3">
@@ -1099,6 +1088,30 @@ export default function ProfilePage() {
             </Card>
           </div>
         </div>
+
+        {/* MOBILE STICKY ACTION BAR — Only shows when editing */}
+        {isEditing && editingSection === activeTab && (
+          <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg z-10">
+            <div className="max-w-6xl mx-auto flex flex-col sm:flex-row gap-3">
+              <Button
+                onClick={handleSectionSave}
+                disabled={loading}
+                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                Save Changes
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleSectionCancel}
+                className="flex-1 text-blue-500 hover:bg-blue-50 hover:text-blue-600 border-gray-300 py-3"
+              >
+                <X className="h-4 w-4 mr-2" />
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

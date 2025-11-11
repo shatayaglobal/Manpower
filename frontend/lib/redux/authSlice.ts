@@ -31,19 +31,23 @@ interface AxiosErrorResponse {
 
 const extractErrorInfo = (error: unknown): AuthError => {
   const axiosError = error as AxiosErrorResponse;
+  const fieldErrors = axiosError?.response?.data?.errors;
+  let errorMessage = axiosError?.response?.data?.message ||
+                     axiosError?.response?.data?.detail ||
+                     axiosError?.response?.data?.non_field_errors?.[0] ||
+                     axiosError?.message ||
+                     "An unexpected error occurred";
+  if (fieldErrors && Object.keys(fieldErrors).length > 0) {
+    const firstErrorKey = Object.keys(fieldErrors)[0];
+    errorMessage = fieldErrors[firstErrorKey][0];
+  }
 
   return {
-    message:
-      axiosError?.response?.data?.message ||
-      axiosError?.response?.data?.detail ||
-      axiosError?.response?.data?.non_field_errors?.[0] ||
-      axiosError?.message ||
-      "An unexpected error occurred",
+    message: errorMessage,
     status: axiosError?.response?.status || 500,
-    errors: axiosError?.response?.data?.errors || {},
+    errors: fieldErrors || {},
     errorType: axiosError?.response?.data?.error_type,
-    googleLoginRequired:
-      axiosError?.response?.data?.google_login_required || false,
+    googleLoginRequired: axiosError?.response?.data?.google_login_required || false,
   };
 };
 
