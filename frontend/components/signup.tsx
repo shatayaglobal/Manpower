@@ -147,46 +147,34 @@ export default function SignUpPage() {
       router.push("/verify-email-sent");
     } else {
       const authError = result.error as AuthError;
-
-      // IMPROVED ERROR HANDLING ⬇️
-      // Check for field-specific errors first
       if (authError?.errors) {
-        // Handle email error specifically
         if (authError.errors.email) {
           toast.error(authError.errors.email[0]);
           return;
         }
-        // Handle first_name error
         if (authError.errors.first_name) {
           toast.error(authError.errors.first_name[0]);
           return;
         }
-        // Handle last_name error
         if (authError.errors.last_name) {
           toast.error(authError.errors.last_name[0]);
           return;
         }
-        // Handle password error
         if (authError.errors.password) {
           toast.error(authError.errors.password[0]);
           return;
         }
-        // Handle account_type error
         if (authError.errors.account_type) {
           toast.error(authError.errors.account_type[0]);
           return;
         }
-
-        // If there are other field errors, show the first one
         const firstErrorField = Object.keys(authError.errors)[0];
         const firstError = authError.errors[firstErrorField][0];
         toast.error(firstError);
       }
-      // If no field errors, check for general message
       else if (authError?.message) {
         toast.error(authError.message);
       }
-      // Fallback error
       else {
         toast.error("Registration failed. Please try again.");
       }
