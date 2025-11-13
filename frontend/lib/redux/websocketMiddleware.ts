@@ -27,7 +27,6 @@ const websocketMiddleware =
   (action: Action) => {
     const { dispatch, getState } = store;
 
-    // Connect WebSocket
     if (action.type === "websocket/connect") {
       const state = getState() as {
         auth: { accessToken: string; isAuthenticated: boolean };

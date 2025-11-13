@@ -150,6 +150,27 @@ class AuthService {
     );
     return response.data;
   }
+  async requestPasswordReset(email: string): Promise<{ message: string }> {
+    const response = await axiosInstance.post<{ message: string }>(
+      "password-reset/request/",
+      { email }
+    );
+    return response.data;
+  }
+
+  async confirmPasswordReset(
+    token: string,
+    newPassword: string
+  ): Promise<{ message: string }> {
+    const response = await axiosInstance.post<{ message: string }>(
+      "password-reset/confirm/",
+      {
+        token,
+        new_password: newPassword,
+      }
+    );
+    return response.data;
+  }
 }
 
 export const authService = new AuthService();

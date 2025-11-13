@@ -14,7 +14,6 @@ urlpatterns = [
     path('resend-verification/', views.ResendVerificationEmailView.as_view(), name='resend-verification'),
     path('logout/', views.LogoutView.as_view(), name='logout'),
     path('google-auth/', views.GoogleAuthView.as_view(), name='google-auth'),
-    path('password-reset/', views.PasswordResetView.as_view(), name='password-reset'),
     path('change-password/', views.ChangePasswordView.as_view(), name='change-password'),
 
     # User endpoints (SAME AS BEFORE)
@@ -26,4 +25,7 @@ urlpatterns = [
 
     # NEW: Profile completion check endpoint
     path('profile/check-complete/', views.check_profile_complete, name='check-profile-complete'),
+
+    path('password-reset/request/', views.request_password_reset, name='password-reset-request'),
+    path('password-reset/confirm/', views.confirm_password_reset, name='password-reset-confirm'),
 ]

@@ -32,11 +32,12 @@ interface AxiosErrorResponse {
 const extractErrorInfo = (error: unknown): AuthError => {
   const axiosError = error as AxiosErrorResponse;
   const fieldErrors = axiosError?.response?.data?.errors;
-  let errorMessage = axiosError?.response?.data?.message ||
-                     axiosError?.response?.data?.detail ||
-                     axiosError?.response?.data?.non_field_errors?.[0] ||
-                     axiosError?.message ||
-                     "An unexpected error occurred";
+  let errorMessage =
+    axiosError?.response?.data?.message ||
+    axiosError?.response?.data?.detail ||
+    axiosError?.response?.data?.non_field_errors?.[0] ||
+    axiosError?.message ||
+    "An unexpected error occurred";
   if (fieldErrors && Object.keys(fieldErrors).length > 0) {
     const firstErrorKey = Object.keys(fieldErrors)[0];
     errorMessage = fieldErrors[firstErrorKey][0];
@@ -47,7 +48,8 @@ const extractErrorInfo = (error: unknown): AuthError => {
     status: axiosError?.response?.status || 500,
     errors: fieldErrors || {},
     errorType: axiosError?.response?.data?.error_type,
-    googleLoginRequired: axiosError?.response?.data?.google_login_required || false,
+    googleLoginRequired:
+      axiosError?.response?.data?.google_login_required || false,
   };
 };
 
@@ -73,6 +75,11 @@ const initialState: AuthState = {
   isResendVerificationLoading: false,
   verifyEmailSuccess: false,
   resendVerificationSuccess: false,
+
+  isRequestPasswordResetLoading: false,
+  isConfirmPasswordResetLoading: false,
+  requestPasswordResetSuccess: false,
+  confirmPasswordResetSuccess: false,
 };
 
 export const loginThunk = createAsyncThunk(
@@ -226,6 +233,33 @@ export const resendVerificationThunk = createAsyncThunk(
   }
 );
 
+export const requestPasswordResetThunk = createAsyncThunk(
+  "auth/requestPasswordReset",
+  async (email: string, { rejectWithValue }) => {
+    try {
+      const result = await authService.requestPasswordReset(email);
+      return result;
+    } catch (error: unknown) {
+      return rejectWithValue(extractErrorInfo(error));
+    }
+  }
+);
+
+export const confirmPasswordResetThunk = createAsyncThunk(
+  "auth/confirmPasswordReset",
+  async (
+    { token, newPassword }: { token: string; newPassword: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const result = await authService.confirmPasswordReset(token, newPassword);
+      return result;
+    } catch (error: unknown) {
+      return rejectWithValue(extractErrorInfo(error));
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -242,6 +276,9 @@ const authSlice = createSlice({
       state.isProfileUpdateLoading = false;
       state.isPasswordResetLoading = false;
       state.isChangePasswordLoading = false;
+
+      state.isRequestPasswordResetLoading = false;
+      state.isConfirmPasswordResetLoading = false;
     },
     clearSuccessStates: (state) => {
       state.passwordResetSuccess = false;
@@ -250,6 +287,9 @@ const authSlice = createSlice({
       state.registerSuccess = false;
       state.verifyEmailSuccess = false;
       state.resendVerificationSuccess = false;
+
+      state.requestPasswordResetSuccess = false;
+      state.confirmPasswordResetSuccess = false;
     },
     updateUser: (state, action: PayloadAction<Partial<User>>) => {
       if (state.user) {
@@ -423,7 +463,37 @@ const authSlice = createSlice({
         state.isResendVerificationLoading = false;
         state.resendVerificationSuccess = false;
         state.error = action.payload as AuthError;
-      });
+      })
+      .addCase(requestPasswordResetThunk.pending, (state) => {
+        state.isRequestPasswordResetLoading = true;
+        state.error = null;
+        state.requestPasswordResetSuccess = false;
+      })
+      .addCase(requestPasswordResetThunk.fulfilled, (state) => {
+        state.isRequestPasswordResetLoading = false;
+        state.requestPasswordResetSuccess = true;
+        state.error = null;
+      })
+      .addCase(requestPasswordResetThunk.rejected, (state, action) => {
+        state.isRequestPasswordResetLoading = false;
+        state.requestPasswordResetSuccess = false;
+        state.error = action.payload as AuthError;
+      })
+      .addCase(confirmPasswordResetThunk.pending, (state) => {
+        state.isConfirmPasswordResetLoading = true;
+        state.error = null;
+        state.confirmPasswordResetSuccess = false;
+      })
+      .addCase(confirmPasswordResetThunk.fulfilled, (state) => {
+        state.isConfirmPasswordResetLoading = false;
+        state.confirmPasswordResetSuccess = true;
+        state.error = null;
+      })
+      .addCase(confirmPasswordResetThunk.rejected, (state, action) => {
+        state.isConfirmPasswordResetLoading = false;
+        state.confirmPasswordResetSuccess = false;
+        state.error = action.payload as AuthError;
+      })
   },
 });
 

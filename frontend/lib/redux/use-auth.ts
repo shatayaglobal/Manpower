@@ -14,6 +14,8 @@ import {
   googleSignInThunk,
   verifyEmailThunk,
   resendVerificationThunk,
+  requestPasswordResetThunk,
+  confirmPasswordResetThunk,
 } from "./authSlice";
 import type {
   LoginCredentials,
@@ -135,6 +137,30 @@ export const useAuthSlice = () => {
     };
   };
 
+  const requestPasswordReset = async (email: string) => {
+    const result = await dispatch(requestPasswordResetThunk(email));
+    return {
+      success: requestPasswordResetThunk.fulfilled.match(result),
+      data: result.payload,
+      error: requestPasswordResetThunk.rejected.match(result)
+        ? (result.payload as AuthError)
+        : null,
+    };
+  };
+
+  const confirmPasswordReset = async (token: string, newPassword: string) => {
+    const result = await dispatch(
+      confirmPasswordResetThunk({ token, newPassword })
+    );
+    return {
+      success: confirmPasswordResetThunk.fulfilled.match(result),
+      data: result.payload,
+      error: confirmPasswordResetThunk.rejected.match(result)
+        ? (result.payload as AuthError)
+        : null,
+    };
+  };
+
   const clearAuthError = () => dispatch(clearError());
   const clearAuthSuccessStates = () => dispatch(clearSuccessStates());
 
@@ -153,6 +179,8 @@ export const useAuthSlice = () => {
     clearAuthSuccessStates,
     verifyEmail,
     resendVerification,
+    requestPasswordReset,
+    confirmPasswordReset,
   };
 };
 

@@ -302,51 +302,6 @@ class GoogleAuthView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class PasswordResetView(APIView):
-    """Password reset request endpoint"""
-    permission_classes = [AllowAny]
-
-    @extend_schema(
-        summary="Request password reset",
-        description="Send password reset email to user",
-        request=PasswordResetSerializer,
-        responses={
-            200: OpenApiResponse(description="Password reset email sent"),
-            400: OpenApiResponse(description="Invalid email"),
-        }
-    )
-    def post(self, request):
-        serializer = PasswordResetSerializer(data=request.data)
-        if serializer.is_valid():
-            email = serializer.validated_data['email']
-            user = User.objects.get(email=email)
-
-            # Generate reset token
-            token = default_token_generator.make_token(user)
-            uid = urlsafe_base64_encode(force_bytes(user.pk))
-
-            # Send reset email (implement your email template)
-            reset_url = f"{settings.FRONTEND_URL}/reset-password/{uid}/{token}/"
-
-            context = {
-                'user': user,
-                'reset_url': reset_url,
-            }
-
-            subject = 'Password Reset Request'
-            message = render_to_string('emails/password_reset.txt', context)
-
-            send_mail(
-                subject=subject,
-                message=message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[email],
-                fail_silently=False,
-            )
-
-            return Response({'message': 'Password reset email sent'})
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class ChangePasswordView(APIView):
     """Change password (invalidates all tokens)"""
@@ -714,3 +669,141 @@ class ResendVerificationEmailView(APIView):
             return Response({
                 'message': 'If this email is registered, a verification email will be sent'
             }, status=status.HTTP_200_OK)
+
+
+# Add these two functions at the very end of your views.py file
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def request_password_reset(request):
+    """
+    Request password reset email
+    POST /api/auth/password-reset/request/
+    Body: { "email": "user@example.com" }
+    """
+    email = request.data.get('email')
+
+    if not email:
+        return Response(
+            {'error': 'Email is required'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        # For security, don't reveal if email exists or not
+        return Response(
+            {'message': 'If an account exists with this email, you will receive a password reset link.'},
+            status=status.HTTP_200_OK
+        )
+
+    # Generate password reset token
+    from django.contrib.auth.tokens import PasswordResetTokenGenerator
+    from django.utils.http import urlsafe_base64_encode
+    from django.utils.encoding import force_bytes
+
+    token_generator = PasswordResetTokenGenerator()
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = token_generator.make_token(user)
+
+    # Construct reset URL
+    frontend_url = settings.FRONTEND_URL
+    reset_url = f"{frontend_url}/reset-password?token={uid}-{token}"
+
+    # Send email
+    subject = 'Password Reset Request - ShatayaGlobal'
+    message = f"""
+Hello {user.first_name or 'there'},
+
+You recently requested to reset your password for your ShatayaGlobal account.
+
+Click the link below to reset your password:
+{reset_url}
+
+This link will expire in 24 hours.
+
+If you did not request a password reset, please ignore this email.
+
+Best regards,
+The ShatayaGlobal Team
+    """
+
+    try:
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [email],
+            fail_silently=False,
+        )
+    except Exception as e:
+        return Response(
+            {'error': 'Failed to send email. Please try again later.'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+    return Response(
+        {'message': 'Password reset email sent successfully.'},
+        status=status.HTTP_200_OK
+    )
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def confirm_password_reset(request):
+    from django.contrib.auth.tokens import PasswordResetTokenGenerator
+    from django.utils.http import urlsafe_base64_decode
+    from django.utils.encoding import force_str
+
+    token_string = request.data.get('token')
+    new_password = request.data.get('new_password')
+
+    if not token_string or not new_password:
+        return Response(
+            {'error': 'Token and new password are required'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Validate password strength
+    if len(new_password) < 8:
+        return Response(
+            {'error': 'Password must be at least 8 characters long'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        # Split token string (format: uid-token)
+        uid, token = token_string.split('-', 1)
+
+        # Decode user ID
+        user_id = force_str(urlsafe_base64_decode(uid))
+        user = User.objects.get(pk=user_id)
+
+        # Verify token
+        token_generator = PasswordResetTokenGenerator()
+        if not token_generator.check_token(user, token):
+            return Response(
+                {'error': 'Invalid or expired reset token'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Set new password
+        user.set_password(new_password)
+        user.save()
+
+        return Response(
+            {'message': 'Password has been reset successfully'},
+            status=status.HTTP_200_OK
+        )
+
+    except (ValueError, User.DoesNotExist):
+        return Response(
+            {'error': 'Invalid reset token'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    except Exception as e:
+        return Response(
+            {'error': 'An error occurred while resetting password'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

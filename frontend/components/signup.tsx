@@ -31,6 +31,7 @@ import {
   Eye,
   EyeOff,
   AlertCircle,
+  CheckCircle2,
 } from "lucide-react";
 import Link from "next/link";
 import { useAuthSlice } from "@/lib/redux/use-auth";
@@ -72,6 +73,30 @@ export default function SignUpPage() {
     confirmPassword: "",
     account_type: "",
   });
+
+  const getPasswordStrength = (pwd: string) => {
+    let strength = 0;
+    if (pwd.length >= 8) strength++;
+    if (/[A-Z]/.test(pwd)) strength++;
+    if (/[a-z]/.test(pwd)) strength++;
+    if (/[0-9]/.test(pwd)) strength++;
+    if (/[^A-Za-z0-9]/.test(pwd)) strength++;
+    return strength;
+  };
+
+  const passwordStrength = getPasswordStrength(formData.password);
+  const strengthColor =
+    passwordStrength <= 2
+      ? "bg-red-500"
+      : passwordStrength === 3
+      ? "bg-yellow-500"
+      : "bg-green-500";
+  const strengthText =
+    passwordStrength <= 2
+      ? "Weak"
+      : passwordStrength === 3
+      ? "Medium"
+      : "Strong";
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -122,15 +147,52 @@ export default function SignUpPage() {
       router.push("/verify-email-sent");
     } else {
       const authError = result.error as AuthError;
-      if (authError?.errors?.email) {
-        toast.error(authError.errors.email[0]);
-      } else if (authError?.message) {
+
+      // IMPROVED ERROR HANDLING ⬇️
+      // Check for field-specific errors first
+      if (authError?.errors) {
+        // Handle email error specifically
+        if (authError.errors.email) {
+          toast.error(authError.errors.email[0]);
+          return;
+        }
+        // Handle first_name error
+        if (authError.errors.first_name) {
+          toast.error(authError.errors.first_name[0]);
+          return;
+        }
+        // Handle last_name error
+        if (authError.errors.last_name) {
+          toast.error(authError.errors.last_name[0]);
+          return;
+        }
+        // Handle password error
+        if (authError.errors.password) {
+          toast.error(authError.errors.password[0]);
+          return;
+        }
+        // Handle account_type error
+        if (authError.errors.account_type) {
+          toast.error(authError.errors.account_type[0]);
+          return;
+        }
+
+        // If there are other field errors, show the first one
+        const firstErrorField = Object.keys(authError.errors)[0];
+        const firstError = authError.errors[firstErrorField][0];
+        toast.error(firstError);
+      }
+      // If no field errors, check for general message
+      else if (authError?.message) {
         toast.error(authError.message);
-      } else {
+      }
+      // Fallback error
+      else {
         toast.error("Registration failed. Please try again.");
       }
     }
   };
+
 
   const handleCredentialResponse = useCallback(
     async (response: GoogleCredentialResponse) => {
@@ -507,13 +569,32 @@ export default function SignUpPage() {
                         )}
                       </button>
                     </div>
+
+                    {/* ADD PASSWORD STRENGTH INDICATOR HERE ⬇️ */}
+                    {formData.password && (
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full transition-all duration-300 ${strengthColor}`}
+                              style={{
+                                width: `${(passwordStrength / 5) * 100}%`,
+                              }}
+                            />
+                          </div>
+                          <span className="text-xs text-gray-600 font-medium">
+                            {strengthText}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
                     {error?.errors?.password && (
                       <p className="text-xs sm:text-sm text-red-600">
                         {error.errors.password[0]}
                       </p>
                     )}
                   </div>
-
                   {/* Confirm Password Field */}
                   <div className="space-y-2">
                     <Label
@@ -551,8 +632,28 @@ export default function SignUpPage() {
                         )}
                       </button>
                     </div>
-                  </div>
 
+                    {/* ADD PASSWORD MATCH INDICATOR HERE ⬇️ */}
+                    {formData.confirmPassword && (
+                      <div className="flex items-center gap-1.5">
+                        {formData.password === formData.confirmPassword ? (
+                          <>
+                            <CheckCircle2 className="h-4 w-4 text-green-500" />
+                            <span className="text-xs text-green-600">
+                              Passwords match
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <AlertCircle className="h-4 w-4 text-red-500" />
+                            <span className="text-xs text-red-600">
+                              Passwords do not match
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
                   {/* Terms and Privacy */}
                   <div className="text-xs sm:text-sm text-gray-600 leading-relaxed">
                     By creating an account, you agree to our{" "}

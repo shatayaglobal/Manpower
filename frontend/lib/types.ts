@@ -83,7 +83,11 @@ export interface AuthState {
   isResendVerificationLoading: boolean;
   verifyEmailSuccess: boolean;
   resendVerificationSuccess: boolean;
-  
+
+  isRequestPasswordResetLoading: boolean;
+  isConfirmPasswordResetLoading: boolean;
+  requestPasswordResetSuccess: boolean;
+  confirmPasswordResetSuccess: boolean;
 }
 
 export interface GoogleCredentialResponse {

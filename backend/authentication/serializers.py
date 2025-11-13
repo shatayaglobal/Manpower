@@ -229,3 +229,26 @@ class UserListSerializer(serializers.ModelSerializer):
 
 class LogoutSerializer(serializers.Serializer):
     refresh = serializers.CharField(help_text="Refresh token to blacklist")
+
+
+class RequestPasswordResetSerializer(serializers.Serializer):
+    """Serializer for requesting password reset email"""
+    email = serializers.EmailField(help_text="Email address to send reset link")
+
+
+class ConfirmPasswordResetSerializer(serializers.Serializer):
+    """Serializer for confirming password reset with token"""
+    token = serializers.CharField(help_text="Password reset token from email")
+    new_password = serializers.CharField(
+        min_length=8,
+        style={'input_type': 'password'},
+        help_text="New password (min 8 characters)"
+    )
+
+    def validate_new_password(self, value):
+        """Validate new password strength"""
+        try:
+            validate_password(value)
+        except DjangoValidationError as e:
+            raise serializers.ValidationError(list(e.messages))
+        return value
