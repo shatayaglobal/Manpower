@@ -26,22 +26,22 @@ export default function AboutPage() {
 
   const teamMembers = [
     {
-      name: "Mohand",
+      name: "Mr. Mohand",
       role: "CEO and General Manager",
       image: "/mohand.jpeg",
     },
     {
-      name: "Naka",
+      name: "Ms. Naka",
       role: "Human Resource Manager",
       image: "/naka.jpeg",
     },
     {
-      name: "Brenda",
+      name: "Ms. Brenda",
       role: "IT Manager",
       image: "/brenda.jpeg",
     },
     {
-      name: "Motez",
+      name: "Mr. Motez",
       role: "Team Member",
       image: "/motez.jpeg",
     },
