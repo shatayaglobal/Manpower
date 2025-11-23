@@ -50,7 +50,7 @@ export default function AboutPage() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="pt-20 sm:pt-24 lg:pt-32 pb-12 sm:pb-16 bg-gradient-to-br from-blue-50 via-white to-yellow-50/20">
+      <section className="pt-10 -mt-10 sm:pt-24 lg:pt-32 pb-12 sm:pb-16 bg-gradient-to-br from-blue-50 via-white to-yellow-50/20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
           <h1 className="font-bold text-3xl sm:text-4xl lg:text-5xl text-gray-900">
             About{" "}
@@ -65,7 +65,7 @@ export default function AboutPage() {
       </section>
 
       {/* Main Content */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-white">
+      <section className="-mt-20 sm:py-16 lg:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 sm:space-y-16">
           {/* Team Section - Moved to Top */}
           <div className="space-y-8">
