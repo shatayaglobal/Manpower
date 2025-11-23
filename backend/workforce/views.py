@@ -659,194 +659,58 @@ def clock_in(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def clock_in(request):
-    """Clock in - can be done by worker or business owner for a worker"""
-    from datetime import datetime, timedelta
-
-    staff_id = request.data.get('staff_id')
-    notes = request.data.get('notes', '')
-    latitude = request.data.get('latitude')
-    longitude = request.data.get('longitude')
-    timezone_offset = request.data.get('timezone_offset')  # Minutes from UTC
-
-    # Convert to float explicitly
-    if latitude:
-        latitude = float(latitude)
-    if longitude:
-        longitude = float(longitude)
-
-    # Accept custom date and times from business owner
-    custom_date = request.data.get('date')
-    custom_clock_in_time = request.data.get('clock_in_time')
-    custom_clock_out_time = request.data.get('clock_out_time')
+def clock_out(request, hours_card_id):
+    """Clock out - can be done by worker or business owner"""
+    from datetime import datetime
 
     try:
-        # If staff_id provided, business owner is adding hours for a worker
-        if staff_id:
-            staff = BusinessStaff.objects.get(id=staff_id)
+        hours_card = HoursCard.objects.get(id=hours_card_id)
 
-            # Verify business owner
-            if staff.business.user != request.user:
-                return Response(
-                    {'error': 'You can only clock in your own staff'},
-                    status=status.HTTP_403_FORBIDDEN
-                )
+        # Verify permission
+        is_worker = hours_card.staff.user == request.user
+        is_business_owner = hours_card.staff.business.user == request.user
 
-            distance = None
+        if not (is_worker or is_business_owner):
+            return Response(
+                {'error': 'You do not have permission to clock out this card'},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
-            # Parse custom date/time
-            if custom_date:
-                clock_date = datetime.strptime(custom_date, '%Y-%m-%d').date()
-            else:
-                clock_date = timezone.now().date()
+        if hours_card.clock_out_datetime:
+            return Response(
+                {'error': 'Already clocked out'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-            if custom_clock_in_time:
-                # Parse time
-                time_obj = datetime.strptime(custom_clock_in_time, '%H:%M').time()
-                # Create naive datetime in user's local timezone
-                naive_dt = datetime.combine(clock_date, time_obj)
+        # Always use the card's date with current time to ensure same-day recording
+        now = timezone.now()
+        current_time = now.time()
 
-                # Convert to UTC - CRITICAL FIX HERE
-                if timezone_offset is not None:
-                    offset_minutes = int(timezone_offset)
-                    # IMPORTANT: timezone_offset is typically POSITIVE for timezones ahead of UTC
-                    # To convert LOCAL time to UTC, we SUBTRACT the offset
-                    # Example: If user is UTC+3 (offset=180), and local time is 12:00
-                    # UTC time = 12:00 - 180 minutes = 09:00 UTC
-                    utc_dt = naive_dt - timedelta(minutes=offset_minutes)
-                    clock_in_datetime = timezone.make_aware(utc_dt, timezone.utc)
-                else:
-                    # No offset, assume input is already UTC
-                    clock_in_datetime = timezone.make_aware(naive_dt, timezone.utc)
-            else:
-                clock_in_datetime = timezone.now()
+        # Combine the card's date with current time
+        naive_dt = datetime.combine(hours_card.date, current_time)
+        clock_out_datetime = timezone.make_aware(naive_dt, timezone.get_current_timezone())
 
-            clock_out_datetime = None
-            if custom_clock_out_time:
-                time_obj = datetime.strptime(custom_clock_out_time, '%H:%M').time()
-                # CRITICAL: Use the SAME date as clock_in
-                naive_dt = datetime.combine(clock_date, time_obj)
-
-                if timezone_offset is not None:
-                    offset_minutes = int(timezone_offset)
-                    utc_dt = naive_dt - timedelta(minutes=offset_minutes)
-                    clock_out_datetime = timezone.make_aware(utc_dt, timezone.utc)
-                else:
-                    clock_out_datetime = timezone.make_aware(naive_dt, timezone.utc)
-
-                # SAFETY CHECK: If clock_out appears to be before clock_in,
-                # it might span midnight - add 1 day to clock_out
-                if clock_out_datetime < clock_in_datetime:
-                    time_diff_hours = (clock_in_datetime - clock_out_datetime).total_seconds() / 3600
-                    # If difference is more than a few hours, likely a date issue
-                    if time_diff_hours > 12:
-                        clock_out_datetime = clock_out_datetime + timedelta(days=1)
-
-            # Check if record already exists
-            existing = HoursCard.objects.filter(staff=staff, date=clock_date).first()
-            if existing:
-                return Response(
-                    {
-                        'error': f'Hours already recorded for {staff.name} on {clock_date.strftime("%B %d, %Y")}',
-                        'detail': 'Please edit the existing record if you need to make changes.',
-                        'existing_record_id': str(existing.id)
-                    },
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-        else:
-            # Worker clocking in themselves
-            staff = BusinessStaff.objects.filter(user=request.user, status='ACTIVE').first()
-            if not staff:
-                return Response(
-                    {'error': 'No active staff record found'},
-                    status=status.HTTP_404_NOT_FOUND
-                )
-
-            clock_date = timezone.now().date()
-            clock_in_datetime = timezone.now()
-            clock_out_datetime = None
-
-            # Verify location if required
-            if staff.business.require_location_for_clock_in:
-                if not latitude or not longitude:
-                    return Response(
-                        {'error': 'Location is required to clock in'},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-
-                if not staff.business.workplace_latitude or not staff.business.workplace_longitude:
-                    return Response(
-                        {'error': 'Workplace location not configured. Please contact your manager.'},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-
-                distance = calculate_distance(
-                    float(latitude),
-                    float(longitude),
-                    float(staff.business.workplace_latitude),
-                    float(staff.business.workplace_longitude)
-                )
-
-                if distance > staff.business.clock_in_radius_meters:
-                    return Response(
-                        {
-                            'error': f'You must be within {staff.business.clock_in_radius_meters}m of the workplace to clock in. You are {int(distance)}m away.',
-                            'distance': int(distance),
-                            'required_distance': staff.business.clock_in_radius_meters
-                        },
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-            else:
-                distance = None
-
-            # Check if already clocked in today
-            existing = HoursCard.objects.filter(
-                staff=staff,
-                date=clock_date,
-                clock_out_datetime__isnull=True
-            ).first()
-            if existing:
-                return Response(
-                    {'error': 'Already clocked in for today'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-        # Create hour card
-        hours_card = HoursCard.objects.create(
-            staff=staff,
-            date=clock_date,
-            clock_in_datetime=clock_in_datetime,
-            clock_out_datetime=clock_out_datetime,
-            clock_in_latitude=latitude if latitude else None,
-            clock_in_longitude=longitude if longitude else None,
-            clock_in_distance_meters=distance,
-            notes=notes,
-            clocked_in_by=request.user,
-            status='PENDING'
-        )
+        # Update clock out
+        hours_card.clock_out_datetime = clock_out_datetime
+        hours_card.clocked_out_by = request.user
+        hours_card.notes = request.data.get('notes', hours_card.notes)
+        hours_card.save()
 
         serializer = HoursCardSerializer(hours_card)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data)
 
-    except BusinessStaff.DoesNotExist:
+    except HoursCard.DoesNotExist:
         return Response(
-            {'error': 'Staff not found'},
+            {'error': 'Hour card not found'},
             status=status.HTTP_404_NOT_FOUND
         )
-    except ValueError as e:
-        return Response(
-            {'error': f'Invalid date/time format: {str(e)}'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
     except Exception as e:
-        import traceback
         return Response(
             {'error': str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-
+    
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def sign_hours_card(request, hours_card_id):
