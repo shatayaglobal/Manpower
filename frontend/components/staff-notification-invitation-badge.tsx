@@ -38,7 +38,7 @@ export function InvitationBadge() {
 
   useEffect(() => {
     fetchInvitations();
-  }, [isAuthenticated, user?.account_type]);
+  }, [isAuthenticated, user?.account_type, fetchInvitations]);
 
   useEffect(() => {
     if (!isAuthenticated || user?.account_type !== "WORKER") return;
@@ -63,7 +63,7 @@ export function InvitationBadge() {
       ws.addEventListener("message", handleWebSocketMessage);
       return () => ws.removeEventListener("message", handleWebSocketMessage);
     }
-  }, [isAuthenticated, user?.account_type]);
+  }, [isAuthenticated, user?.account_type, ]);
 
   useEffect(() => {
     const handleInvitationChange = () => {

@@ -50,7 +50,7 @@ export const useProfile = () => {
     } catch {
       return false;
     }
-  }, [dispatch, user, isAuthenticated, getErrorMessage]);
+  }, [dispatch, user, isAuthenticated]);
 
   // Get user profile
   const loadProfile = useCallback(async (): Promise<void> => {
@@ -60,7 +60,7 @@ export const useProfile = () => {
       await dispatch(getProfileThunk()).unwrap();
     } catch  {
     }
-  }, [dispatch, isAuthenticated, getErrorMessage]);
+  }, [dispatch, isAuthenticated]);
 
   // Update profile
   const updateProfile = useCallback(async (data: ProfileUpdateData): Promise<boolean> => {

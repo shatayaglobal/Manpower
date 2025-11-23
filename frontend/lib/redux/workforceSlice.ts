@@ -184,30 +184,48 @@ export const fetchMyHoursCards = createAsyncThunk(
   }
 );
 
+interface ClockInData {
+  latitude?: number;
+  longitude?: number;
+  timezone_offset?: number;
+  staff_id?: string;
+  notes?: string;
+  date?: string;
+  clock_in_time?: string;
+  clock_out_time?: string;
+}
+
+interface ApiError {
+  response?: {
+    data?: {
+      error?: string;
+      detail?: string;
+      distance?: number;
+      required_distance?: number;
+      workplace_location?: {
+        latitude: number;
+        longitude: number;
+      };
+    };
+  };
+  message?: string;
+}
+
 export const clockInAction = createAsyncThunk(
   "workforce/clockIn",
-  async (
-    data?: {
-      latitude?: number;
-      longitude?: number;
-      timezone_offset?: number;
-      staff_id?: string;
-      notes?: string;
-    },
-    { rejectWithValue }
-  ) => {
+  async (data: ClockInData | undefined, { rejectWithValue }) => {
     try {
       return await workforceApi.clockIn(data);
-    } catch (error: any) {
-      // Extract the full error response from backend
-      const errorData = error.response?.data || {
-        error: error.message || "Failed to clock in"
+    } catch (error) {
+      const apiError = error as ApiError;
+      const errorData = apiError.response?.data || {
+        error: apiError.message || "Failed to clock in"
       };
       return rejectWithValue(errorData);
     }
   }
+  
 );
-
 export const clockOutAction = createAsyncThunk(
   "workforce/clockOut",
   async ({ hoursCardId, notes }: { hoursCardId: string; notes?: string }) => {

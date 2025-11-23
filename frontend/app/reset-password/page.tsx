@@ -93,7 +93,7 @@ export default function ResetPasswordPage() {
       } else {
         toast.error("Failed to reset password. The link may have expired.");
       }
-    } catch (error) {
+    } catch  {
       toast.error("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);

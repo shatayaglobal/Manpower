@@ -30,12 +30,7 @@ import { AddWorkerHoursModal } from "./add-workers-hours-modal";
 import { HoursCardDetailsModal } from "./workers-hours-details-modal";
 
 const HoursManagementPage = () => {
-  const [localSearchTerm, setLocalSearchTerm] = useState("");
-  const [localStatusFilter, setLocalStatusFilter] = useState("all");
-  const [localStaffFilter, setLocalStaffFilter] = useState("all");
-  const [localDateFrom, setLocalDateFrom] = useState("");
-  const [localDateTo, setLocalDateTo] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage] = useState(1);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [selectedHours, setSelectedHours] = useState<HoursCard | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
@@ -173,32 +168,6 @@ const HoursManagementPage = () => {
     }
   }, [businessId, loadStaff]);
 
-  useEffect(() => {
-    if (businessId) {
-      loadHoursCards({
-        page: currentPage,
-        search: localSearchTerm,
-        //status: localStatusFilter === "all" ? "" : localStatusFilter,
-        staff: localStaffFilter === "all" ? "" : localStaffFilter,
-        date_from: localDateFrom,
-        date_to: localDateTo,
-        ordering: "-date",
-      });
-    }
-  }, [
-    businessId,
-    currentPage,
-    localSearchTerm,
-    localStatusFilter,
-    localStaffFilter,
-    localDateFrom,
-    localDateTo,
-    loadHoursCards,
-  ]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [localSearchTerm, localStatusFilter, localStaffFilter, localDateFrom, localDateTo]);
 
   const toggleExpand = (workerId: string) => {
     setExpandedWorkers((prev) => {
@@ -251,9 +220,6 @@ const HoursManagementPage = () => {
     setSelectedHours(null);
   };
 
-  const clockedInToday = hoursCards.filter(
-    (h) => h.date === new Date().toISOString().split("T")[0] && h.clock_in && !h.clock_out
-  );
   const pendingCount = hoursCards.filter((h) => h.status === "SIGNED").length;
   const approvedCount = hoursCards.filter((h) => h.status === "APPROVED").length;
   const totalApprovedHours = hoursCards

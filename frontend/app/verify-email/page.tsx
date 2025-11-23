@@ -13,7 +13,7 @@ import {
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useAuthSlice } from "@/lib/redux/use-auth";
-import { AuthError, VerifyEmailResponse } from "@/lib/types";
+import { AuthError } from "@/lib/types";
 
 type VerificationState = "verifying" | "success" | "error";
 
