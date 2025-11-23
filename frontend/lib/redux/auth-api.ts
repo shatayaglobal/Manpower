@@ -171,6 +171,16 @@ class AuthService {
     );
     return response.data;
   }
+
+  async searchUsers(query: string): Promise<User[]> {
+    const response = await axiosInstance.get("users/", {
+      params: {
+        search: query,
+        account_type: 'WORKER'
+      }
+    });
+    return response.data.results || response.data; 
+  }
 }
 
 export const authService = new AuthService();

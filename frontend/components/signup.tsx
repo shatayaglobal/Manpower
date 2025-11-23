@@ -1,6 +1,5 @@
 "use client";
 
-import type React from "react";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -27,7 +26,6 @@ import {
   Lock,
   User,
   Building2,
-  ArrowRight,
   Eye,
   EyeOff,
   AlertCircle,
@@ -40,30 +38,34 @@ import { toast } from "sonner";
 import { AuthError, GoogleCredentialResponse } from "@/lib/types";
 import AccountTypeModal from "@/components/account-type-modal";
 
-interface GoogleIdentityButtonOptions {
-  theme?: "outline" | "filled_blue" | "filled_black";
-  size?: "large" | "medium" | "small";
-  text?: "signin_with" | "signup_with" | "continue_with" | "signin";
-  type?: "standard" | "icon";
-  shape?: "rectangular" | "pill" | "circle" | "square";
-  logo_alignment?: "left" | "center";
-  width?: string;
-  locale?: string;
-}
+type GoogleGIS = {
+  accounts: {
+    id: {
+      initialize: (options: {
+        client_id: string;
+        callback: (response: GoogleCredentialResponse) => void;
+        auto_select?: boolean;
+        cancel_on_tap_outside?: boolean;
+      }) => void;
+      renderButton: (element: HTMLElement, options: {
+        theme?: "outline" | "filled_blue" | "filled_black";
+        size?: "large" | "medium" | "small";
+        text?: "signin_with" | "signup_with" | "continue_with" | "signin";
+        width?: string;
+      }) => void;
+    };
+  };
+};
 
 export default function SignUpPage() {
   const router = useRouter();
-  const { register, googleAuth, clearAuthError, clearAuthSuccessStates } =
-    useAuthSlice();
-  const { isRegisterLoading, error, isAuthenticated, isGoogleAuthLoading } =
-    useAuthState();
+  const { register, googleAuth, clearAuthError, clearAuthSuccessStates } = useAuthSlice();
+  const { isRegisterLoading, error, isAuthenticated, isGoogleAuthLoading } = useAuthState();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showAccountTypeModal, setShowAccountTypeModal] = useState(false);
-  const [pendingGoogleCredential, setPendingGoogleCredential] = useState<
-    string | null
-  >(null);
+  const [pendingGoogleCredential, setPendingGoogleCredential] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     first_name: "",
@@ -74,7 +76,7 @@ export default function SignUpPage() {
     account_type: "",
   });
 
-  const getPasswordStrength = (pwd: string) => {
+  const getPasswordStrength = (pwd: string): number => {
     let strength = 0;
     if (pwd.length >= 8) strength++;
     if (/[A-Z]/.test(pwd)) strength++;
@@ -85,23 +87,11 @@ export default function SignUpPage() {
   };
 
   const passwordStrength = getPasswordStrength(formData.password);
-  const strengthColor =
-    passwordStrength <= 2
-      ? "bg-red-500"
-      : passwordStrength === 3
-      ? "bg-yellow-500"
-      : "bg-green-500";
-  const strengthText =
-    passwordStrength <= 2
-      ? "Weak"
-      : passwordStrength === 3
-      ? "Medium"
-      : "Strong";
+  const strengthColor = passwordStrength <= 2 ? "bg-red-500" : passwordStrength === 3 ? "bg-yellow-500" : "bg-green-500";
+  const strengthText = passwordStrength <= 2 ? "Weak" : passwordStrength === 3 ? "Medium" : "Strong";
 
   useEffect(() => {
-    if (isAuthenticated) {
-      router.push("/home");
-    }
+    if (isAuthenticated) router.push("/home");
   }, [isAuthenticated, router]);
 
   useEffect(() => {
@@ -109,11 +99,9 @@ export default function SignUpPage() {
     clearAuthSuccessStates();
   }, [clearAuthError, clearAuthSuccessStates]);
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    if (error) {
-      clearAuthError();
-    }
+  const handleInputChange = (field: keyof typeof formData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (error) clearAuthError();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -123,119 +111,58 @@ export default function SignUpPage() {
       toast.error("Passwords don't match");
       return;
     }
-
     if (!formData.account_type) {
       toast.error("Please select an account type");
       return;
     }
 
-    const submitData = {
+    const result = await register({
       first_name: formData.first_name,
       last_name: formData.last_name,
       email: formData.email,
       password: formData.password,
       password_confirm: formData.confirmPassword,
-      account_type: formData.account_type,
-    };
-
-    const result = await register(submitData);
+      account_type: formData.account_type as "WORKER" | "BUSINESS",
+    });
 
     if (result.success) {
-      if (typeof window !== "undefined") {
-        sessionStorage.setItem("verification_email", formData.email);
-      }
+      sessionStorage.setItem("verification_email", formData.email);
       router.push("/verify-email-sent");
     } else {
-      const authError = result.error as AuthError;
-      if (authError?.errors) {
-        if (authError.errors.email) {
-          toast.error(authError.errors.email[0]);
-          return;
-        }
-        if (authError.errors.first_name) {
-          toast.error(authError.errors.first_name[0]);
-          return;
-        }
-        if (authError.errors.last_name) {
-          toast.error(authError.errors.last_name[0]);
-          return;
-        }
-        if (authError.errors.password) {
-          toast.error(authError.errors.password[0]);
-          return;
-        }
-        if (authError.errors.account_type) {
-          toast.error(authError.errors.account_type[0]);
-          return;
-        }
-        const firstErrorField = Object.keys(authError.errors)[0];
-        const firstError = authError.errors[firstErrorField][0];
-        toast.error(firstError);
-      }
-      else if (authError?.message) {
-        toast.error(authError.message);
-      }
-      else {
-        toast.error("Registration failed. Please try again.");
+      const err = result.error as AuthError;
+      if (err?.errors) {
+        const firstField = Object.keys(err.errors)[0] as keyof typeof err.errors;
+        toast.error(err.errors[firstField][0]);
+      } else {
+        toast.error(err?.message || "Registration failed");
       }
     }
   };
 
+  const handleCredentialResponse = useCallback((response: GoogleCredentialResponse) => {
+    setPendingGoogleCredential(response.credential);
+    setShowAccountTypeModal(true);
+  }, []);
 
-  const handleCredentialResponse = useCallback(
-    async (response: GoogleCredentialResponse) => {
-      try {
-        setPendingGoogleCredential(response.credential);
-        setShowAccountTypeModal(true);
-      } catch {
-        toast.error("An error occurred during Google sign-in.", {});
-      }
-    },
-    []
-  );
-
-  const handleAccountTypeSelect = async (
-    accountType: "WORKER" | "BUSINESS"
-  ) => {
+  const handleAccountTypeSelect = async (accountType: "WORKER" | "BUSINESS") => {
     if (!pendingGoogleCredential) return;
 
-    try {
-      const result = await googleAuth({
-        credential: pendingGoogleCredential,
-        token: "",
-        account_type: accountType,
-      });
+    const result = await googleAuth({
+      credential: pendingGoogleCredential,
+      token: "",
+      account_type: accountType,
+    });
 
-      if (result.success) {
-        setShowAccountTypeModal(false);
-        setPendingGoogleCredential(null);
-
-        const accountTypeName =
-          accountType === "WORKER" ? "Worker" : "Business";
-        toast.success(
-          `Google sign-up successful! Welcome to your ${accountTypeName} account.`,
-          {}
-        );
-
-        setTimeout(() => {
-          router.push("/home");
-        }, 100);
-      } else {
-        toast.error("Google sign-up failed. Please try again.", {});
-        setShowAccountTypeModal(false);
-        setPendingGoogleCredential(null);
-      }
-    } catch {
-      toast.error("An error occurred during Google sign-up.", {});
+    if (result.success) {
+      setShowAccountTypeModal(false);
+      setPendingGoogleCredential(null);
+      toast.success(`Welcome to your ${accountType === "WORKER" ? "Worker" : "Business"} account!`);
+      setTimeout(() => router.push("/home"), 100);
+    } else {
+      toast.error("Google sign-up failed. Please try again.");
       setShowAccountTypeModal(false);
       setPendingGoogleCredential(null);
     }
-  };
-
-  const handleAccountTypeCancel = () => {
-    setShowAccountTypeModal(false);
-    setPendingGoogleCredential(null);
-    toast.info("Google sign-up cancelled. You can try again anytime.");
   };
 
   useEffect(() => {
@@ -246,103 +173,70 @@ export default function SignUpPage() {
     document.head.appendChild(script);
 
     script.onload = () => {
-      if (window.google) {
-        try {
-          window.google.accounts.id.initialize({
-            client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
-            callback: handleCredentialResponse,
-            auto_select: false,
-            cancel_on_tap_outside: true,
+      const google = window.google as unknown as GoogleGIS | undefined;
+
+      if (google?.accounts?.id) {
+        google.accounts.id.initialize({
+          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
+          callback: handleCredentialResponse,
+          auto_select: false,
+          cancel_on_tap_outside: true,
+        });
+
+        const renderButton = (id: string) => {
+          const container = document.getElementById(id);
+          if (!container) return;
+
+          const width = container.parentElement?.offsetWidth || 400;
+
+          google.accounts.id.renderButton(container, {
+            theme: "outline",
+            size: "large",
+            width: width.toString(),
+            text: "signup_with",
           });
+        };
 
-          // Render mobile button
-          const mobileButtonContainer = document.getElementById(
-            "google-signup-button-mobile"
-          );
-          if (mobileButtonContainer) {
-            const containerWidth =
-              mobileButtonContainer.parentElement?.offsetWidth || 400;
-
-            (
-              window.google.accounts.id.renderButton as (
-                element: HTMLElement,
-                options: GoogleIdentityButtonOptions
-              ) => void
-            )(mobileButtonContainer, {
-              theme: "outline",
-              size: "large",
-              width: containerWidth.toString(),
-              text: "signup_with",
-            });
-          }
-
-          // Render desktop button
-          const desktopButtonContainer = document.getElementById(
-            "google-signup-button-desktop"
-          );
-          if (desktopButtonContainer) {
-            const containerWidth =
-              desktopButtonContainer.parentElement?.offsetWidth || 400;
-
-            (
-              window.google.accounts.id.renderButton as (
-                element: HTMLElement,
-                options: GoogleIdentityButtonOptions
-              ) => void
-            )(desktopButtonContainer, {
-              theme: "outline",
-              size: "large",
-              width: containerWidth.toString(),
-              text: "signup_with",
-            });
-          }
-        } catch {
-          throw new Error("Google Sign-In initialization failed");
-        }
+        renderButton("google-signup-button-mobile");
+        renderButton("google-signup-button-desktop");
       }
     };
+
     return () => {
-      if (document.head.contains(script)) {
-        document.head.removeChild(script);
-      }
+      document.head.contains(script) && document.head.removeChild(script);
     };
   }, [handleCredentialResponse]);
 
   return (
     <>
-      {/* Account Type Selection Modal */}
       <AccountTypeModal
         open={showAccountTypeModal}
         onSelect={handleAccountTypeSelect}
-        onCancel={handleAccountTypeCancel}
+        onCancel={() => {
+          setShowAccountTypeModal(false);
+          setPendingGoogleCredential(null);
+          toast.info("Google sign-up cancelled.");
+        }}
         isLoading={isGoogleAuthLoading}
       />
 
       <div className="bg-gradient-to-br from-white via-slate-50/20 to-amber-50/15 min-h-screen">
-        {/* Main Content */}
-        <div className="flex items-center justify-center min-h-screen py-8 px-4 sm:px-6 lg:px-8">
-          <div className="w-full max-w-md sm:max-w-lg lg:max-w-2xl xl:max-w-3xl space-y-6">
+        <div className="flex items-center justify-center min-h-screen py-8 px-4">
+          <div className="w-full max-w-3xl space-y-6">
             <div className="text-center space-y-3">
-              <h1 className="font-bold text-2xl sm:text-3xl text-gray-900">
-                Create Your Account
-              </h1>
-              <p className="text-sm sm:text-base text-gray-600">
-                Join thousands of professionals connecting talent with
-                opportunity
+              <h1 className="font-bold text-3xl text-gray-900">Create Your Account</h1>
+              <p className="text-base text-gray-600">
+                Join thousands of professionals connecting talent with opportunity
               </p>
             </div>
 
-            <Card className="border-0 shadow-lg bg-white w-full">
-              <CardHeader className="space-y-3 pb-4">
-                <CardTitle className="text-xl sm:text-2xl font-semibold text-center text-gray-900">
-                  Sign Up
-                </CardTitle>
-                <CardDescription className="text-center text-sm sm:text-base text-gray-600">
-                  Choose your account type and get started today
-                </CardDescription>
+            <Card className="border-0 shadow-lg">
+              <CardHeader className="text-center">
+                <CardTitle className="text-2xl">Sign Up</CardTitle>
+                <CardDescription>Choose your account type and get started</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-5">
-                {/* Error Display */}
+
+              <CardContent className="space-y-6">
                 {error && (
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
@@ -350,360 +244,190 @@ export default function SignUpPage() {
                   </Alert>
                 )}
 
-                {/* Google Sign Up Button */}
-                <div className="space-y-2">
-                  {/* Mobile: Full width, safe padding */}
+                {/* Google Button */}
+                <div className="space-y-4">
                   <div className="px-4 lg:hidden">
-                    <div className="w-full min-h-[44px] flex items-center justify-center">
-                      <div
-                        id="google-signup-button-mobile"
-                        className="w-full"
-                      ></div>
+                    <div id="google-signup-button-mobile" className="w-full min-h-[50px]" />
+                  </div>
+                  <div className="hidden lg:block">
+                    <div className="max-w-md mx-auto translate-x-12">
+                      <div id="google-signup-button-desktop" className="w-full min-h-[50px]" />
                     </div>
                   </div>
-
-                  {/* Desktop: Centered + nudged right */}
-                  <div className="hidden lg:block px-0">
-                    <div className="mx-auto max-w-lg xl:max-w-xl min-h-[44px] flex items-center justify-center translate-x-20">
-                      <div
-                        id="google-signup-button-desktop"
-                        className="w-full"
-                      ></div>
-                    </div>
-                  </div>
-
-                  <p className="text-center text-xs sm:text-sm text-gray-500 px-4 lg:px-0">
-                    You&apos;ll choose your account type after signing in with
-                    Google
+                  <p className="text-center text-sm text-gray-500">
+                    You&apos;ll choose your account type after signing in with Google
                   </p>
                 </div>
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <Separator className="w-full" />
-                  </div>
-                  <div className="relative flex justify-center text-xs sm:text-sm uppercase">
-                    <span className="bg-white px-2 text-gray-500">
-                      Or continue with email
-                    </span>
-                  </div>
-                </div>
 
-                {/* Sign Up Form */}
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  {/* Account Type Selection */}
+                <Separator>
+                  <span className="bg-white px-3 text-sm text-gray-500">Or continue with email</span>
+                </Separator>
+
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  {/* Account Type - Full Width */}
                   <div className="space-y-2">
-                    <Label
-                      htmlFor="accountType"
-                      className="text-sm font-medium text-gray-700"
-                    >
+                    <Label htmlFor="account-type" className="text-sm font-medium">
                       Account Type
                     </Label>
                     <Select
                       value={formData.account_type}
-                      onValueChange={(value) =>
-                        handleInputChange("account_type", value)
-                      }
-                      disabled={isRegisterLoading || isGoogleAuthLoading}
+                      onValueChange={(v) => handleInputChange("account_type", v)}
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger id="account-type" className="w-full">
                         <SelectValue placeholder="Choose your account type" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="WORKER">
-                          <div className="flex items-center space-x-2">
-                            <User className="h-4 w-4 text-blue-600" />
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4" />
                             <span>Worker - Looking for opportunities</span>
                           </div>
                         </SelectItem>
                         <SelectItem value="BUSINESS">
-                          <div className="flex items-center space-x-2">
-                            <Building2 className="h-4 w-4 text-amber-600" />
+                          <div className="flex items-center gap-2">
+                            <Building2 className="h-4 w-4" />
                             <span>Business - Hiring talent</span>
                           </div>
                         </SelectItem>
                       </SelectContent>
                     </Select>
-                    {error?.errors?.account_type && (
-                      <p className="text-xs sm:text-sm text-red-600">
-                        {error.errors.account_type[0]}
-                      </p>
-                    )}
                   </div>
 
                   {/* Name Fields */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label
-                        htmlFor="firstName"
-                        className="text-sm font-medium text-gray-700"
-                      >
+                      <Label htmlFor="first-name" className="text-sm font-medium">
                         First Name
                       </Label>
                       <Input
-                        id="firstName"
-                        type="text"
-                        placeholder="John"
+                        id="first-name"
                         value={formData.first_name}
-                        onChange={(e) =>
-                          handleInputChange("first_name", e.target.value)
-                        }
-                        className={`w-full ${
-                          error?.errors?.first_name ? "border-red-300" : ""
-                        }`}
+                        onChange={e => handleInputChange("first_name", e.target.value)}
+                        placeholder="John"
                         required
-                        disabled={isRegisterLoading || isGoogleAuthLoading}
                       />
-                      {error?.errors?.first_name && (
-                        <p className="text-xs sm:text-sm text-red-600">
-                          {error.errors.first_name[0]}
-                        </p>
-                      )}
                     </div>
                     <div className="space-y-2">
-                      <Label
-                        htmlFor="lastName"
-                        className="text-sm font-medium text-gray-700"
-                      >
+                      <Label htmlFor="last-name" className="text-sm font-medium">
                         Last Name
                       </Label>
                       <Input
-                        id="lastName"
-                        type="text"
-                        placeholder="Doe"
+                        id="last-name"
                         value={formData.last_name}
-                        onChange={(e) =>
-                          handleInputChange("last_name", e.target.value)
-                        }
-                        className={`w-full ${
-                          error?.errors?.last_name ? "border-red-300" : ""
-                        }`}
+                        onChange={e => handleInputChange("last_name", e.target.value)}
+                        placeholder="Doe"
                         required
-                        disabled={isRegisterLoading || isGoogleAuthLoading}
                       />
-                      {error?.errors?.last_name && (
-                        <p className="text-xs sm:text-sm text-red-600">
-                          {error.errors.last_name[0]}
-                        </p>
-                      )}
                     </div>
                   </div>
 
-                  {/* Email Field */}
+                  {/* Email */}
                   <div className="space-y-2">
-                    <Label
-                      htmlFor="email"
-                      className="text-sm font-medium text-gray-700"
-                    >
+                    <Label htmlFor="email" className="text-sm font-medium">
                       Email Address
                     </Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                       <Input
                         id="email"
                         type="email"
-                        placeholder="john.doe@example.com"
+                        className="pl-10"
                         value={formData.email}
-                        onChange={(e) =>
-                          handleInputChange("email", e.target.value)
-                        }
-                        className={`pl-10 w-full ${
-                          error?.errors?.email ? "border-red-300" : ""
-                        }`}
+                        onChange={e => handleInputChange("email", e.target.value)}
+                        placeholder="john.doe@example.com"
                         required
-                        disabled={isRegisterLoading || isGoogleAuthLoading}
                       />
                     </div>
-                    {error?.errors?.email && (
-                      <p className="text-xs sm:text-sm text-red-600">
-                        {error.errors.email[0]}
-                      </p>
-                    )}
                   </div>
 
-                  {/* Password Field */}
+                  {/* Password */}
                   <div className="space-y-2">
-                    <Label
-                      htmlFor="password"
-                      className="text-sm font-medium text-gray-700"
-                    >
+                    <Label htmlFor="password" className="text-sm font-medium">
                       Password
                     </Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                       <Input
                         id="password"
                         type={showPassword ? "text" : "password"}
-                        placeholder="Create a strong password"
+                        className="pl-10 pr-10"
                         value={formData.password}
-                        onChange={(e) =>
-                          handleInputChange("password", e.target.value)
-                        }
-                        className={`pl-10 pr-10 w-full ${
-                          error?.errors?.password ? "border-red-300" : ""
-                        }`}
+                        onChange={e => handleInputChange("password", e.target.value)}
+                        placeholder="Create a strong password"
                         required
-                        disabled={isRegisterLoading || isGoogleAuthLoading}
                       />
                       <button
                         type="button"
-                        className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                         onClick={() => setShowPassword(!showPassword)}
-                        disabled={isRegisterLoading || isGoogleAuthLoading}
                       >
-                        {showPassword ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
-
-                    {/* ADD PASSWORD STRENGTH INDICATOR HERE ⬇️ */}
                     {formData.password && (
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                            <div
-                              className={`h-full transition-all duration-300 ${strengthColor}`}
-                              style={{
-                                width: `${(passwordStrength / 5) * 100}%`,
-                              }}
-                            />
-                          </div>
-                          <span className="text-xs text-gray-600 font-medium">
-                            {strengthText}
-                          </span>
+                      <div className="flex items-center gap-2 mt-2">
+                        <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <div className={`h-full transition-all ${strengthColor}`} style={{ width: `${(passwordStrength / 5) * 100}%` }} />
                         </div>
+                        <span className="text-xs font-medium text-gray-600">{strengthText}</span>
                       </div>
                     )}
-
-                    {error?.errors?.password && (
-                      <p className="text-xs sm:text-sm text-red-600">
-                        {error.errors.password[0]}
-                      </p>
-                    )}
                   </div>
-                  {/* Confirm Password Field */}
+
+                  {/* Confirm Password */}
                   <div className="space-y-2">
-                    <Label
-                      htmlFor="confirmPassword"
-                      className="text-sm font-medium text-gray-700"
-                    >
+                    <Label htmlFor="confirm-password" className="text-sm font-medium">
                       Confirm Password
                     </Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                       <Input
-                        id="confirmPassword"
+                        id="confirm-password"
                         type={showConfirmPassword ? "text" : "password"}
-                        placeholder="Confirm your password"
+                        className="pl-10 pr-10"
                         value={formData.confirmPassword}
-                        onChange={(e) =>
-                          handleInputChange("confirmPassword", e.target.value)
-                        }
-                        className="pl-10 pr-10 w-full"
+                        onChange={e => handleInputChange("confirmPassword", e.target.value)}
+                        placeholder="Confirm your password"
                         required
-                        disabled={isRegisterLoading || isGoogleAuthLoading}
                       />
                       <button
                         type="button"
-                        className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
-                        onClick={() =>
-                          setShowConfirmPassword(!showConfirmPassword)
-                        }
-                        disabled={isRegisterLoading || isGoogleAuthLoading}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       >
-                        {showConfirmPassword ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
+                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
-
-                    {/* ADD PASSWORD MATCH INDICATOR HERE ⬇️ */}
                     {formData.confirmPassword && (
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-2 mt-2">
                         {formData.password === formData.confirmPassword ? (
                           <>
                             <CheckCircle2 className="h-4 w-4 text-green-500" />
-                            <span className="text-xs text-green-600">
-                              Passwords match
-                            </span>
+                            <span className="text-sm text-green-600">Passwords match</span>
                           </>
                         ) : (
                           <>
                             <AlertCircle className="h-4 w-4 text-red-500" />
-                            <span className="text-xs text-red-600">
-                              Passwords do not match
-                            </span>
+                            <span className="text-sm text-red-600">Passwords do not match</span>
                           </>
                         )}
                       </div>
                     )}
                   </div>
-                  {/* Terms and Privacy */}
-                  <div className="text-xs sm:text-sm text-gray-600 leading-relaxed">
-                    By creating an account, you agree to our{" "}
-                    <Link
-                      href="/terms"
-                      className="text-blue-600 hover:text-blue-700 underline"
-                    >
-                      Terms of Service
-                    </Link>{" "}
-                    and{" "}
-                    <Link
-                      href="/privacy"
-                      className="text-blue-600 hover:text-blue-700 underline"
-                    >
-                      Privacy Policy
-                    </Link>
-                    .
-                  </div>
 
-                  {/* Submit Button */}
-                  <Button
-                    type="submit"
-                    className="w-full bg-blue-500 hover:bg-blue-600 text-white h-10 sm:h-11 text-sm sm:text-base shadow-sm mt-4 sm:mt-6"
-                    disabled={isRegisterLoading || isGoogleAuthLoading}
-                  >
-                    {isRegisterLoading ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Creating Account...
-                      </>
-                    ) : (
-                      <>
-                        Create Account
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </>
-                    )}
+                  <Button type="submit" className="w-full h-11 bg-blue-500 hover:bg-blue-600" disabled={isRegisterLoading}>
+                    {isRegisterLoading ? "Creating Account..." : "Create Account"}
                   </Button>
                 </form>
               </CardContent>
             </Card>
 
-            {/* Additional Links */}
-            <div className="text-center space-y-3">
-              <p className="text-sm text-gray-600">
-                Already have an account?{" "}
-                <Link
-                  href="/login"
-                  className="text-blue-600 hover:text-blue-700 underline font-medium"
-                >
-                  Sign in here
-                </Link>
-              </p>
-              <p className="text-sm text-gray-600">
-                Need help?{" "}
-                <Link
-                  href="/contact"
-                  className="text-blue-600 hover:text-blue-700 underline"
-                >
-                  Contact Support
-                </Link>
-              </p>
-            </div>
+            <p className="text-center text-sm text-gray-600">
+              Already have an account?{" "}
+              <Link href="/login" className="text-blue-600 font-medium hover:underline">
+                Sign in
+              </Link>
+            </p>
           </div>
         </div>
       </div>

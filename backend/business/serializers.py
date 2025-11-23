@@ -15,7 +15,10 @@ class BusinessSerializer(serializers.ModelSerializer):
             'id', 'user', 'user_name', 'name', 'business_id', 'slug',
             'category', 'size', 'description', 'email', 'phone', 'website',
             'address', 'city', 'country', 'postal_code', 'service_time',
-            'is_verified', 'is_active', 'total_staff', 'total_active_staff',
+            'is_verified', 'is_active', 'total_staff','workplace_latitude',
+            'workplace_longitude',
+            'clock_in_radius_meters',   
+            'require_location_for_clock_in',  'total_active_staff',
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'user', 'business_id', 'slug', 'is_verified', 'created_at', 'updated_at']
@@ -39,7 +42,8 @@ class BusinessListSerializer(serializers.ModelSerializer):
             'id', 'user', 'user_name', 'name', 'business_id', 'slug',
             'category', 'size', 'description', 'email', 'phone', 'website',
             'address', 'city', 'country', 'postal_code', 'service_time',
-            'is_verified', 'is_active', 'total_staff',
+            'is_verified', 'is_active', 'total_staff', 'workplace_latitude', 'workplace_longitude',
+            'clock_in_radius_meters', 'require_location_for_clock_in',
             'created_at', 'updated_at'
         ]
 

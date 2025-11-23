@@ -6,11 +6,11 @@ from .models import Business, ContactUs
 @admin.register(Business)
 class BusinessAdmin(admin.ModelAdmin):
     list_display = ['name', 'business_id', 'user', 'category', 'size', 'city', 'country', 'is_verified', 'is_active', 'created_at']
-    list_filter = ['category', 'size', 'is_verified', 'is_active', 'created_at', 'city', 'country']
+    list_filter = ['category', 'size', 'is_verified', 'is_active', 'created_at', 'city', 'country', 'require_location_for_clock_in']
     search_fields = ['name', 'business_id', 'user__email', 'description', 'email', 'phone']
     readonly_fields = ['business_id', 'slug', 'verification_token', 'created_at', 'updated_at']
     ordering = ['-created_at']
-    actions = ['verify_businesses', 'unverify_businesses']
+    actions = ['verify_businesses', 'unverify_businesses', 'enable_location_tracking', 'disable_location_tracking']
 
     fieldsets = (
         ('Basic Information', {
@@ -21,6 +21,15 @@ class BusinessAdmin(admin.ModelAdmin):
         }),
         ('Location', {
             'fields': ('address', 'city', 'country', 'postal_code')
+        }),
+        ('Workplace Location Settings', {
+            'fields': (
+                'require_location_for_clock_in',
+                'workplace_latitude',
+                'workplace_longitude',
+                'clock_in_radius_meters'
+            ),
+            'description': 'Configure geolocation requirements for staff clock-in'
         }),
         ('Business Details', {
             'fields': ('service_time',)
@@ -42,6 +51,16 @@ class BusinessAdmin(admin.ModelAdmin):
         updated = queryset.update(is_verified=False)
         self.message_user(request, f'{updated} businesses unverified.')
     unverify_businesses.short_description = "Unverify selected businesses"
+
+    def enable_location_tracking(self, request, queryset):
+        updated = queryset.update(require_location_for_clock_in=True)
+        self.message_user(request, f'{updated} businesses now require location for clock-in.')
+    enable_location_tracking.short_description = "Enable location tracking for clock-in"
+
+    def disable_location_tracking(self, request, queryset):
+        updated = queryset.update(require_location_for_clock_in=False)
+        self.message_user(request, f'{updated} businesses no longer require location for clock-in.')
+    disable_location_tracking.short_description = "Disable location tracking for clock-in"
 
 
 @admin.register(ContactUs)

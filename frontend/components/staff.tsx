@@ -7,16 +7,13 @@ import {
   Edit2,
   Trash2,
   Search,
-  Filter,
-  Mail,
-  Phone,
   AlertCircle,
   Loader2,
   ChevronDown,
   ChevronUp,
   MoreHorizontal,
   Download,
-  X,
+  Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,19 +26,13 @@ import {
 import { useWorkforce } from "@/lib/redux/use-workforce";
 import {
   BusinessStaff,
-  StaffFormData,
   EmploymentType,
   StaffStatus,
 } from "@/lib/workforce-types";
 import { toast } from "sonner";
 import { useBusiness } from "@/lib/redux/useBusiness";
 import { useRouter } from "next/navigation";
-
-interface StaffModalProps {
-  staff: BusinessStaff | null;
-  onClose: () => void;
-  businessId: string;
-}
+import { StaffModal } from "@/components/staff/staff-modal";
 
 type SortField =
   | "name"
@@ -52,7 +43,7 @@ type SortField =
   | "hire_date";
 type SortDirection = "asc" | "desc";
 
-const StaffManagementPage: React.FC = () => {
+const StaffManagementPage = () => {
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
   const [localSearchTerm, setLocalSearchTerm] = useState<string>("");
   const [localStatusFilter, setLocalStatusFilter] = useState<string>("all");
@@ -84,6 +75,7 @@ const StaffManagementPage: React.FC = () => {
   const business = businesses[0] || null;
   const businessId = business?.id || "";
   const router = useRouter();
+
 
   useEffect(() => {
     loadBusinesses();
@@ -288,343 +280,6 @@ const StaffManagementPage: React.FC = () => {
     toast.success(`Page ${currentPage} exported successfully`);
   };
 
-  const StaffModal: React.FC<StaffModalProps> = ({
-    staff,
-    onClose,
-    businessId,
-  }) => {
-    const [formData, setFormData] = useState<StaffFormData>({
-      name: staff?.name || "",
-      job_title: staff?.job_title || "",
-      department: staff?.department || "",
-      employment_type: staff?.employment_type || "FULL_TIME",
-      status: staff?.status || "ACTIVE",
-      email: staff?.email || "",
-      phone: staff?.phone || "",
-      hourly_rate: staff?.hourly_rate || "",
-      hire_date: staff?.hire_date || new Date().toISOString().split("T")[0],
-    });
-
-    const [errors, setErrors] = useState<Record<string, string>>({});
-    const [submitting, setSubmitting] = useState<boolean>(false);
-
-    const { addStaff, editStaff } = useWorkforce();
-
-    useEffect(() => {
-      if (staff) {
-        setFormData({
-          name: staff.name || "",
-          job_title: staff.job_title || "",
-          department: staff.department || "",
-          employment_type: staff.employment_type || "FULL_TIME",
-          status: staff.status || "ACTIVE",
-          email: staff.email || "",
-          phone: staff.phone || "",
-          hourly_rate: staff.hourly_rate || "",
-          hire_date: staff.hire_date || new Date().toISOString().split("T")[0],
-        });
-      }
-    }, [staff]);
-
-    const validateForm = (): boolean => {
-      const newErrors: Record<string, string> = {};
-
-      if (!formData.name.trim()) newErrors.name = "Name is required";
-      if (!formData.job_title.trim())
-        newErrors.job_title = "Job title is required";
-      if (!formData.email.trim()) newErrors.email = "Email is required";
-      if (
-        formData.email &&
-        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
-      ) {
-        newErrors.email = "Please enter a valid email";
-      }
-      if (!formData.phone.trim()) newErrors.phone = "Phone is required";
-
-      setErrors(newErrors);
-      return Object.keys(newErrors).length === 0;
-    };
-
-    const handleSubmit = async (): Promise<void> => {
-      if (!validateForm()) return;
-
-      setSubmitting(true);
-      try {
-        const submitData = {
-          ...formData,
-          business: businessId,
-        };
-
-        if (staff) {
-          await editStaff(staff.id, submitData);
-          toast.success("Staff member updated successfully!");
-        } else {
-          await addStaff(submitData);
-          toast.success("Staff member added successfully!");
-        }
-        onClose();
-        selectStaff(null);
-        loadStaff({
-          page: currentPage,
-          search: localSearchTerm,
-          status: (localStatusFilter === "all" ? "" : localStatusFilter) as
-            | ""
-            | undefined,
-          employment_type: (localEmploymentTypeFilter === "all"
-            ? ""
-            : localEmploymentTypeFilter) as "" | undefined,
-          ordering: sortDirection === "desc" ? `-${sortField}` : sortField,
-        });
-      } catch (error: unknown) {
-        let errorMessage = "Failed to save staff member. Please try again.";
-
-        if (error && typeof error === "object" && "response" in error) {
-          const response = (
-            error as {
-              response?: { data?: { business?: string[]; detail?: string } };
-            }
-          ).response;
-          errorMessage =
-            response?.data?.business?.[0] ||
-            response?.data?.detail ||
-            errorMessage;
-        }
-
-        toast.error(errorMessage);
-      } finally {
-        setSubmitting(false);
-      }
-    };
-
-    return (
-      <div className="fixed inset-0 bg-black/20 flex items-center justify-center p-4 z-50">
-        <div className="bg-white rounded-lg max-w-full w-full sm:max-w-lg md:max-w-2xl max-h-[90vh] overflow-y-auto">
-          <div className="p-4 sm:p-6 border-b border-gray-200">
-            <div className="flex justify-between items-center">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
-                {staff ? "Edit Staff Member" : "Add New Staff Member"}
-              </h2>
-              <button
-                onClick={onClose}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-
-          <div className="p-4 sm:p-6">
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name *
-                </label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.name ? "border-red-300" : "border-gray-300"
-                  }`}
-                  placeholder="John Doe"
-                />
-                {errors.name && (
-                  <p className="text-red-600 text-sm mt-1">{errors.name}</p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Job Title *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.job_title}
-                    onChange={(e) =>
-                      setFormData({ ...formData, job_title: e.target.value })
-                    }
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.job_title ? "border-red-300" : "border-gray-300"
-                    }`}
-                    placeholder="Manager"
-                  />
-                  {errors.job_title && (
-                    <p className="text-red-600 text-sm mt-1">
-                      {errors.job_title}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Department
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.department}
-                    onChange={(e) =>
-                      setFormData({ ...formData, department: e.target.value })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Sales"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Employment Type *
-                  </label>
-                  <select
-                    value={formData.employment_type}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        employment_type: e.target.value as EmploymentType,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="FULL_TIME">Full Time</option>
-                    <option value="PART_TIME">Part Time</option>
-                    <option value="CONTRACT">Contract</option>
-                    <option value="INTERN">Intern</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Status *
-                  </label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        status: e.target.value as StaffStatus,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="ACTIVE">Active</option>
-                    <option value="INACTIVE">Inactive</option>
-                    <option value="ON_LEAVE">On Leave</option>
-                    <option value="TERMINATED">Terminated</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email *
-                  </label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.email ? "border-red-300" : "border-gray-300"
-                    }`}
-                    placeholder="john@example.com"
-                  />
-                  {errors.email && (
-                    <p className="text-red-600 text-sm mt-1">{errors.email}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone *
-                  </label>
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.phone ? "border-red-300" : "border-gray-300"
-                    }`}
-                    placeholder="+256-700-000000"
-                  />
-                  {errors.phone && (
-                    <p className="text-red-600 text-sm mt-1">{errors.phone}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Hourly Rate (Optional)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.hourly_rate}
-                    onChange={(e) =>
-                      setFormData({ ...formData, hourly_rate: e.target.value })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="25.00"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Hire Date *
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.hire_date}
-                    onChange={(e) =>
-                      setFormData({ ...formData, hire_date: e.target.value })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="px-4 sm:px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-end space-x-0 sm:space-x-3 gap-4 sm:gap-0">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              disabled={submitting}
-              className="w-full sm:w-auto border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600 min-w-[120px]"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={submitting}
-              className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white min-w-[120px]"
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin text-blue-500" />
-                  {staff ? "Updating..." : "Adding..."}
-                </>
-              ) : staff ? (
-                "Update Staff"
-              ) : (
-                "Add Staff"
-              )}
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   if (!businessLoading && !business) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -651,8 +306,8 @@ const StaffManagementPage: React.FC = () => {
   const onLeaveStaff = staff.filter((s) => s.status === "ON_LEAVE").length;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {staffError && (
           <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
             <div className="flex items-center">
@@ -672,115 +327,115 @@ const StaffManagementPage: React.FC = () => {
           </div>
         )}
 
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-6">
-            <div className="flex-1">
+        {/* Header with Stats Cards - More Compact */}
+        <div className="mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+            <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                 Staff Management
               </h1>
-              <p className="text-gray-600 text-sm sm:text-base mt-1">
-                Manage your team members and their information
+              <p className="text-gray-600 text-sm mt-1">
+                Manage your team members
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto min-w-0">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Button
                 variant="outline"
                 onClick={exportToCSV}
                 disabled={staff.length === 0}
-                className="w-full sm:w-auto border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600 min-w-[120px] py-3 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-blue-500"
+                className="border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
               >
-                <Download className="w-4 h-4 mr-2 text-blue-500" />
-                Export CSV
+                <Download className="w-4 h-4 mr-2" />
+                Export
               </Button>
               <Button
                 onClick={() => {
                   selectStaff(null);
                   setShowCreateModal(true);
                 }}
-                className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white shadow-sm min-w-[120px] py-3"
+                className="bg-blue-500 hover:bg-blue-600 text-white shadow-sm"
               >
-                <Plus className="w-4 h-4 mr-2 text-amber-600" />
+                <Plus className="w-4 h-4 mr-2" />
                 Add Staff
               </Button>
             </div>
           </div>
+
+          {/* Compact Stats Cards */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-white rounded-lg border border-gray-200 p-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-gray-600">Total Staff</p>
+                  <p className="text-xl font-bold text-gray-900">
+                    {staffPagination.count}
+                  </p>
+                </div>
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Users className="w-5 h-5 text-blue-500" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg border border-gray-200 p-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-gray-600">Active</p>
+                  <p className="text-xl font-bold text-gray-900">
+                    {activeStaff}
+                  </p>
+                </div>
+                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                  <Users className="w-5 h-5 text-green-600" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg border border-gray-200 p-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-gray-600">On Leave</p>
+                  <p className="text-xl font-bold text-gray-900">
+                    {onLeaveStaff}
+                  </p>
+                </div>
+                <div className="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center">
+                  <Users className="w-5 h-5 text-amber-600" />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8">
-          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
-            <div className="flex items-center">
-              <div className="w-10 sm:w-12 h-10 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
-                <Users className="w-5 sm:w-6 h-5 sm:h-6 text-blue-500" />
-              </div>
-              <div>
-                <p className="text-xl sm:text-2xl font-bold text-gray-900">
-                  {staffPagination.count}
-                </p>
-                <p className="text-gray-600 text-sm">Total Staff</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
-            <div className="flex items-center">
-              <div className="w-10 sm:w-12 h-10 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
-                <Users className="w-5 sm:w-6 h-5 sm:h-6 text-green-600" />
-              </div>
-              <div>
-                <p className="text-xl sm:text-2xl font-bold text-gray-900">
-                  {activeStaff}
-                </p>
-                <p className="text-gray-600 text-sm">Active</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
-            <div className="flex items-center">
-              <div className="w-10 sm:w-12 h-10 sm:h-12 bg-amber-50 rounded-lg flex items-center justify-center mr-4">
-                <Users className="w-5 sm:w-6 h-5 sm:h-6 text-amber-600" />
-              </div>
-              <div>
-                <p className="text-xl sm:text-2xl font-bold text-gray-900">
-                  {onLeaveStaff}
-                </p>
-                <p className="text-gray-600 text-sm">On Leave</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 sm:p-6 rounded-lg border border-gray-200 shadow-sm mb-6">
-          <div className="flex flex-col gap-4">
+        {/* Compact Search & Filters - Single Line */}
+        <div className="bg-white px-4 py-3 rounded-lg border border-gray-200 shadow-sm mb-4">
+          <div className="flex flex-col lg:flex-row gap-3">
             <div className="flex-1 relative">
-              <Search className="w-5 h-5 text-amber-600 absolute left-3 top-3" />
+              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
               <input
                 type="text"
-                placeholder="Search by name, email, or job title..."
+                placeholder="Search staff..."
                 value={localSearchTerm}
                 onChange={(e) => setLocalSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               />
             </div>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              <div className="flex items-center gap-2">
-                <Filter className="w-5 h-5 text-amber-600" />
-                <select
-                  value={localStatusFilter}
-                  onChange={(e) => setLocalStatusFilter(e.target.value)}
-                  className="w-full sm:w-auto px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="all">All Status</option>
-                  <option value="ACTIVE">Active</option>
-                  <option value="INACTIVE">Inactive</option>
-                  <option value="ON_LEAVE">On Leave</option>
-                  <option value="TERMINATED">Terminated</option>
-                </select>
-              </div>
+            <div className="flex gap-2">
+              <select
+                value={localStatusFilter}
+                onChange={(e) => setLocalStatusFilter(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              >
+                <option value="all">All Status</option>
+                <option value="ACTIVE">Active</option>
+                <option value="INACTIVE">Inactive</option>
+                <option value="ON_LEAVE">On Leave</option>
+                <option value="TERMINATED">Terminated</option>
+              </select>
               <select
                 value={localEmploymentTypeFilter}
                 onChange={(e) => setLocalEmploymentTypeFilter(e.target.value)}
-                className="w-full sm:w-auto px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               >
                 <option value="all">All Types</option>
                 <option value="FULL_TIME">Full Time</option>
@@ -798,12 +453,12 @@ const StaffManagementPage: React.FC = () => {
             <p className="ml-2 text-gray-600">Loading staff members...</p>
           </div>
         ) : staff.length === 0 ? (
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 sm:p-12 text-center">
-            <Users className="w-16 sm:w-20 h-16 sm:h-20 text-gray-300 mx-auto mb-6" />
-            <h3 className="text-lg sm:text-xl font-medium text-gray-900 mb-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 text-center">
+            <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
               No staff members yet
             </h3>
-            <p className="text-gray-600 text-sm sm:text-base mb-8 max-w-md mx-auto">
+            <p className="text-gray-600 text-sm mb-6">
               Start building your team by adding your first staff member.
             </p>
             <Button
@@ -811,10 +466,9 @@ const StaffManagementPage: React.FC = () => {
                 selectStaff(null);
                 setShowCreateModal(true);
               }}
-              size="lg"
-              className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white shadow-sm min-w-[160px] py-3"
+              className="bg-blue-500 hover:bg-blue-600 text-white"
             >
-              <Plus className="w-5 h-5 mr-2 text-amber-600" />
+              <Plus className="w-4 h-4 mr-2" />
               Add Your First Staff Member
             </Button>
           </div>
@@ -855,25 +509,25 @@ const StaffManagementPage: React.FC = () => {
                       >
                         <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            <div className="w-8 sm:w-10 h-8 sm:h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 font-semibold">
+                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 font-semibold text-sm">
                               {member.name.charAt(0).toUpperCase()}
                             </div>
-                            <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900 truncate">
+                            <div className="ml-3">
+                              <div className="text-sm font-medium text-gray-900">
                                 {member.name}
                               </div>
-                              <div className="text-xs sm:text-sm text-gray-500">
+                              <div className="text-xs text-gray-500">
                                 {member.staff_id}
                               </div>
                             </div>
                           </div>
                         </td>
                         <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900 truncate">
+                          <div className="text-sm text-gray-900">
                             {member.job_title}
                           </div>
                         </td>
-                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
                             {member.department || "-"}
                           </div>
@@ -890,15 +544,8 @@ const StaffManagementPage: React.FC = () => {
                           </div>
                         </td>
                         <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                          <div className="text-xs sm:text-sm text-gray-500">
-                            <div className="flex items-center">
-                              <Mail className="w-3 h-3 mr-1 text-amber-600" />
-                              <span className="truncate max-w-[120px] sm:max-w-[150px]">
-                                {member.email}
-                              </span>
-                            </div>
+                          <div className="text-xs text-gray-500">
                             <div className="flex items-center mt-1">
-                              <Phone className="w-3 h-3 mr-1 text-amber-600" />
                               <span>{member.phone}</span>
                             </div>
                           </div>
@@ -907,14 +554,22 @@ const StaffManagementPage: React.FC = () => {
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="sm">
-                                <MoreHorizontal className="w-4 h-4 text-blue-500" />
+                                <MoreHorizontal className="w-4 h-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem
+                                onClick={() =>
+                                  router.push(`/staff/${member.id}`)
+                                }
+                              >
+                                <Eye className="w-4 h-4 mr-2" />
+                                View Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
                                 onClick={() => handleEditStaff(member)}
                               >
-                                <Edit2 className="w-4 h-4 mr-2 text-blue-500" />
+                                <Edit2 className="w-4 h-4 mr-2" />
                                 Edit
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
@@ -924,7 +579,7 @@ const StaffManagementPage: React.FC = () => {
                                   handleDeleteStaff(member.id, member.name)
                                 }
                               >
-                                <Trash2 className="w-4 h-4 mr-2 text-red-600" />
+                                <Trash2 className="w-4 h-4 mr-2" />
                                 Delete
                               </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -937,15 +592,15 @@ const StaffManagementPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Server-side Pagination */}
+            {/* Pagination */}
             {staffPagination.count > itemsPerPage && (
-              <div className="bg-white px-4 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 sm:px-6 mt-4 rounded-lg gap-4 sm:gap-0">
+              <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-4 rounded-lg">
                 <div className="flex-1 flex justify-between sm:hidden">
                   <Button
                     onClick={handlePreviousPage}
                     disabled={!staffPagination.hasPrevious || staffLoading}
                     variant="outline"
-                    className="w-full sm:w-auto border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600 min-w-[120px] py-3"
+                    size="sm"
                   >
                     Previous
                   </Button>
@@ -956,12 +611,12 @@ const StaffManagementPage: React.FC = () => {
                     onClick={handleNextPage}
                     disabled={!staffPagination.hasNext || staffLoading}
                     variant="outline"
-                    className="w-full sm:w-auto border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600 min-w-[120px] py-3"
+                    size="sm"
                   >
                     Next
                   </Button>
                 </div>
-                <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
                   <div>
                     <p className="text-sm text-gray-700">
                       Showing{" "}
@@ -988,11 +643,11 @@ const StaffManagementPage: React.FC = () => {
                         onClick={handlePreviousPage}
                         disabled={!staffPagination.hasPrevious || staffLoading}
                         variant="outline"
-                        className="rounded-r-none border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
+                        size="sm"
+                        className="rounded-r-none"
                       >
                         Previous
                       </Button>
-
                       {Array.from({ length: totalPages }, (_, i) => i + 1)
                         .filter((page) => {
                           return (
@@ -1013,7 +668,8 @@ const StaffManagementPage: React.FC = () => {
                                   variant={
                                     currentPage === page ? "default" : "outline"
                                   }
-                                  className="rounded-none border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
+                                  size="sm"
+                                  className="rounded-none"
                                   disabled={staffLoading}
                                 >
                                   {page}
@@ -1028,19 +684,20 @@ const StaffManagementPage: React.FC = () => {
                               variant={
                                 currentPage === page ? "default" : "outline"
                               }
-                              className="rounded-none border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
+                              size="sm"
+                              className="rounded-none"
                               disabled={staffLoading}
                             >
                               {page}
                             </Button>
                           );
                         })}
-
                       <Button
                         onClick={handleNextPage}
                         disabled={!staffPagination.hasNext || staffLoading}
                         variant="outline"
-                        className="rounded-l-none border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
+                        size="sm"
+                        className="rounded-l-none"
                       >
                         Next
                       </Button>
@@ -1059,6 +716,20 @@ const StaffManagementPage: React.FC = () => {
             onClose={() => {
               setShowCreateModal(false);
               selectStaff(null);
+            }}
+            onSuccess={() => {
+              loadStaff({
+                page: currentPage,
+                search: localSearchTerm,
+                status: (localStatusFilter === "all"
+                  ? ""
+                  : localStatusFilter) as "" | undefined,
+                employment_type: (localEmploymentTypeFilter === "all"
+                  ? ""
+                  : localEmploymentTypeFilter) as "" | undefined,
+                ordering:
+                  sortDirection === "desc" ? `-${sortField}` : sortField,
+              });
             }}
           />
         )}

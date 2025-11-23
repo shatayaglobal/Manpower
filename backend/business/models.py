@@ -58,6 +58,28 @@ class Business(UUIDModel):
     is_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     verification_token = models.CharField(max_length=255, blank=True)
+    workplace_latitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True,
+        help_text="Workplace latitude for clock-in geofencing"
+    )
+    workplace_longitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True,
+        help_text="Workplace longitude for clock-in geofencing"
+    )
+    clock_in_radius_meters = models.IntegerField(
+        default=100,
+        help_text="Allowed radius in meters for clock-in (default 100m)"
+    )
+    require_location_for_clock_in = models.BooleanField(
+        default=True,
+        help_text="Require workers to be at workplace location to clock in"
+    )
 
     class Meta:
         verbose_name = 'Business'

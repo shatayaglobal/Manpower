@@ -8,8 +8,6 @@ import type {
   RegisterData,
   GoogleAuthData,
   ChangePasswordData,
-  VerifyEmailResponse,
-  ResendVerificationResponse,
 } from "@/lib/types";
 
 interface ApiErrorResponse {

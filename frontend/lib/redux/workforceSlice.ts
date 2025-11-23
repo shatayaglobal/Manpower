@@ -12,7 +12,6 @@ import {
   HoursCardFilters,
 } from "@/lib/workforce-types";
 
-
 type QueryParams = Partial<StaffFilters & ShiftFilters & HoursCardFilters> & {
   page?: number;
   page_size?: number;
@@ -167,6 +166,74 @@ export const deleteStaff = createAsyncThunk(
   "workforce/deleteStaff",
   async (id: string) => {
     await workforceApi.deleteStaff(id);
+  }
+);
+
+// Worker thunks
+export const fetchMyShifts = createAsyncThunk(
+  "workforce/fetchMyShifts",
+  async () => {
+    return await workforceApi.getMyShifts();
+  }
+);
+
+export const fetchMyHoursCards = createAsyncThunk(
+  "workforce/fetchMyHoursCards",
+  async () => {
+    return await workforceApi.getMyHoursCards();
+  }
+);
+
+export const clockInAction = createAsyncThunk(
+  "workforce/clockIn",
+  async (
+    data?: {
+      latitude?: number;
+      longitude?: number;
+      timezone_offset?: number;
+      staff_id?: string;
+      notes?: string;
+    },
+    { rejectWithValue }
+  ) => {
+    try {
+      return await workforceApi.clockIn(data);
+    } catch (error: any) {
+      // Extract the full error response from backend
+      const errorData = error.response?.data || {
+        error: error.message || "Failed to clock in"
+      };
+      return rejectWithValue(errorData);
+    }
+  }
+);
+
+export const clockOutAction = createAsyncThunk(
+  "workforce/clockOut",
+  async ({ hoursCardId, notes }: { hoursCardId: string; notes?: string }) => {
+    return await workforceApi.clockOut(hoursCardId, notes);
+  }
+);
+
+export const signHoursCardAction = createAsyncThunk(
+  "workforce/signHoursCard",
+  async ({ hoursCardId, signature }: { hoursCardId: string; signature: string }) => {
+    return await workforceApi.signHoursCard(hoursCardId, signature);
+  }
+);
+
+export const approveSignedHoursCardAction = createAsyncThunk(
+  "workforce/approveSignedHoursCard",
+  async ({
+    hoursCardId,
+    status,
+    rejectionReason
+  }: {
+    hoursCardId: string;
+    status: 'APPROVED' | 'REJECTED';
+    rejectionReason?: string
+  }) => {
+    return await workforceApi.approveSignedHoursCard(hoursCardId, status, rejectionReason);
   }
 );
 
@@ -569,6 +636,44 @@ const workforceSlice = createSlice({
           state.selectedHoursCard = action.payload;
         }
       })
+      // Worker reducers
+.addCase(fetchMyShifts.fulfilled, (state, action) => {
+  state.myShifts = action.payload;
+})
+.addCase(fetchMyHoursCards.fulfilled, (state, action) => {
+  state.myHoursCards = action.payload;
+  // Set today's hours card if exists and not clocked out
+  const today = new Date().toISOString().split('T')[0];
+  state.todayHoursCard = action.payload.find(
+    (h: HoursCard) => h.date === today && !h.clock_out
+  ) || null;
+})
+.addCase(clockInAction.fulfilled, (state, action) => {
+  state.todayHoursCard = action.payload;
+  state.myHoursCards.unshift(action.payload);
+})
+.addCase(clockOutAction.fulfilled, (state, action) => {
+  state.todayHoursCard = null;
+  const index = state.myHoursCards.findIndex((h) => h.id === action.payload.id);
+  if (index !== -1) {
+    state.myHoursCards[index] = action.payload;
+  }
+})
+.addCase(signHoursCardAction.fulfilled, (state, action) => {
+  const index = state.myHoursCards.findIndex((h) => h.id === action.payload.id);
+  if (index !== -1) {
+    state.myHoursCards[index] = action.payload;
+  }
+})
+.addCase(approveSignedHoursCardAction.fulfilled, (state, action) => {
+  const index = state.hoursCards.findIndex((h) => h.id === action.payload.id);
+  if (index !== -1) {
+    state.hoursCards[index] = action.payload;
+  }
+  if (state.selectedHoursCard?.id === action.payload.id) {
+    state.selectedHoursCard = action.payload;
+  }
+})
       // .addCase(fetchMyStaffProfile.pending, (state) => {
       //   state.staffLoading = true;
       // })

@@ -53,7 +53,6 @@ export default function AccountTypeModal({
 
         {/* Grid – mobile: 1 col, desktop: 2 col (original) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3 sm:mt-6">
-          {/* ==================== WORKER CARD ==================== */}
           <Card
             className="relative cursor-pointer hover:shadow-lg transition-all duration-200 hover:border-blue-500 group overflow-hidden"
             onClick={() => !isLoading && onSelect("WORKER")}
@@ -97,8 +96,6 @@ export default function AccountTypeModal({
               </Button>
             </div>
           </Card>
-
-          {/* ==================== BUSINESS CARD ==================== */}
           <Card
             className="relative cursor-pointer hover:shadow-lg transition-all duration-200 hover:border-amber-500 group overflow-hidden"
             onClick={() => !isLoading && onSelect("BUSINESS")}

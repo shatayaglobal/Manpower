@@ -4,6 +4,7 @@ from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
 from .models import Messages
 from .serializers import MessageSerializer
+from workforce.models import StaffInvitation
 
 def convert_uuids_to_strings(data):
     """Recursively convert all UUID objects to strings"""
@@ -48,6 +49,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
         print(f"WebSocket connected for user: {self.user.email}")
+
+        await self.send_counts()
 
     @database_sync_to_async
     def get_user_from_token(self, token):
@@ -185,3 +188,26 @@ class ChatConsumer(AsyncWebsocketConsumer):
             receiver_id=user_id,
             is_read=False
         ).count()
+
+    @database_sync_to_async
+    def get_invitation_count(self):
+        """Get pending invitation count for current user"""
+        return StaffInvitation.objects.filter(
+            worker=self.user,
+            status='PENDING'
+        ).count()
+
+    async def send_counts(self):
+        """Send unread message and invitation counts"""
+        unread_count = await self.get_unread_count(self.user.id)
+        invitation_count = await self.get_invitation_count()
+
+        await self.send(text_data=json.dumps({
+            'type': 'counts',
+            'unread_count': unread_count,
+            'invitation_count': invitation_count
+        }))
+
+    async def invitation_update(self, event):
+            """Handle invitation count updates"""
+            await self.send_counts()

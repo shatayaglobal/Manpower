@@ -27,8 +27,8 @@ export interface ChangePasswordData {
   new_password: string;
 }
 
-// User Interface (matches Django model)
 export interface User {
+  profile: string;
   id: string;
   email: string;
   name?: string;

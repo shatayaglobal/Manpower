@@ -1,6 +1,5 @@
 "use client";
 
-import type React from "react";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -20,13 +19,21 @@ import Link from "next/link";
 import { useAuthSlice } from "@/lib/redux/use-auth";
 import { useAuthState } from "@/lib/redux/redux";
 import { toast } from "sonner";
-import { AuthError, Google, GoogleCredentialResponse } from "@/lib/types";
 import AccountTypeModal from "@/components/account-type-modal";
 
-declare global {
-  interface Window {
-    google?: Google;
-  }
+interface GoogleCredentialResponse {
+  credential: string;
+}
+
+interface AuthError {
+  message?: string;
+  googleLoginRequired?: boolean;
+  status?: number;
+}
+
+interface AuthResult {
+  success: boolean;
+  error?: AuthError;
 }
 
 export default function SignInPage() {
@@ -37,44 +44,30 @@ export default function SignInPage() {
     useAuthState();
 
   const [showAccountTypeModal, setShowAccountTypeModal] = useState(false);
-  const [pendingGoogleCredential, setPendingGoogleCredential] = useState<
-    string | null
-  >(null);
+  const [pendingGoogleCredential, setPendingGoogleCredential] = useState<string | null>(null);
   const [isGoogleButtonReady, setIsGoogleButtonReady] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
 
   useEffect(() => {
     const registered = searchParams.get("registered");
-    if (registered === "true") {
-      toast.success(
-        "Registration successful! Please sign in with your credentials."
-      );
-      if (typeof window !== "undefined") {
-        const url = new URL(window.location.href);
-        url.searchParams.delete("registered");
-        window.history.replaceState({}, "", url.toString());
-      }
-    }
-
     const loginSuccess = searchParams.get("loginSuccess");
-    if (loginSuccess === "true") {
-      toast.success("Login successful! Welcome back.");
-      if (typeof window !== "undefined") {
-        const url = new URL(window.location.href);
-        url.searchParams.delete("loginSuccess");
-        window.history.replaceState({}, "", url.toString());
-      }
+
+    if (registered === "true" || loginSuccess === "true") {
+      toast.success(
+        registered === "true"
+          ? "Registration successful! Please sign in."
+          : "Welcome back!"
+      );
+      const url = new URL(window.location.href);
+      url.searchParams.delete("registered");
+      url.searchParams.delete("loginSuccess");
+      window.history.replaceState({}, "", url.toString());
     }
   }, [searchParams]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      router.push("/home");
-    }
+    if (isAuthenticated) router.push("/home");
   }, [isAuthenticated, router]);
 
   useEffect(() => {
@@ -82,101 +75,73 @@ export default function SignInPage() {
     clearAuthError();
   }, [resetLoading, clearAuthError]);
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: "email" | "password", value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    if (error) {
-      clearAuthError();
-    }
+    if (error) clearAuthError();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.email || !formData.password) return;
 
-    const result = await login(formData);
+    const result = (await login(formData)) as AuthResult;
 
     if (result.success) {
-      toast.success("Login successful! Welcome back.");
+      toast.success("Welcome back!");
       setTimeout(() => router.push("/home"), 100);
     } else {
-      const error = result.error as AuthError;
-      if (error?.googleLoginRequired) {
+      const err = result.error;
+      if (err?.googleLoginRequired) {
         toast.error(
-          "This account was created with Google. Please use the 'Continue with Google' button above.",
-          { duration: 6000 }
+          "This account was created with Google. Please use the Google button.",
+          { duration: 7000 }
         );
       } else {
-        toast.error(error?.message || "Login failed. Please try again.");
+        toast.error(err?.message || "Login failed. Please try again.");
       }
     }
   };
 
   const handleCredentialResponse = useCallback(
     async (response: GoogleCredentialResponse) => {
-      try {
-        const result = await googleAuth({
-          credential: response.credential,
-          token: "",
-        });
+      const result = (await googleAuth({
+        credential: response.credential,
+        token: "",
+      })) as AuthResult;
 
-        if (result.success) {
-          toast.success("Login successful! Welcome back.");
-          setTimeout(() => router.push("/home"), 100);
+      if (result.success) {
+        toast.success("Signed in with Google!");
+        setTimeout(() => router.push("/home"), 100);
+      } else {
+        const err = result.error;
+        if (err?.status === 404) {
+          setPendingGoogleCredential(response.credential);
+          setShowAccountTypeModal(true);
         } else {
-          const errorData = result.error as AuthError;
-          if (errorData?.status === 404) {
-            setPendingGoogleCredential(response.credential);
-            setShowAccountTypeModal(true);
-          } else {
-            toast.error(
-              errorData?.message || "Google sign-in failed. Please try again."
-            );
-          }
+          toast.error(err?.message || "Google sign-in failed");
         }
-      } catch {
-        toast.error("An error occurred during Google sign-in.");
       }
     },
     [googleAuth, router]
   );
 
-  const handleAccountTypeSelect = async (
-    accountType: "WORKER" | "BUSINESS"
-  ) => {
+  const handleAccountTypeSelect = async (type: "WORKER" | "BUSINESS") => {
     if (!pendingGoogleCredential) return;
 
-    try {
-      const result = await googleAuth({
-        credential: pendingGoogleCredential,
-        token: "",
-        account_type: accountType,
-      });
+    const result = (await googleAuth({
+      credential: pendingGoogleCredential,
+      token: "",
+      account_type: type,
+    })) as AuthResult;
 
-      if (result.success) {
-        setShowAccountTypeModal(false);
-        setPendingGoogleCredential(null);
-        const accountTypeName =
-          accountType === "WORKER" ? "Worker" : "Business";
-        toast.success(
-          `Account created! Welcome to your ${accountTypeName} account.`
-        );
-        setTimeout(() => router.push("/home"), 100);
-      } else {
-        toast.error("Account creation failed. Please try again.");
-        setShowAccountTypeModal(false);
-        setPendingGoogleCredential(null);
-      }
-    } catch {
-      toast.error("An error occurred during account creation.");
+    if (result.success) {
       setShowAccountTypeModal(false);
       setPendingGoogleCredential(null);
+      toast.success(
+        `Welcome to your ${type === "WORKER" ? "Worker" : "Business"} account!`
+      );
+      setTimeout(() => router.push("/home"), 100);
     }
-  };
-
-  const handleAccountTypeCancel = () => {
-    setShowAccountTypeModal(false);
-    setPendingGoogleCredential(null);
-    toast.info("Sign-in cancelled.");
   };
 
   useEffect(() => {
@@ -187,60 +152,50 @@ export default function SignInPage() {
     document.head.appendChild(script);
 
     script.onload = () => {
-      if (window.google) {
-        try {
-          window.google.accounts.id.initialize({
-            client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
-            callback: handleCredentialResponse,
-            auto_select: false,
-            cancel_on_tap_outside: true,
-          });
+      type GoogleGIS = {
+        accounts: {
+          id: {
+            initialize: (config: {
+              client_id: string;
+              callback: (resp: GoogleCredentialResponse) => void;
+              auto_select?: boolean;
+              cancel_on_tap_outside?: boolean;
+            }) => void;
+            renderButton: (
+              el: HTMLElement,
+              options: { theme: string; size: string; width?: string }
+            ) => void;
+          };
+        };
+      };
 
-          // Render mobile button
-          const mobileButtonContainer = document.getElementById(
-            "google-signin-button-mobile"
-          );
-          if (mobileButtonContainer) {
-            const containerWidth =
-              mobileButtonContainer.parentElement?.offsetWidth || 400;
+      const google = window.google as unknown as GoogleGIS | undefined;
 
-            window.google.accounts.id.renderButton(mobileButtonContainer, {
+      if (google?.accounts?.id) {
+        google.accounts.id.initialize({
+          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
+          callback: handleCredentialResponse,
+          auto_select: false,
+          cancel_on_tap_outside: true,
+        });
+
+        ["mobile", "desktop"].forEach((type) => {
+          const el = document.getElementById(`google-signin-button-${type}`);
+          if (el) {
+            google.accounts.id.renderButton(el, {
               theme: "outline",
               size: "large",
-              width: containerWidth.toString(),
+              width: "100%",
             });
           }
+        });
 
-          // Render desktop button
-          const desktopButtonContainer = document.getElementById(
-            "google-signin-button-desktop"
-          );
-          if (desktopButtonContainer) {
-            const containerWidth =
-              desktopButtonContainer.parentElement?.offsetWidth || 400;
-
-            window.google.accounts.id.renderButton(desktopButtonContainer, {
-              theme: "outline",
-              size: "large",
-              width: containerWidth.toString(),
-            });
-          }
-
-          setIsGoogleButtonReady(true);
-        } catch {
-          setIsGoogleButtonReady(true);
-        }
+        setIsGoogleButtonReady(true);
       }
-    };
-
-    script.onerror = () => {
-      setIsGoogleButtonReady(true);
     };
 
     return () => {
-      if (document.head.contains(script)) {
-        document.head.removeChild(script);
-      }
+      document.head.contains(script) && document.head.removeChild(script);
     };
   }, [handleCredentialResponse]);
 
@@ -249,228 +204,156 @@ export default function SignInPage() {
       <AccountTypeModal
         open={showAccountTypeModal}
         onSelect={handleAccountTypeSelect}
-        onCancel={handleAccountTypeCancel}
+        onCancel={() => {
+          setShowAccountTypeModal(false);
+          setPendingGoogleCredential(null);
+        }}
         isLoading={isGoogleAuthLoading}
       />
-      <div className="bg-gradient-to-br from-white via-slate-50/20 to-amber-50/15 min-h-screen sm:py-4 lg:py-12">
-        <div className="flex items-center justify-center min-h-screen py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
-          <div className="w-full max-w-md space-y-4 sm:space-y-6 lg:space-y-8">
-            {/* Header */}
-            <div className="text-center space-y-2 sm:space-y-3 lg:space-y-4">
-              <h1 className="font-bold text-2xl sm:text-3xl lg:text-4xl text-gray-900">
-                Welcome Back
-              </h1>
-              <p className="text-gray-600 text-sm sm:text-base px-2">
-                Sign in to your account to continue connecting talent with
-                opportunity
-              </p>
-            </div>
 
-            {/* Sign In Card */}
-            <Card className="border-0 shadow-lg bg-white">
-              <CardHeader className="space-y-2 sm:space-y-3 lg:space-y-4 pb-3 sm:pb-4 lg:pb-6 px-4 sm:px-6 pt-4 sm:pt-6">
-                <CardTitle className="text-xl sm:text-2xl font-semibold text-center text-gray-900">
-                  Sign In
-                </CardTitle>
-                <CardDescription className="text-center text-gray-600 text-xs sm:text-sm lg:text-base">
-                  Access your account with email or Google
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4 sm:space-y-5 lg:space-y-6 px-4 sm:px-6 pb-4 sm:pb-6">
-                {/* Error Display */}
-                {error && (
-                  <Alert variant="destructive" className="py-2 sm:py-3">
-                    <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <AlertDescription className="text-xs sm:text-sm">
-                      {error.message}
-                    </AlertDescription>
-                  </Alert>
-                )}
-                {/* Google Sign In Button */}
-                <div className="space-y-2">
-                  {/* Mobile: Full width, safe padding */}
-                  <div className="px-4 lg:hidden">
-                    <div className="w-full min-h-[44px] flex items-center justify-center">
-                      {!isGoogleButtonReady ? (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-50 border border-gray-200 rounded-md">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-                        </div>
-                      ) : null}
-                      <div
-                        id="google-signin-button-mobile"
-                        className={
-                          !isGoogleButtonReady ? "opacity-0" : "w-full"
-                        }
-                      ></div>
-                    </div>
-                  </div>
-
-                  {/* Desktop: Centered */}
-                  <div className="hidden lg:block px-0">
-                    <div className="mx-auto max-w-lg xl:max-w-xl min-h-[44px] flex items-center justify-center">
-                      {!isGoogleButtonReady ? (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-50 border border-gray-200 rounded-md">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-                        </div>
-                      ) : null}
-                      <div
-                        id="google-signin-button-desktop"
-                        className={
-                          !isGoogleButtonReady ? "opacity-0" : "w-full"
-                        }
-                      ></div>
-                    </div>
-                  </div>
-
-                  <p className="text-xs text-gray-500 text-center px-2">
-                    Google sign-in creates a Worker account
-                  </p>
-                </div>
-                {/* Divider */}
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <Separator className="w-full" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-white px-2 text-gray-500">
-                      Or continue with email
-                    </span>
-                  </div>
-                </div>
-
-                {/* Sign In Form */}
-                <form
-                  onSubmit={handleSubmit}
-                  className="space-y-3 sm:space-y-4"
-                >
-                  {/* Email Field */}
-                  <div className="space-y-1.5 sm:space-y-2">
-                    <Label
-                      htmlFor="email"
-                      className="text-xs sm:text-sm font-medium text-gray-700"
-                    >
-                      Email Address
-                    </Label>
-                    <div className="relative">
-                      <Mail className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="john.doe@example.com"
-                        value={formData.email}
-                        onChange={(e) =>
-                          handleInputChange("email", e.target.value)
-                        }
-                        className={`pl-8 sm:pl-10 h-10 sm:h-11 text-sm sm:text-base ${
-                          error?.errors?.email ? "border-red-300" : ""
-                        }`}
-                        required
-                        disabled={isLoginLoading || isGoogleAuthLoading}
-                      />
-                    </div>
-                    {error?.errors?.email && (
-                      <p className="text-xs text-red-600">
-                        {error.errors.email[0]}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Password Field */}
-                  <div className="space-y-1.5 sm:space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label
-                        htmlFor="password"
-                        className="text-xs sm:text-sm font-medium text-gray-700"
-                      >
-                        Password
-                      </Label>
-                      <Link
-                        href="/forgot-password"
-                        className="text-xs text-blue-500 hover:text-blue-600 underline"
-                      >
-                        Forgot password?
-                      </Link>
-                    </div>
-                    <div className="relative">
-                      <Lock className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
-                      <Input
-                        id="password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Enter your password"
-                        value={formData.password}
-                        onChange={(e) =>
-                          handleInputChange("password", e.target.value)
-                        }
-                        className={`pl-8 sm:pl-10 pr-9 sm:pr-10 h-10 sm:h-11 text-sm sm:text-base ${
-                          error?.errors?.password ? "border-red-300" : ""
-                        }`}
-                        required
-                        disabled={isLoginLoading || isGoogleAuthLoading}
-                      />
-                      <button
-                        type="button"
-                        className="absolute right-2.5 sm:right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                        onClick={() => setShowPassword(!showPassword)}
-                        disabled={isLoginLoading || isGoogleAuthLoading}
-                      >
-                        {showPassword ? (
-                          <EyeOff className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                        ) : (
-                          <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                        )}
-                      </button>
-                    </div>
-                    {error?.errors?.password && (
-                      <p className="text-xs text-red-600">
-                        {error.errors.password[0]}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Submit Button */}
-                  <Button
-                    type="submit"
-                    className="w-full bg-blue-500 hover:bg-blue-600 text-white h-10 sm:h-11 text-sm sm:text-base shadow-sm mt-4 sm:mt-6"
-                    disabled={isLoginLoading || isGoogleAuthLoading}
-                  >
-                    {isLoginLoading ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Signing In...
-                      </>
-                    ) : (
-                      <>
-                        Sign In
-                        <ArrowRight className="ml-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                      </>
-                    )}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-
-            {/* Additional Links */}
-            <div className="text-center space-y-2 sm:space-y-3 px-2">
-              <p className="text-xs sm:text-sm text-gray-600">
-                Don&apos;t have an account?{" "}
-                <Link
-                  href="/signup"
-                  className="text-blue-500 hover:text-blue-600 underline font-medium"
-                >
-                  Sign up here
-                </Link>
-              </p>
-              <p className="text-xs sm:text-sm text-gray-600">
-                Need help?{" "}
-                <Link
-                  href="/contact"
-                  className="text-blue-500 hover:text-blue-600 underline"
-                >
-                  Contact Support
-                </Link>
-              </p>
-            </div>
+      <div className="min-h-screen bg-gradient-to-br from-white via-slate-50/20 to-amber-50/15 flex items-center justify-center p-4">
+        <div className="w-full max-w-md space-y-8">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-gray-900">Welcome Back</h1>
+            <p className="mt-2 text-gray-600">Sign in to continue</p>
           </div>
+
+          <Card className="border-0 shadow-xl">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl">Sign In</CardTitle>
+              <CardDescription>Choose your preferred method</CardDescription>
+            </CardHeader>
+
+            <CardContent className="space-y-6">
+              {error && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error.message}</AlertDescription>
+                </Alert>
+              )}
+
+              <div className="space-y-4">
+                <div className="lg:hidden">
+                  <div
+                    id="google-signin-button-mobile"
+                    className={!isGoogleButtonReady ? "opacity-0" : ""}
+                  />
+                </div>
+                <div className="hidden lg:block">
+                  <div
+                    id="google-signin-button-desktop"
+                    className={!isGoogleButtonReady ? "opacity-0" : ""}
+                  />
+                </div>
+                <p className="text-xs text-center text-gray-500">
+                  Google sign-in creates a Worker account
+                </p>
+              </div>
+
+              <div className="relative">
+                <Separator />
+                <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-3 text-xs text-gray-500">
+                  Or continue with email
+                </span>
+              </div>
+
+              <form
+                onSubmit={handleSubmit}
+                className="space-y-5"
+                autoComplete="on"
+                method="post"
+                action="#"
+              >
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                    <Input
+                      id="email"
+                      name="username"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={formData.email}
+                      onChange={(e) =>
+                        handleInputChange("email", e.target.value)
+                      }
+                      className="pl-10"
+                      autoComplete="username"
+                      spellCheck="false"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <Label htmlFor="password">Password</Label>
+                    <Link
+                      href="/forgot-password"
+                      className="text-xs text-blue-600 hover:underline"
+                      tabIndex={-1}
+                    >
+                      Forgot?
+                    </Link>
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                    <Input
+                      id="password"
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter your password"
+                      value={formData.password}
+                      onChange={(e) =>
+                        handleInputChange("password", e.target.value)
+                      }
+                      className="pl-10 pr-10"
+                      autoComplete="current-password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                      tabIndex={-1}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full h-11 bg-blue-500 hover:bg-blue-600"
+                  disabled={isLoginLoading || isGoogleAuthLoading}
+                >
+                  {isLoginLoading ? (
+                    "Signing in..."
+                  ) : (
+                    <>
+                      Sign In
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          <p className="text-center text-sm text-gray-600">
+            No account?{" "}
+            <Link
+              href="/signup"
+              className="font-medium text-blue-600 hover:underline"
+            >
+              Sign up
+            </Link>
+          </p>
         </div>
       </div>
     </>

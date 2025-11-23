@@ -23,7 +23,6 @@ import { Business } from "@/lib/business-types";
 import { BUSINESS_CATEGORIES } from "@/lib/business-types";
 import { useRouter } from "next/navigation";
 
-// TypeScript Interfaces
 interface CompanyCardProps {
   company: Business;
   onViewDetails: (company: Business) => void;
@@ -40,7 +39,7 @@ const BrowseCompaniesPage: React.FC = () => {
   const [selectedCompany, setSelectedCompany] = useState<Business | null>(null);
   const router = useRouter();
 
-  // Redux hooks
+
   const {
     businesses,
     loading,
@@ -51,18 +50,15 @@ const BrowseCompaniesPage: React.FC = () => {
     setFilters,
   } = useBusiness();
 
-  // Load businesses on component mount
   useEffect(() => {
     loadBusinesses();
   }, [loadBusinesses]);
 
-  // Update local state when Redux filters change
   useEffect(() => {
     setLocalSearchTerm(filters.search);
     setLocalFilterCategory(filters.category);
   }, [filters]);
 
-  // Apply filters with debouncing
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       setFilters({

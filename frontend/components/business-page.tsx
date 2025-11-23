@@ -23,16 +23,12 @@ import { Business, BusinessFormData } from "@/lib/business-types";
 import { BUSINESS_CATEGORIES } from "@/lib/business-types";
 import { toast } from "sonner";
 import Link from "next/link";
+import { WorkplaceLocationSettings } from "./business-location-settings";
+import { AddressAutocomplete } from "./address-auto-complete";
 
 interface BusinessModalProps {
   business: Business | null;
   onClose: () => void;
-}
-
-interface VerificationStatus {
-  text: string;
-  color: string;
-  icon: React.ComponentType<{ className?: string }>;
 }
 
 interface Step {
@@ -62,23 +58,6 @@ const MyBusinessPage: React.FC = () => {
   useEffect(() => {
     loadBusinesses();
   }, [loadBusinesses]);
-
-  // const getVerificationStatus = (status: string): VerificationStatus => {
-  //   switch (status) {
-  //     case "verified":
-  //       return { text: "Verified", color: "green", icon: CheckCircle };
-  //     case "documents_pending":
-  //       return {
-  //         text: "Documents Required",
-  //         color: "yellow",
-  //         icon: AlertCircle,
-  //       };
-  //     case "under_review":
-  //       return { text: "Under Review", color: "blue", icon: Clock };
-  //     default:
-  //       return { text: "Not Verified", color: "gray", icon: XCircle };
-  //   }
-  // };
 
   const BusinessModal: React.FC<BusinessModalProps> = ({
     business,
@@ -408,26 +387,36 @@ const MyBusinessPage: React.FC = () => {
               <div className="space-y-3 sm:space-y-4">
                 <div>
                   <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                    Address *
+                    Business Address *
                   </label>
-                  <textarea
+                  <AddressAutocomplete
                     value={formData.address}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                      setFormData({ ...formData, address: e.target.value })
+                    onChange={(address) =>
+                      setFormData({ ...formData, address })
                     }
-                    rows={2}
-                    className={`w-full px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base ${
-                      errors.address ? "border-red-300" : "border-gray-300"
-                    }`}
-                    placeholder="Street address, building, floor"
+                    onPlaceSelected={(place) => {
+                      setFormData({
+                        ...formData,
+                        address: place.address,
+                        city: place.city,
+                        country: place.country,
+                        postal_code: place.postal_code || formData.postal_code,
+                        workplace_latitude: Number(place.latitude.toFixed(6)),
+                        workplace_longitude: Number(place.longitude.toFixed(6)),
+                      });
+                    }}
                   />
                   {errors.address && (
                     <p className="text-red-600 text-xs sm:text-sm mt-1">
                       {errors.address}
                     </p>
                   )}
+                  <p className="text-xs text-gray-500 mt-1">
+                    Start typing to search for your address
+                  </p>
                 </div>
 
+                {/* City and Country are now auto-filled but still editable */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
@@ -436,7 +425,7 @@ const MyBusinessPage: React.FC = () => {
                     <input
                       type="text"
                       value={formData.city}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      onChange={(e) =>
                         setFormData({ ...formData, city: e.target.value })
                       }
                       className={`w-full px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base ${
@@ -458,7 +447,7 @@ const MyBusinessPage: React.FC = () => {
                     <input
                       type="text"
                       value={formData.country}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      onChange={(e) =>
                         setFormData({ ...formData, country: e.target.value })
                       }
                       className={`w-full px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base ${
@@ -480,7 +469,7 @@ const MyBusinessPage: React.FC = () => {
                     <input
                       type="text"
                       value={formData.postal_code}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      onChange={(e) =>
                         setFormData({
                           ...formData,
                           postal_code: e.target.value,
@@ -491,6 +480,21 @@ const MyBusinessPage: React.FC = () => {
                     />
                   </div>
                 </div>
+
+                {/* Show coordinates preview if set */}
+                {formData.workplace_latitude &&
+                  formData.workplace_longitude && (
+                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-sm text-green-900 font-medium flex items-center">
+                        <MapPin className="w-4 h-4 mr-1" />
+                        Workplace Location Automatically Set
+                      </p>
+                      <p className="text-xs text-green-700 mt-1">
+                        Coordinates: {formData.workplace_latitude.toFixed(6)},{" "}
+                        {formData.workplace_longitude.toFixed(6)}
+                      </p>
+                    </div>
+                  )}
 
                 <div>
                   <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
@@ -700,11 +704,10 @@ const MyBusinessPage: React.FC = () => {
     );
   }
 
-  // No business created yet - show setup wizard
   if (!hasBusiness) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
           <div className="text-center mb-6 sm:mb-10">
             <Building2 className="w-12 sm:w-16 h-12 sm:h-16 text-blue-500 mx-auto mb-4 sm:mb-6" />
             <h1 className="text-xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
@@ -800,26 +803,21 @@ const MyBusinessPage: React.FC = () => {
     );
   }
 
-  // Business exists - show dashboard
-  // const verification = getVerificationStatus(
-  //   business.verification_status || "not_started"
-  // );
-  // const StatusIcon = verification.icon;
-
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
+        {/* Error Alert */}
         {error && (
           <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
             <div className="flex">
               <AlertCircle className="h-5 w-5 text-red-600 mr-2" />
               <div>
-                <p className="text-xs sm:text-sm text-red-600">{error}</p>
+                <p className="text-sm text-red-600">{error}</p>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={clearBusinessError}
-                  className="mt-2 border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600 text-xs sm:text-sm"
+                  className="mt-2"
                 >
                   Dismiss
                 </Button>
@@ -828,228 +826,188 @@ const MyBusinessPage: React.FC = () => {
           </div>
         )}
 
-        {/* Business Header */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-            <div className="flex-1 space-y-3 sm:space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 truncate">
-                  {business.name}
-                </h1>
-                {/* <span
-                  className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium
-                  ${
-                    verification.color === "green"
-                      ? "bg-green-100 text-green-800"
-                      : ""
-                  }
-                  ${
-                    verification.color === "yellow"
-                      ? "bg-amber-50 text-amber-700"
-                      : ""
-                  }
-                  ${
-                    verification.color === "blue"
-                      ? "bg-blue-50 text-blue-500 border-blue-200"
-                      : ""
-                  }
-                  ${
-                    verification.color === "gray"
-                      ? "bg-gray-100 text-gray-800"
-                      : ""
-                  }
-                `}
-                >
-                  <StatusIcon className="w-3 sm:w-4 h-3 sm:h-4 mr-1" />
-                  {verification.text}
-                </span> */}
-              </div>
-              <p className="text-gray-500 text-xs sm:text-sm">
-                {business.business_id}
-              </p>
-              <p className="text-gray-600 text-sm sm:text-base">
-                {business.description}
-              </p>
-            </div>
-            <div className="flex justify-end sm:items-start">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  selectBusiness(business);
-                  setShowCreateModal(true);
-                }}
-                className="w-full sm:w-auto border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600 text-sm sm:text-base"
-              >
-                <Edit2 className="w-3 sm:w-4 h-3 sm:h-4 mr-2 text-blue-500" />
-                Edit Business
-              </Button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 mt-4 sm:mt-6">
-            <div className="flex items-center">
-              <MapPin className="w-4 sm:w-5 h-4 sm:h-5 text-amber-600 mr-2" />
-              <span className="text-gray-700 text-sm sm:text-base">
-                {business.city}, {business.country}
-              </span>
-            </div>
-            <div className="flex items-center">
-              <Mail className="w-4 sm:w-5 h-4 sm:h-5 text-amber-600 mr-2" />
-              <span className="text-gray-700 text-sm sm:text-base">
-                {business.email}
-              </span>
-            </div>
-            <div className="flex items-center">
-              <Phone className="w-4 sm:w-5 h-4 sm:h-5 text-amber-600 mr-2" />
-              <span className="text-gray-700 text-sm sm:text-base">
-                {business.phone}
-              </span>
-            </div>
-          </div>
-
-          {/* After the existing grid with MapPin, Mail, Phone */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 mt-3 sm:mt-4">
-            <div className="flex items-center">
-              <Building2 className="w-4 sm:w-5 h-4 sm:h-5 text-amber-600 mr-2" />
-              <span className="text-gray-700 text-sm sm:text-base">
-                {business.size === "SMALL" && "1-10 employees"}
-                {business.size === "MEDIUM" && "11-50 employees"}
-                {business.size === "LARGE" && "51-200 employees"}
-                {business.size === "ENTERPRISE" && "200+ employees"}
-              </span>
-            </div>
-            {business.service_time && (
-              <div className="flex items-center">
-                <Clock className="w-4 sm:w-5 h-4 sm:h-5 text-amber-600 mr-2" />
-                <span className="text-gray-700 text-sm sm:text-base">
-                  {business.service_time}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+        {/* 1. Quick Stats — Top Row */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-lg sm:text-2xl font-bold text-gray-900">
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900">
                   {business.staff_count || 0}
                 </p>
-                <p className="text-gray-600 text-xs sm:text-sm">Total Staff</p>
+                <p className="text-gray-600 text-sm">Total Staff</p>
               </div>
-              <div className="w-8 sm:w-12 h-8 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Users className="w-4 sm:w-6 h-4 sm:h-6 text-blue-500" />
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Users className="w-7 h-7 text-blue-600" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-lg sm:text-2xl font-bold text-gray-900">
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900">
                   {business.active_jobs || 0}
                 </p>
-                <p className="text-gray-600 text-xs sm:text-sm">Active Jobs</p>
+                <p className="text-gray-600 text-sm">Active Jobs</p>
               </div>
-              <div className="w-8 sm:w-12 h-8 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <Briefcase className="w-4 sm:w-6 h-4 sm:h-6 text-green-600" />
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <Briefcase className="w-7 h-7 text-green-600" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-lg sm:text-2xl font-bold text-gray-900">
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900">
                   {business.total_applications || 0}
                 </p>
-                <p className="text-gray-600 text-xs sm:text-sm">Applications</p>
+                <p className="text-gray-600 text-sm">Applications</p>
               </div>
-              <div className="w-8 sm:w-12 h-8 sm:h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <BarChart3 className="w-4 sm:w-6 h-4 sm:h-6 text-purple-600" />
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <BarChart3 className="w-7 h-7 text-purple-600" />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
-          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
+        {/* Quick Actions — Full Width */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 sm:p-6 mb-8">
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-5">
             Quick Actions
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Link
               href="/staff"
-              className="flex items-center p-3 sm:p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+              className="flex items-center p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all group"
             >
-              <div className="w-8 sm:w-10 h-8 sm:h-10 bg-blue-500 rounded-lg flex items-center justify-center mr-3">
-                <Users className="w-4 sm:w-5 h-4 sm:h-5 text-white" />
+              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
+                <Users className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="font-medium text-gray-900 text-sm sm:text-base">
-                  Manage Staff
-                </p>
-                <p className="text-xs sm:text-sm text-gray-600">
-                  Add or edit staff
+                <p className="font-medium text-gray-900">Manage Staff</p>
+                <p className="text-xs text-gray-600">
+                  Add or edit team members
                 </p>
               </div>
             </Link>
 
             <Link
               href="/shifts"
-              className="flex items-center p-3 sm:p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
+              className="flex items-center p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-all group"
             >
-              <div className="w-8 sm:w-10 h-8 sm:h-10 bg-green-500 rounded-lg flex items-center justify-center mr-3">
-                <Calendar className="w-4 sm:w-5 h-4 sm:h-5 text-white" />
+              <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
+                <Calendar className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="font-medium text-gray-900 text-sm sm:text-base">
-                  Schedule Shifts
-                </p>
-                <p className="text-xs sm:text-sm text-gray-600">
-                  Plan work schedules
-                </p>
+                <p className="font-medium text-gray-900">Schedule Shifts</p>
+                <p className="text-xs text-gray-600">Plan work schedules</p>
               </div>
             </Link>
 
             <Link
               href="/jobs/create"
-              className="flex items-center p-3 sm:p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors"
+              className="flex items-center p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-all group"
             >
-              <div className="w-8 sm:w-10 h-8 sm:h-10 bg-purple-500 rounded-lg flex items-center justify-center mr-3">
-                <Briefcase className="w-4 sm:w-5 h-4 sm:h-5 text-white" />
+              <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
+                <Briefcase className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="font-medium text-gray-900 text-sm sm:text-base">
-                  Post Job
-                </p>
-                <p className="text-xs sm:text-sm text-gray-600">
-                  Create job listing
-                </p>
+                <p className="font-medium text-gray-900">Post Job</p>
+                <p className="text-xs text-gray-600">Create new job listing</p>
               </div>
             </Link>
 
+            {/* Fixed: Added missing </p> and proper structure */}
             <Link
               href="/manage-applications"
-              className="flex items-center p-3 sm:p-4 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors"
+              className="flex items-center p-4 bg-orange-50 hover:bg-orange-100 rounded-lg transition-all group"
             >
-              <div className="w-8 sm:w-10 h-8 sm:h-10 bg-orange-500 rounded-lg flex items-center justify-center mr-3">
-                <BarChart3 className="w-4 sm:w-5 h-4 sm:h-5 text-white" />
+              <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
+                <BarChart3 className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="font-medium text-gray-900 text-sm sm:text-base">
-                  Applications
-                </p>
-                <p className="text-xs sm:text-sm text-gray-600">
-                  Review applicants
-                </p>
+                <p className="font-medium text-gray-900">Applications</p>
+                <p className="text-xs text-gray-600">Review applicants</p>
               </div>
             </Link>
           </div>
         </div>
 
+        {/* 3. Business Info + Workplace Settings — Side by Side */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+          {/* Business Header Card */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 sm:p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                  {business.name}
+                </h1>
+                <p className="text-sm text-gray-500 mt-1">
+                  {business.business_id}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  selectBusiness(business);
+                  setShowCreateModal(true);
+                }}
+              >
+                <Edit2 className="w-4 h-4 mr-2" />
+                Edit
+              </Button>
+            </div>
+
+            {business.description && (
+              <p className="text-gray-600 text-sm sm:text-base mb-5">
+                {business.description}
+              </p>
+            )}
+
+            <div className="space-y-3 text-sm">
+              <div className="flex items-center text-gray-700">
+                <MapPin className="w-4 h-4 mr-2 text-amber-600" />
+                {business.city}, {business.country}
+              </div>
+              <div className="flex items-center text-gray-700">
+                <Mail className="w-4 h-4 mr-2 text-amber-600" />
+                {business.email}
+              </div>
+              <div className="flex items-center text-gray-700">
+                <Phone className="w-4 h-4 mr-2 text-amber-600" />
+                {business.phone}
+              </div>
+              <div className="flex items-center text-gray-700">
+                <Building2 className="w-4 h-4 mr-2 text-amber-600" />
+                {business.size === "SMALL" && "1–10 employees"}
+                {business.size === "MEDIUM" && "11–50 employees"}
+                {business.size === "LARGE" && "51–200 employees"}
+                {business.size === "ENTERPRISE" && "200+ employees"}
+              </div>
+              {business.service_time && (
+                <div className="flex items-center text-gray-700">
+                  <Clock className="w-4 h-4 mr-220 text-amber-600" />
+                  {business.service_time}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Workplace Location Settings */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 sm:p-6">
+            <WorkplaceLocationSettings
+              business={business}
+              onUpdate={async (data) => {
+                await editBusiness(business.id, data);
+                loadBusinesses();
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Modal */}
         {showCreateModal && (
           <BusinessModal
             business={selectedBusiness}

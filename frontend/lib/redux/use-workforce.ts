@@ -27,6 +27,12 @@ import {
   clearStaffError,
   clearShiftError,
   clearHoursError,
+  fetchMyShifts,
+  fetchMyHoursCards,
+  clockInAction,
+  clockOutAction,
+  signHoursCardAction,
+  approveSignedHoursCardAction,
 } from "./workforceSlice";
 import {
   StaffFormData,
@@ -36,7 +42,8 @@ import {
   HoursCard,
   StaffFilters,
   ShiftFilters,
-  HoursCardFilters
+  HoursCardFilters,
+  ClockInParams,
 } from "@/lib/workforce-types";
 
 // Query params type
@@ -66,6 +73,11 @@ interface RootState {
       hasNext: boolean;
       hasPrevious: boolean;
     };
+    myStaffProfile: BusinessStaff | null;
+    myShifts: Shift[];
+    myHoursCards: HoursCard[];
+    todayHoursCard: HoursCard | null;
+
     shifts: Shift[];
     selectedShift: Shift | null;
     shiftLoading: boolean;
@@ -111,6 +123,9 @@ export const useWorkforce = () => {
     shiftFilters,
     shiftPagination,
     hoursCards,
+    myShifts,
+    myHoursCards,
+    todayHoursCard,
     selectedHoursCard,
     hoursLoading,
     hoursError,
@@ -278,6 +293,49 @@ export const useWorkforce = () => {
     dispatch(clearHoursError());
   }, [dispatch]);
 
+  // Worker methods
+  const loadMyShifts = useCallback(() => {
+    return dispatch(fetchMyShifts());
+  }, [dispatch]);
+
+  const loadMyHoursCards = useCallback(() => {
+    return dispatch(fetchMyHoursCards());
+  }, [dispatch]);
+
+  const clockIn = useCallback(
+    (data?: ClockInParams) => {
+      return dispatch(clockInAction(data));
+    },
+    [dispatch]
+  );
+
+  const clockOut = useCallback(
+    (hoursCardId: string, notes?: string) => {
+      return dispatch(clockOutAction({ hoursCardId, notes }));
+    },
+    [dispatch]
+  );
+
+  const signHoursCard = useCallback(
+    (hoursCardId: string, signature: string) => {
+      return dispatch(signHoursCardAction({ hoursCardId, signature }));
+    },
+    [dispatch]
+  );
+
+  const approveSignedHoursCard = useCallback(
+    (
+      hoursCardId: string,
+      status: "APPROVED" | "REJECTED",
+      rejectionReason?: string
+    ) => {
+      return dispatch(
+        approveSignedHoursCardAction({ hoursCardId, status, rejectionReason })
+      );
+    },
+    [dispatch]
+  );
+
   return {
     // Staff
     staff,
@@ -295,6 +353,16 @@ export const useWorkforce = () => {
     updateStaffFilters,
     resetStaffFilters: resetStaffFiltersAction,
     clearStaffError: clearStaffErrorAction,
+
+    // Worker data
+    myShifts,
+    myHoursCards,
+    todayHoursCard,
+    loadMyShifts,
+    loadMyHoursCards,
+    clockIn,
+    clockOut,
+    signHoursCard,
 
     // Shifts
     shifts,
@@ -323,6 +391,7 @@ export const useWorkforce = () => {
     loadHoursCards,
     approveHours,
     rejectHours,
+    approveSignedHoursCard,
     selectHoursCard,
     updateHoursFilters,
     resetHoursFilters: resetHoursFiltersAction,

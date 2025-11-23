@@ -152,4 +152,58 @@ export const workforceApi = {
     );
     return response.data;
   },
+  // Worker APIs - for workers to view/manage their own data
+getMyShifts: async () => {
+  const response = await axiosInstance.get<Shift[]>("workforce/my-shifts/");
+  return response.data;
+},
+
+getMyHoursCards: async () => {
+  const response = await axiosInstance.get<HoursCard[]>("workforce/my-hours/");
+  return response.data;
+},
+
+clockIn: async (data?: {
+  staff_id?: string;
+  notes?: string;
+  latitude?: number;
+  longitude?: number;
+  timezone_offset?: number;
+}) => {
+  const response = await axiosInstance.post<HoursCard>(
+    "workforce/clock-in/",
+    data || {}
+  );
+  return response.data;
+},
+
+clockOut: async (hoursCardId: string, notes?: string) => {
+  const response = await axiosInstance.post<HoursCard>(
+    `workforce/hours-cards/${hoursCardId}/clock-out/`,
+    { notes }
+  );
+  return response.data;
+},
+
+signHoursCard: async (hoursCardId: string, signature: string) => {
+  const response = await axiosInstance.post<HoursCard>(
+    `workforce/hours-cards/${hoursCardId}/sign/`,
+    { signature }
+  );
+  return response.data;
+},
+approveSignedHoursCard: async (hoursCardId: string, status: 'APPROVED' | 'REJECTED', rejectionReason?: string) => {
+  const response = await axiosInstance.post<HoursCard>(
+    `workforce/hours-cards/${hoursCardId}/approve/`,
+    {
+      status,
+      rejection_reason: rejectionReason
+    }
+  );
+  return response.data;
+},
+
+
+
+
 };

@@ -25,6 +25,8 @@ import {
   MessageCircle,
   Clock,
   Menu,
+  Bell,
+  FileText,
 } from "lucide-react";
 import Link from "next/link";
 import { useAuthState } from "@/lib/redux/redux";
@@ -35,6 +37,7 @@ import { useMessaging } from "@/lib/redux/use-messaging";
 import { websocketActions } from "@/lib/redux/websocket-actions";
 import Image from "next/image";
 import { getCurrentUserThunk } from "@/lib/redux/authSlice";
+import { InvitationBadge } from "./staff-notification-invitation-badge";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -283,7 +286,6 @@ export default function AppLayout({ children }: AppLayoutProps) {
                         href="/companies"
                         className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm flex items-center gap-1"
                       >
-                        <Building className="h-4 w-4" />
                         Companies
                       </Link>
                       <DropdownMenu>
@@ -320,6 +322,44 @@ export default function AppLayout({ children }: AppLayoutProps) {
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm flex items-center gap-1">
+                            My Work
+                            <ChevronDown className="h-3 w-3 opacity-70" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuItem asChild>
+                            <Link
+                              href="/worker-dashboard"
+                              className="flex items-center"
+                            >
+                              <Clock className="mr-2 h-4 w-4" />
+                              Dashboard & Clock
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link
+                              href="/my-hours"
+                              className="flex items-center"
+                            >
+                              <FileText className="mr-2 h-4 w-4" />
+                              My Hours
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link
+                              href="/my-shifts"
+                              className="flex items-center"
+                            >
+                              <Calendar className="mr-2 h-4 w-4" />
+                              My Shifts
+                            </Link>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                      <InvitationBadge />
                     </>
                   )}
                   <Link
@@ -509,6 +549,22 @@ export default function AppLayout({ children }: AppLayoutProps) {
                             </>
                           )}
                         </MobileNavAccordion>
+                        {isWorkerUser && (
+                          <MobileNavAccordion
+                            title="My Work"
+                            icon={<Clock className="h-4 w-4" />}
+                          >
+                            <MobileNavItem href="/worker-dashboard">
+                              Dashboard & Clock
+                            </MobileNavItem>
+                            <MobileNavItem href="/my-hours">
+                              My Hours
+                            </MobileNavItem>
+                            <MobileNavItem href="/my-shifts">
+                              My Shifts
+                            </MobileNavItem>
+                          </MobileNavAccordion>
+                        )}
 
                         {/* WORKFORCE SECTION (only business) */}
                         {isBusinessUser && (
@@ -545,6 +601,17 @@ export default function AppLayout({ children }: AppLayoutProps) {
                             )}
                           </Link>
                         </DropdownMenuItem>
+                        {isWorkerUser && (
+                          <DropdownMenuItem asChild>
+                            <Link
+                              href="/invitations"
+                              className="flex items-center gap-2 py-2 px-4 text-sm"
+                            >
+                              <Bell className="h-4 w-4" />
+                              Invitations
+                            </Link>
+                          </DropdownMenuItem>
+                        )}
 
                         {/* BLOG */}
                         <DropdownMenuItem asChild>

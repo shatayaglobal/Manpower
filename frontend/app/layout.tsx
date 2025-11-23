@@ -5,6 +5,7 @@ import "./globals.css";
 import Navbar from "@/components/navbar";
 import ReduxProvider from "@/lib/redux/redux-provider";
 import { Toaster } from "sonner";
+import GoogleMapsScript from "@/components/google-map-script";
 
 const playfairDisplay = Playfair_Display({
   subsets: ["latin"],
@@ -40,8 +41,9 @@ export default function RootLayout({
       <body className="font-sans">
         <ReduxProvider>
           <Navbar>
+            <GoogleMapsScript />
             {children}
-            <Toaster position="top-right" duration={3000} theme="light"/>
+            <Toaster position="top-right" duration={3000} theme="light" />
           </Navbar>
         </ReduxProvider>
       </body>
