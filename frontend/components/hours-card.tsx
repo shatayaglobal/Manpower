@@ -35,11 +35,17 @@ const HoursManagementPage = () => {
   const [selectedHours, setSelectedHours] = useState<HoursCard | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [showClockInModal, setShowClockInModal] = useState(false);
-  const [expandedWorkers, setExpandedWorkers] = useState<Set<string>>(new Set());
+  const [expandedWorkers, setExpandedWorkers] = useState<Set<string>>(
+    new Set()
+  );
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [detailsHours, setDetailsHours] = useState<HoursCard | null>(null);
 
-  const { businesses, loading: businessLoading, loadBusinesses } = useBusiness();
+  const {
+    businesses,
+    loading: businessLoading,
+    loadBusinesses,
+  } = useBusiness();
   const {
     hoursCards,
     hoursLoading,
@@ -53,7 +59,10 @@ const HoursManagementPage = () => {
   const businessId = business?.id || "";
   const router = useRouter();
 
-  const getFormattedTime = (datetime?: string | null, timeOnly?: string | null): string => {
+  const getFormattedTime = (
+    datetime?: string | null,
+    timeOnly?: string | null
+  ): string => {
     if (datetime) {
       return new Date(datetime).toLocaleTimeString("en-US", {
         hour: "numeric",
@@ -71,18 +80,18 @@ const HoursManagementPage = () => {
     return "";
   };
 
- const calculateTotalHours = (h: HoursCard): number => {
-  if (h.clock_in_datetime && !h.clock_out_datetime) {
-    const now = new Date();
-    const inTime = new Date(h.clock_in_datetime);
-    if (inTime.toDateString() === now.toDateString()) {
-      const diff = (now.getTime() - inTime.getTime()) / (1000 * 60 * 60);
-      return Math.max(0, diff);
+  const calculateTotalHours = (h: HoursCard): number => {
+    if (h.clock_in_datetime && !h.clock_out_datetime) {
+      const now = new Date();
+      const inTime = new Date(h.clock_in_datetime);
+      if (inTime.toDateString() === now.toDateString()) {
+        const diff = (now.getTime() - inTime.getTime()) / (1000 * 60 * 60);
+        return Math.max(0, diff);
+      }
     }
-  }
 
-  return h.total_hours_decimal ?? 0;
-};
+    return h.total_hours_decimal ?? 0;
+  };
 
   const getStatusBadge = (h: HoursCard) => {
     if (h.clock_in && !h.clock_out) {
@@ -127,12 +136,15 @@ const HoursManagementPage = () => {
   };
 
   const groupedWorkers = useMemo(() => {
-    const map = new Map<string, {
-      workerId: string;
-      workerName: string;
-      entries: HoursCard[];
-      totalHours: number;
-    }>();
+    const map = new Map<
+      string,
+      {
+        workerId: string;
+        workerName: string;
+        entries: HoursCard[];
+        totalHours: number;
+      }
+    >();
 
     hoursCards.forEach((card) => {
       const key = card.staff || card.staff_name || "unknown";
@@ -150,8 +162,9 @@ const HoursManagementPage = () => {
     });
 
     map.forEach((group) => {
-      group.entries.sort((a: HoursCard, b: HoursCard) =>
-        new Date(b.date).getTime() - new Date(a.date).getTime()
+      group.entries.sort(
+        (a: HoursCard, b: HoursCard) =>
+          new Date(b.date).getTime() - new Date(a.date).getTime()
       );
     });
 
@@ -167,7 +180,6 @@ const HoursManagementPage = () => {
       loadStaff();
     }
   }, [businessId, loadStaff]);
-
 
   const toggleExpand = (workerId: string) => {
     setExpandedWorkers((prev) => {
@@ -204,7 +216,11 @@ const HoursManagementPage = () => {
     if (!selectedHours || !rejectionReason.trim()) return;
 
     try {
-      await approveSignedHoursCard(selectedHours.id, "REJECTED", rejectionReason);
+      await approveSignedHoursCard(
+        selectedHours.id,
+        "REJECTED",
+        rejectionReason
+      );
       toast.success("Hours rejected");
       setShowRejectModal(false);
       setRejectionReason("");
@@ -221,7 +237,9 @@ const HoursManagementPage = () => {
   };
 
   const pendingCount = hoursCards.filter((h) => h.status === "SIGNED").length;
-  const approvedCount = hoursCards.filter((h) => h.status === "APPROVED").length;
+  const approvedCount = hoursCards.filter(
+    (h) => h.status === "APPROVED"
+  ).length;
   const totalApprovedHours = hoursCards
     .filter((h) => h.status === "APPROVED")
     .reduce((sum, h) => sum + (h.total_hours_decimal || 0), 0);
@@ -232,54 +250,72 @@ const HoursManagementPage = () => {
         <div className="text-center">
           <AlertCircle className="w-20 h-20 text-yellow-500 mx-auto mb-6" />
           <h2 className="text-2xl font-bold mb-4">No Business Profile</h2>
-          <p className="text-gray-600 mb-6">Create a business profile to get started</p>
-          <Button onClick={() => router.push("/business")}>Create Profile</Button>
+          <p className="text-gray-600 mb-6">
+            Create a business profile to get started
+          </p>
+          <Button onClick={() => router.push("/business")}>
+            Create Profile
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="bg-white rounded-lg p-6 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex justify-between items-start mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Hours & Attendance</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Hours & Attendance
+            </h1>
             <p className="text-gray-600 mt-1">Review and approve staff hours</p>
           </div>
-          <Button onClick={() => setShowClockInModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
+          <Button
+            onClick={() => setShowClockInModal(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
             <Plus className="w-4 h-4 mr-2" /> Add Hours
           </Button>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg border p-6 flex items-center">
-            <div className="w-12 h-12 bg-amber-50 rounded-lg flex items-center justify-center mr-4">
-              <Clock className="w-6 h-6 text-amber-600" />
+          {/* Pending Approval */}
+          <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-center justify-between hover:shadow-sm transition-shadow">
+            <div className="text-left">
+              <p className="text-2xl font-bold text-gray-900">{pendingCount}</p>
+              <p className="text-sm text-gray-600 mt-1">Pending Approval</p>
             </div>
-            <div>
-              <p className="text-2xl font-bold">{pendingCount}</p>
-              <p className="text-sm text-gray-600">Pending Approval</p>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg border p-6 flex items-center">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
-              <CheckCircle className="w-6 h-6 text-green-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{approvedCount}</p>
-              <p className="text-sm text-gray-600">Approved</p>
+            <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Clock className="w-5 h-5 text-amber-600" />
             </div>
           </div>
-          <div className="bg-white rounded-lg border p-6 flex items-center">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
-              <Users className="w-6 h-6 text-blue-600" />
+
+          {/* Approved */}
+          <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-center justify-between hover:shadow-sm transition-shadow">
+            <div className="text-left">
+              <p className="text-2xl font-bold text-gray-900">
+                {approvedCount}
+              </p>
+              <p className="text-sm text-gray-600 mt-1">Approved</p>
             </div>
-            <div>
-              <p className="text-2xl font-bold">{totalApprovedHours.toFixed(1)}</p>
-              <p className="text-sm text-gray-600">Total Hours</p>
+            <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+            </div>
+          </div>
+
+          {/* Total Hours */}
+          <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-center justify-between hover:shadow-sm transition-shadow">
+            <div className="text-left">
+              <p className="text-2xl font-bold text-gray-900">
+                {totalApprovedHours.toFixed(1)}
+              </p>
+              <p className="text-sm text-gray-600 mt-1">Total Hours</p>
+            </div>
+            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Users className="w-5 h-5 text-blue-600" />
             </div>
           </div>
         </div>
@@ -293,8 +329,13 @@ const HoursManagementPage = () => {
           <div className="bg-white rounded-lg border p-12 text-center">
             <Clock className="w-20 h-20 text-gray-300 mx-auto mb-6" />
             <h3 className="text-xl font-medium mb-2">No hours recorded yet</h3>
-            <p className="text-gray-500 mb-6">Start tracking staff hours by adding their first entry</p>
-            <Button onClick={() => setShowClockInModal(true)}>
+            <p className="text-gray-500 mb-6">
+              Start tracking staff hours by adding their first entry
+            </p>
+            <Button
+              onClick={() => setShowClockInModal(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
               <Plus className="w-4 h-4 mr-2" />
               Add First Hours
             </Button>
@@ -344,13 +385,19 @@ const HoursManagementPage = () => {
                           <td className="px-6 py-4">
                             <div className="flex items-center">
                               <div className="ml-3">
-                                <p className="font-semibold text-gray-900">{workerName}</p>
-                                <p className="text-xs text-gray-500">{entries.length} days recorded</p>
+                                <p className="font-semibold text-gray-900">
+                                  {workerName}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {entries.length} days recorded
+                                </p>
                               </div>
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <p className="text-lg font-bold text-gray-900">{totalHours.toFixed(1)} hrs</p>
+                            <p className="text-lg font-bold text-gray-900">
+                              {totalHours.toFixed(1)} hrs
+                            </p>
                           </td>
                           <td className="px-6 py-4">
                             {active ? (
@@ -364,7 +411,10 @@ const HoursManagementPage = () => {
                           </td>
                           <td className="px-6 py-4 text-right">
                             <DropdownMenu>
-                              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                              <DropdownMenuTrigger
+                                asChild
+                                onClick={(e) => e.stopPropagation()}
+                              >
                                 <Button variant="ghost" size="sm">
                                   <MoreHorizontal className="w-5 h-5" />
                                 </Button>
@@ -429,26 +479,41 @@ const HoursManagementPage = () => {
                                   >
                                     <div>
                                       <p className="font-medium text-gray-900">
-                                        {new Date(entry.date).toLocaleDateString("en-US", {
+                                        {new Date(
+                                          entry.date
+                                        ).toLocaleDateString("en-US", {
                                           weekday: "long",
                                           month: "short",
                                           day: "numeric",
                                         })}
                                       </p>
                                       <p className="text-sm text-gray-600 mt-1">
-                                        {getFormattedTime(entry.clock_in_datetime, entry.clock_in)} →{" "}
-                                        {entry.clock_out_datetime || entry.clock_out ? (
-                                          getFormattedTime(entry.clock_out_datetime, entry.clock_out)
+                                        {getFormattedTime(
+                                          entry.clock_in_datetime,
+                                          entry.clock_in
+                                        )}{" "}
+                                        →{" "}
+                                        {entry.clock_out_datetime ||
+                                        entry.clock_out ? (
+                                          getFormattedTime(
+                                            entry.clock_out_datetime,
+                                            entry.clock_out
+                                          )
                                         ) : (
-                                          <span className="text-green-600 font-medium">Active</span>
+                                          <span className="text-green-600 font-medium">
+                                            Active
+                                          </span>
                                         )}
                                       </p>
                                     </div>
                                     <div className="text-right">
                                       <p className="font-semibold text-gray-900">
-                                        {calculateTotalHours(entry).toFixed(2)} hrs
+                                        {calculateTotalHours(entry).toFixed(2)}{" "}
+                                        hrs
                                       </p>
-                                      <div className="mt-1">{getStatusBadge(entry)}</div>
+                                      <div className="mt-1">
+                                        {getStatusBadge(entry)}
+                                      </div>
                                     </div>
                                   </div>
                                 ))}
@@ -480,7 +545,9 @@ const HoursManagementPage = () => {
         <AddWorkerHoursModal
           isOpen={showClockInModal}
           onClose={() => setShowClockInModal(false)}
-          onSuccess={() => loadHoursCards({ page: currentPage, ordering: "-date" })}
+          onSuccess={() =>
+            loadHoursCards({ page: currentPage, ordering: "-date" })
+          }
         />
 
         {/* Reject Modal */}
@@ -489,13 +556,17 @@ const HoursManagementPage = () => {
             <div className="bg-white rounded-lg max-w-md w-full">
               <div className="flex justify-between items-center p-6 border-b">
                 <h2 className="text-xl font-semibold">Reject Hours</h2>
-                <button onClick={closeRejectModal} className="text-gray-400 hover:text-gray-600">
+                <button
+                  onClick={closeRejectModal}
+                  className="text-gray-400 hover:text-gray-600"
+                >
                   <X className="w-5 h-5" />
                 </button>
               </div>
               <div className="p-6">
                 <p className="text-sm text-gray-600 mb-4">
-                  Please provide a reason for rejecting these hours. The staff member will see this message.
+                  Please provide a reason for rejecting these hours. The staff
+                  member will see this message.
                 </p>
                 <textarea
                   value={rejectionReason}

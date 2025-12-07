@@ -3,13 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,13 +17,11 @@ import {
 import {
   AlertCircle,
   X,
-  Briefcase,
   Save,
   ArrowLeft,
   Calendar,
   DollarSign,
   MapPin,
-  FileText,
   Loader2,
 } from "lucide-react";
 import { useSelector } from "react-redux";
@@ -225,8 +217,8 @@ export default function JobCreationForm({
           router.push("/jobs?success=created");
         }
       }
-    } catch (error) {
-      console.error("Error creating job:", error);
+    } catch  {
+      //console.error("Error creating job:", error);
     }
   };
 
@@ -234,22 +226,18 @@ export default function JobCreationForm({
     {
       value: PRIORITY_LEVELS.LOW,
       label: "Low Priority",
-      description: "Standard job posting",
     },
     {
       value: PRIORITY_LEVELS.MEDIUM,
       label: "Medium Priority",
-      description: "Regular visibility",
     },
     {
       value: PRIORITY_LEVELS.HIGH,
       label: "High Priority",
-      description: "Increased visibility",
     },
     {
       value: PRIORITY_LEVELS.URGENT,
       label: "Urgent",
-      description: "Maximum visibility",
     },
   ];
 
@@ -257,363 +245,239 @@ export default function JobCreationForm({
     {
       value: POST_TYPES.JOB,
       label: "Job Posting",
-      description: "Standard job listing",
     },
     {
       value: POST_TYPES.GENERAL,
-      label: "General Post",
-      description: "General announcement",
+      label: "General Post/Announcement",
     },
     {
       value: POST_TYPES.ANNOUNCEMENT,
       label: "Announcement",
-      description: "Company announcement",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gray -mt-5">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="bg-white rounded-lg p-6 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
+      <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-10">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center">
-              <Button
-                variant="ghost"
-                onClick={() => (onCancel ? onCancel() : router.push("/jobs"))}
-                className="mb-4 text-blue-700 hover:text-blue-800 -mt-5"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-              </Button>
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => (onCancel ? onCancel() : router.push("/jobs"))}
+              className="shrink-0 -mt-4"
+            >
+              <ArrowLeft className="h-6 w-6" />
+            </Button>
+
+            <div className="min-w-0 flex-1">
+              <h1 className="text-3xl font-bold text-gray-900 leading-tight">
                 Create Job Posting
               </h1>
-              <p className="text-base text-gray-600 mt-2">
-                Post a new job opportunity for candidates to discover
+              <p className="text-gray-600 text-base">
+                Fill in the details below
               </p>
             </div>
           </div>
         </div>
 
-        {/* Error Alert */}
         {error && (
-          <Card className="mb-6 border-red-200 bg-red-50">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
-                <div>
-                  <h4 className="font-medium text-red-800">Error</h4>
-                  <p className="text-red-700 text-sm mt-1">{error}</p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={clearPostError}
-                  className="ml-auto p-1 text-red-600 hover:text-red-700"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+          <div className="mb-8 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-red-600" />
+              <div>
+                <p className="font-medium text-red-800">Error</p>
+                <p className="text-sm text-red-700">{error}</p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+            <Button variant="ghost" size="sm" onClick={clearPostError}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Basic Information */}
-          <Card className="bg-white border-gray-200 shadow-md rounded-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-xl font-semibold text-gray-900">
-                <FileText className="h-5 w-5 text-blue-700" />
-                Basic Information
-              </CardTitle>
-              <CardDescription className="text-base text-gray-600">
-                Enter the essential details for your job posting
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Job Title */}
-              <div>
-                <Label
-                  htmlFor="title"
-                  className="text-base font-medium text-gray-700"
-                >
-                  Job Title *
-                </Label>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Row 1: Job Title + Location */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <Label htmlFor="title">
+                Job Title <span className="text-red-600">*</span>
+              </Label>
+              <Input
+                id="title"
+                value={formData.title}
+                onChange={(e) => handleInputChange("title", e.target.value)}
+                className={errors.title ? "border-red-300" : ""}
+                disabled={loading}
+              />
+              {errors.title && (
+                <p className="mt-1 text-sm text-red-600">{errors.title}</p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="location">
+                Location <span className="text-red-600">*</span>
+              </Label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
                 <Input
-                  id="title"
-                  type="text"
-                  placeholder="e.g., Senior Software Developer"
-                  value={formData.title}
-                  onChange={(e) => handleInputChange("title", e.target.value)}
-                  className={`mt-1 w-full border-gray-300 focus:ring-blue-700 text-base ${
-                    errors.title
-                      ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                      : ""
-                  }`}
-                  disabled={loading}
-                />
-                {errors.title && (
-                  <p className="mt-1 text-sm text-red-600">{errors.title}</p>
-                )}
-                <p className="mt-1 text-xs text-gray-500">
-                  {formData.title.length}/250 characters
-                </p>
-              </div>
-
-              {/* Job Description */}
-              <div>
-                <Label
-                  htmlFor="description"
-                  className="text-base font-medium text-gray-700"
-                >
-                  Job Description *
-                </Label>
-                <Textarea
-                  id="description"
-                  placeholder="Describe the role, responsibilities, and what makes this opportunity great..."
-                  value={formData.description}
+                  id="location"
+                  value={formData.location || ""}
                   onChange={(e) =>
-                    handleInputChange("description", e.target.value)
+                    handleInputChange("location", e.target.value)
                   }
-                  rows={5}
-                  className={`mt-1 w-full resize-none border-gray-300 focus:ring-blue-700 text-base ${
-                    errors.description
-                      ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                      : ""
-                  }`}
+                  className={`pl-10 ${errors.location ? "border-red-300" : ""}`}
                   disabled={loading}
                 />
-                {errors.description && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.description}
-                  </p>
-                )}
-                <p className="mt-1 text-xs text-gray-500">
-                  {formData.description.length}/1000 characters
-                </p>
               </div>
+              {errors.location && (
+                <p className="mt-1 text-sm text-red-600">{errors.location}</p>
+              )}
+            </div>
+          </div>
 
-              {/* Location */}
-              <div>
-                <Label
-                  htmlFor="location"
-                  className="text-base font-medium text-gray-700"
-                >
-                  Location *
-                </Label>
-                <div className="mt-1 relative">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-amber-600" />
-                  <Input
-                    id="location"
-                    type="text"
-                    placeholder="e.g., New York, NY or Remote"
-                    value={formData.location || ""}
-                    onChange={(e) =>
-                      handleInputChange("location", e.target.value)
-                    }
-                    className={`pl-10 w-full border-gray-300 focus:ring-blue-700 text-base ${
-                      errors.location
-                        ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                        : ""
-                    }`}
-                    disabled={loading}
-                  />
-                </div>
-                {errors.location && (
-                  <p className="mt-1 text-sm text-red-600">{errors.location}</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          {/* Row 2: Post Type + Priority Level – FORCED SAME WIDTH & HEIGHT */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <Label>Post Type</Label>
+              <Select
+                value={formData.post_type}
+                onValueChange={(v) => handleInputChange("post_type", v)}
+                disabled={loading}
+              >
+                <SelectTrigger className="h-10 w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {postTypeOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      <div>
+                        <div className="font-medium">{option.label}</div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-          {/* Job Details */}
-          <Card className="bg-white border-gray-200 shadow-md rounded-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-xl font-semibold text-gray-900">
-                <Briefcase className="h-5 w-5 text-blue-700" />
-                Job Details
-              </CardTitle>
-              <CardDescription className="text-base text-gray-600">
-                Specify the type, priority, and compensation details
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Post Type - Full Width */}
-              <div>
-                <Label className="text-base font-medium text-gray-700">
-                  Post Type
-                </Label>
-                <Select
-                  value={formData.post_type}
-                  onValueChange={(
-                    value: (typeof POST_TYPES)[keyof typeof POST_TYPES]
-                  ) => handleInputChange("post_type", value)}
-                  disabled={loading}
-                >
-                  <SelectTrigger className="mt-1 w-full border-gray-300 text-base">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {postTypeOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        <div>
-                          <div className="font-medium">{option.label}</div>
-                          <div className="text-xs text-gray-500">
-                            {option.description}
-                          </div>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div>
+              <Label>Priority Level</Label>
+              <Select
+                value={formData.priority}
+                onValueChange={(v) => handleInputChange("priority", v)}
+                disabled={loading}
+              >
+                <SelectTrigger className="h-10 w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {priorityOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      <div>
+                        <div className="font-medium">{option.label}</div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
-              {/* Priority - Full Width */}
-              <div>
-                <Label className="text-base font-medium text-gray-700">
-                  Priority Level
-                </Label>
-                <Select
-                  value={formData.priority}
-                  onValueChange={(
-                    value: (typeof PRIORITY_LEVELS)[keyof typeof PRIORITY_LEVELS]
-                  ) => handleInputChange("priority", value)}
-                  disabled={loading}
-                >
-                  <SelectTrigger className="mt-1 w-full border-gray-300 text-base">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {priorityOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        <div>
-                          <div className="font-medium">{option.label}</div>
-                          <div className="text-xs text-gray-500">
-                            {option.description}
-                          </div>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Salary Range */}
-              <div>
-                <Label
-                  htmlFor="salary_range"
-                  className="text-base font-medium text-gray-700"
-                >
-                  Salary Range
-                </Label>
-                <div className="mt-1 relative">
-                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-amber-600" />
-                  <Input
-                    id="salary_range"
-                    type="text"
-                    placeholder="e.g., $80,000 - $120,000 annually"
-                    value={formData.salary_range || ""}
-                    onChange={(e) =>
-                      handleInputChange("salary_range", e.target.value)
-                    }
-                    className={`pl-10 w-full border-gray-300 focus:ring-blue-700 text-base ${
-                      errors.salary_range
-                        ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                        : ""
-                    }`}
-                    disabled={loading}
-                  />
-                </div>
-                {errors.salary_range && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.salary_range}
-                  </p>
-                )}
-                <p className="mt-1 text-xs text-gray-500">
-                  Optional - Leave blank if salary is negotiable
-                </p>
-              </div>
-
-              {/* Requirements */}
-              <div>
-                <Label
-                  htmlFor="requirements"
-                  className="text-base font-medium text-gray-700"
-                >
-                  Requirements
-                </Label>
-                <Textarea
-                  id="requirements"
-                  placeholder="List the required skills, experience, and qualifications..."
-                  value={formData.requirements || ""}
+          {/* Row 3: Salary Range + Expiry Date – SAME LINE */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <Label htmlFor="salary_range">Salary Range</Label>
+              <div className="relative">
+                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                <Input
+                  id="salary_range"
+                  value={formData.salary_range || ""}
                   onChange={(e) =>
-                    handleInputChange("requirements", e.target.value)
+                    handleInputChange("salary_range", e.target.value)
                   }
-                  rows={4}
-                  className={`mt-1 w-full resize-none border-gray-300 focus:ring-blue-700 text-base ${
-                    errors.requirements
-                      ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                      : ""
+                  className={`pl-10 ${
+                    errors.salary_range ? "border-red-300" : ""
                   }`}
                   disabled={loading}
                 />
-                {errors.requirements && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.requirements}
-                  </p>
-                )}
-                <p className="mt-1 text-xs text-gray-500">
-                  {(formData.requirements || "").length}/500 characters
-                </p>
               </div>
+              <p className="mt-1 text-xs text-gray-500">Optional</p>
+            </div>
 
-              {/* Expiry Date */}
-              <div>
-                <Label
-                  htmlFor="expires_at"
-                  className="text-base font-medium text-gray-700"
-                >
-                  Expiry Date
-                </Label>
-                <div className="mt-1 relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-amber-600" />
-                  <Input
-                    id="expires_at"
-                    type="date"
-                    value={formData.expires_at || ""}
-                    onChange={(e) =>
-                      handleInputChange("expires_at", e.target.value)
-                    }
-                    className={`pl-10 w-full border-gray-300 focus:ring-blue-700 text-base ${
-                      errors.expires_at
-                        ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                        : ""
-                    }`}
-                    min={new Date().toISOString().split("T")[0]}
-                    disabled={loading}
-                  />
-                </div>
-                {errors.expires_at && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.expires_at}
-                  </p>
-                )}
-                <p className="mt-1 text-xs text-gray-500">
-                  Optional - Leave blank for no expiry
-                </p>
+            <div>
+              <Label htmlFor="expires_at">Expiry Date</Label>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                <Input
+                  id="expires_at"
+                  type="date"
+                  value={formData.expires_at || ""}
+                  onChange={(e) =>
+                    handleInputChange("expires_at", e.target.value)
+                  }
+                  className={`pl-10 ${
+                    errors.expires_at ? "border-red-300" : ""
+                  }`}
+                  min={new Date().toISOString().split("T")[0]}
+                  disabled={loading}
+                />
               </div>
-            </CardContent>
-          </Card>
+              <p className="mt-1 text-xs text-gray-500">Optional</p>
+            </div>
+          </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-4 pt-6">
+          {/* Full-width Textareas */}
+          <div>
+            <Label htmlFor="description">
+              Job Description <span className="text-red-600">*</span>
+            </Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) => handleInputChange("description", e.target.value)}
+              rows={10}
+              className={`resize-none ${
+                errors.description ? "border-red-300" : ""
+              }`}
+              disabled={loading}
+            />
+            <div className="flex justify-end mt-1">
+              <p className="text-xs text-gray-500">
+                {formData.description.length}/1000
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="requirements">Requirements</Label>
+            <Textarea
+              id="requirements"
+              value={formData.requirements || ""}
+              onChange={(e) =>
+                handleInputChange("requirements", e.target.value)
+              }
+              rows={8}
+              className={`resize-none ${
+                errors.requirements ? "border-red-300" : ""
+              }`}
+              disabled={loading}
+            />
+            <div className="flex justify-end mt-1">
+              <p className="text-xs text-gray-500">
+                {(formData.requirements || "").length}/500
+              </p>
+            </div>
+          </div>
+
+          {/* Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 pt-8">
             <Button
               type="button"
               variant="outline"
               onClick={() => (onCancel ? onCancel() : router.push("/jobs"))}
-              className="flex-1 border-gray-300 text-blue-700 hover:bg-amber-50 hover:text-amber-600 rounded-md"
+              className="flex-1 h-11"
               disabled={loading}
             >
               Cancel
@@ -621,7 +485,7 @@ export default function JobCreationForm({
             <Button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-blue-700 hover:bg-blue-800 rounded-md"
+              className="flex-1 h-11 bg-blue-600 hover:bg-blue-700"
             >
               {loading ? (
                 <>

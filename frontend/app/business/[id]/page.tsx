@@ -55,8 +55,7 @@ const BusinessDetailsPage: React.FC = () => {
         setLoading(true);
         const businessData = await businessAPI.getBusiness(businessId);
         setBusiness(businessData);
-      } catch (error) {
-        console.error("Error fetching business details:", error);
+      } catch {
         setError("Failed to load business details");
       } finally {
         setLoading(false);

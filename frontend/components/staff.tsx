@@ -76,7 +76,6 @@ const StaffManagementPage = () => {
   const businessId = business?.id || "";
   const router = useRouter();
 
-
   useEffect(() => {
     loadBusinesses();
   }, [loadBusinesses]);
@@ -306,8 +305,8 @@ const StaffManagementPage = () => {
   const onLeaveStaff = staff.filter((s) => s.status === "ON_LEAVE").length;
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="bg-white rounded-lg p-6 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {staffError && (
           <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
             <div className="flex items-center">
@@ -363,10 +362,10 @@ const StaffManagementPage = () => {
 
           {/* Compact Stats Cards */}
           <div className="grid grid-cols-3 gap-3">
-            <div className="bg-white rounded-lg border border-gray-200 p-3">
+            <div className="bg-white rounded-xl border border-gray-200 p-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-gray-600">Total Staff</p>
+                  <p className="text-base text-gray-600">Total Staff</p>
                   <p className="text-xl font-bold text-gray-900">
                     {staffPagination.count}
                   </p>
@@ -377,10 +376,10 @@ const StaffManagementPage = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg border border-gray-200 p-3">
+            <div className="bg-white rounded-xl border border-gray-200 p-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-gray-600">Active</p>
+                  <p className="text-base text-gray-600">Active</p>
                   <p className="text-xl font-bold text-gray-900">
                     {activeStaff}
                   </p>
@@ -391,10 +390,10 @@ const StaffManagementPage = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg border border-gray-200 p-3">
+            <div className="bg-white rounded-xl border border-gray-200 p-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-gray-600">On Leave</p>
+                  <p className="text-base text-gray-600">On Leave</p>
                   <p className="text-xl font-bold text-gray-900">
                     {onLeaveStaff}
                   </p>
@@ -408,23 +407,26 @@ const StaffManagementPage = () => {
         </div>
 
         {/* Compact Search & Filters - Single Line */}
-        <div className="bg-white px-4 py-3 rounded-lg border border-gray-200 shadow-sm mb-4">
-          <div className="flex flex-col lg:flex-row gap-3">
+        <div className="mb-6">
+          <div className="flex flex-col lg:flex-row gap-4">
+            {/* Search */}
             <div className="flex-1 relative">
-              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
               <input
                 type="text"
                 placeholder="Search staff..."
                 value={localSearchTerm}
                 onChange={(e) => setLocalSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none text-sm transition-colors"
               />
             </div>
-            <div className="flex gap-2">
+
+            {/* Filters */}
+            <div className="flex gap-3">
               <select
                 value={localStatusFilter}
                 onChange={(e) => setLocalStatusFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                className="px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 text-sm transition-colors"
               >
                 <option value="all">All Status</option>
                 <option value="ACTIVE">Active</option>
@@ -432,10 +434,11 @@ const StaffManagementPage = () => {
                 <option value="ON_LEAVE">On Leave</option>
                 <option value="TERMINATED">Terminated</option>
               </select>
+
               <select
                 value={localEmploymentTypeFilter}
                 onChange={(e) => setLocalEmploymentTypeFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                className="px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 text-sm transition-colors"
               >
                 <option value="all">All Types</option>
                 <option value="FULL_TIME">Full Time</option>
@@ -509,15 +512,9 @@ const StaffManagementPage = () => {
                       >
                         <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 font-semibold text-sm">
-                              {member.name.charAt(0).toUpperCase()}
-                            </div>
                             <div className="ml-3">
                               <div className="text-sm font-medium text-gray-900">
                                 {member.name}
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                {member.staff_id}
                               </div>
                             </div>
                           </div>

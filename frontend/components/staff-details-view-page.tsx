@@ -153,66 +153,77 @@ const StaffDetailPage: React.FC = () => {
       </div>
     );
   }
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Back button */}
+    <div className="bg-white rounded-lg p-6 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Back Button */}
         <Button
           variant="ghost"
           onClick={() => router.push("/staff")}
-          className="mb-6 text-gray-600 hover:text-gray-900"
+          className="mb-8 text-gray-600 hover:text-gray-900"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Staff List
         </Button>
 
-        {/* Header Card */}
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mb-8">
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
-            <div className="flex items-center gap-5">
-              <div className="w-20 h-20 rounded-full bg-blue-600 flex items-center justify-center text-white text-3xl font-bold shadow-md">
-                {staff.name.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">
-                  {staff.name}
-                </h1>
-                <p className="text-gray-500">{staff.staff_id}</p>
+        {/* Header Card - Clean & Compact */}
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-3 mb-8 -mt-5">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
+            {/* Avatar - Perfect Size */}
+            <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-2xl font-bold shadow-md ring-4 ring-blue-100">
+              {staff.name.charAt(0).toUpperCase()}
+            </div>
+
+            {/* Name, ID & Badges */}
+            <div className="flex-1 text-center sm:text-left">
+              <h1 className="text-2xl font-bold text-gray-900">{staff.name}</h1>
+              <p className="text-base text-gray-500 mt-1">
+                ID: {staff.staff_id}
+              </p>
+
+              <div className="flex flex-wrap gap-2 justify-center sm:justify-start mt-4">
+                {getStatusBadge(staff.status)}
+                {getEmploymentTypeBadge(staff.employment_type)}
+                {getInvitationStatusBadge()}
               </div>
             </div>
           </div>
-
-          <div className="flex flex-wrap gap-3 mt-6">
-            {getStatusBadge(staff.status)}
-            {getEmploymentTypeBadge(staff.employment_type)}
-            {getInvitationStatusBadge()}
-          </div>
         </div>
 
-        {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Job Information */}
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-5">
-              Job Information
-            </h2>
+        {/* Two Column Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Job Information Card */}
+          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
+                <Briefcase className="w-5 h-5 text-white" />
+              </div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Job Information
+              </h2>
+            </div>
 
             <div className="space-y-5">
               <div className="flex items-start gap-4">
-                <Briefcase className="w-5 h-5 text-blue-600 mt-0.5" />
+                <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                  <Briefcase className="w-5 h-5 text-blue-600" />
+                </div>
                 <div>
                   <p className="text-sm text-gray-600">Job Title</p>
-                  <p className="font-medium text-gray-900">{staff.job_title}</p>
+                  <p className="text-base font-medium text-gray-900">
+                    {staff.job_title}
+                  </p>
                 </div>
               </div>
 
               {staff.department && (
                 <div className="flex items-start gap-4">
-                  <MapPin className="w-5 h-5 text-blue-600 mt-0.5" />
+                  <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-5 h-5 text-purple-600" />
+                  </div>
                   <div>
                     <p className="text-sm text-gray-600">Department</p>
-                    <p className="font-medium text-gray-900">
+                    <p className="text-base font-medium text-gray-900">
                       {staff.department}
                     </p>
                   </div>
@@ -220,10 +231,12 @@ const StaffDetailPage: React.FC = () => {
               )}
 
               <div className="flex items-start gap-4">
-                <Calendar className="w-5 h-5 text-blue-600 mt-0.5" />
+                <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
+                  <Calendar className="w-5 h-5 text-green-600" />
+                </div>
                 <div>
                   <p className="text-sm text-gray-600">Hire Date</p>
-                  <p className="font-medium text-gray-900">
+                  <p className="text-base font-medium text-gray-900">
                     {new Date(staff.hire_date).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "long",
@@ -235,7 +248,9 @@ const StaffDetailPage: React.FC = () => {
 
               {staff.hourly_rate != null && (
                 <div className="flex items-start gap-4">
-                  <DollarSign className="w-5 h-5 text-blue-600 mt-0.5" />
+                  <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                    <DollarSign className="w-5 h-5 text-emerald-600" />
+                  </div>
                   <div>
                     <p className="text-sm text-gray-600">Hourly Rate</p>
                     <p className="text-base font-medium text-gray-900">
@@ -247,20 +262,27 @@ const StaffDetailPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Contact Information */}
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-5">
-              Contact Information
-            </h2>
+          {/* Contact Information Card */}
+          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
+                <Mail className="w-5 h-5 text-white" />
+              </div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Contact Information
+              </h2>
+            </div>
 
             <div className="space-y-5">
               <div className="flex items-start gap-4">
-                <Mail className="w-5 h-5 text-blue-600 mt-0.5" />
+                <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                  <Mail className="w-5 h-5 text-blue-600" />
+                </div>
                 <div>
                   <p className="text-sm text-gray-600">Email</p>
                   <a
                     href={`mailto:${staff.email}`}
-                    className="text-base font-medium text-blue-600 hover:text-blue-700 hover:underline"
+                    className="text-base font-medium text-blue-600 hover:text-blue-700 hover:underline break-all"
                   >
                     {staff.email}
                   </a>
@@ -268,7 +290,9 @@ const StaffDetailPage: React.FC = () => {
               </div>
 
               <div className="flex items-start gap-4">
-                <Phone className="w-5 h-5 text-blue-600 mt-0.5" />
+                <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
+                  <Phone className="w-5 h-5 text-green-600" />
+                </div>
                 <div>
                   <p className="text-sm text-gray-600">Phone</p>
                   <a
@@ -281,15 +305,21 @@ const StaffDetailPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Linked User Account Badge */}
+            {/* Linked Account Badge - Cleaned Up */}
             {staff.user && (
               <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="flex items-center gap-3">
-                  <UserIcon className="w-5 h-5 text-blue-600" />
-                  <p className="text-sm text-blue-800">
-                    <span className="font-semibold">Linked Account:</span> This
-                    staff member has a registered user account
-                  </p>
+                  <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
+                    <UserIcon className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-blue-900">
+                      Linked Account
+                    </p>
+                    <p className="text-sm text-blue-700">
+                      This staff member has a registered user account
+                    </p>
+                  </div>
                 </div>
               </div>
             )}

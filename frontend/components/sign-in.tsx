@@ -40,14 +40,26 @@ export default function SignInPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login, googleAuth, clearAuthError, resetLoading } = useAuthSlice();
-  const { isLoginLoading, error, isAuthenticated, isGoogleAuthLoading } =
+  const { isLoginLoading, error, isAuthenticated, isGoogleAuthLoading, user } =
     useAuthState();
 
   const [showAccountTypeModal, setShowAccountTypeModal] = useState(false);
-  const [pendingGoogleCredential, setPendingGoogleCredential] = useState<string | null>(null);
+  const [pendingGoogleCredential, setPendingGoogleCredential] = useState<
+    string | null
+  >(null);
   const [isGoogleButtonReady, setIsGoogleButtonReady] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
+
+  const getRedirectUrl = useCallback((accountType?: string) => {
+    if (accountType === "WORKER") {
+      return "/worker-dashboard";
+    }
+    if (accountType === "BUSINESS") {
+      return "/business";
+    }
+    return "/worker-dashboard";
+  }, []);
 
   useEffect(() => {
     const registered = searchParams.get("registered");
@@ -67,8 +79,11 @@ export default function SignInPage() {
   }, [searchParams]);
 
   useEffect(() => {
-    if (isAuthenticated) router.push("/home");
-  }, [isAuthenticated, router]);
+    if (isAuthenticated && user?.account_type) {
+      const redirectUrl = getRedirectUrl(user.account_type);
+      router.push(redirectUrl);
+    }
+  }, [isAuthenticated, user?.account_type, router, getRedirectUrl]);
 
   useEffect(() => {
     resetLoading();
@@ -88,7 +103,7 @@ export default function SignInPage() {
 
     if (result.success) {
       toast.success("Welcome back!");
-      setTimeout(() => router.push("/home"), 100);
+      // The useEffect will handle the redirect when user data is loaded
     } else {
       const err = result.error;
       if (err?.googleLoginRequired) {
@@ -111,7 +126,7 @@ export default function SignInPage() {
 
       if (result.success) {
         toast.success("Signed in with Google!");
-        setTimeout(() => router.push("/home"), 100);
+        // The useEffect will handle the redirect when user data is loaded
       } else {
         const err = result.error;
         if (err?.status === 404) {
@@ -122,7 +137,7 @@ export default function SignInPage() {
         }
       }
     },
-    [googleAuth, router]
+    [googleAuth]
   );
 
   const handleAccountTypeSelect = async (type: "WORKER" | "BUSINESS") => {
@@ -140,7 +155,7 @@ export default function SignInPage() {
       toast.success(
         `Welcome to your ${type === "WORKER" ? "Worker" : "Business"} account!`
       );
-      setTimeout(() => router.push("/home"), 100);
+      // The useEffect will handle the redirect when user data is loaded
     }
   };
 
@@ -316,7 +331,9 @@ export default function SignInPage() {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
                       tabIndex={-1}
-                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
                     >
                       {showPassword ? (
                         <EyeOff className="h-4 w-4" />

@@ -24,12 +24,12 @@ export const UserSearchSelect: React.FC<UserSearchSelectProps> = ({
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // Load users once
+
   useEffect(() => {
     authService.searchUsers("").then(setUsers).catch(console.error);
   }, []);
 
-  // Filter as user types
+
   useEffect(() => {
     const q = query.toLowerCase().trim();
     if (!q) {
@@ -45,7 +45,7 @@ export const UserSearchSelect: React.FC<UserSearchSelectProps> = ({
     }
   }, [query, users]);
 
-  // Close dropdown when clicking outside
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {

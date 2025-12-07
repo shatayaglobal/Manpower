@@ -118,11 +118,12 @@ export default function ApplicationsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 ">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="bg-white rounded-lg p-6 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
+          <div className="flex items-start gap-4">
+            {/* Back button */}
             <Button
               variant="ghost"
               onClick={() => router.back()}
@@ -130,17 +131,17 @@ export default function ApplicationsPage() {
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
-          </div>
 
-          <div className="flex items-center gap-3 mb-2">
-            <Briefcase className="h-8 w-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">
-              My Job Applications
-            </h1>
+            {/* Title + description stacked vertically */}
+            <div className="flex-1 flex flex-col">
+              <h1 className="text-3xl font-bold text-gray-900">
+                My Job Applications
+              </h1>
+              <p className="text-gray-600 text-lg">
+                Track your job applications and their current status.
+              </p>
+            </div>
           </div>
-          <p className="text-gray-600">
-            Track your job applications and their current status.
-          </p>
         </div>
 
         {/* Error Message */}
@@ -195,85 +196,90 @@ export default function ApplicationsPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200">
-                        {applications.map((application: JobApplication, index: number) => {
-                          // Type guard to check if job is an object
-                          const job =
-                            typeof application.job === "object" &&
-                            application.job !== null
-                              ? application.job
-                              : null;
+                        {applications.map(
+                          (application: JobApplication, index: number) => {
+                            // Type guard to check if job is an object
+                            const job =
+                              typeof application.job === "object" &&
+                              application.job !== null
+                                ? application.job
+                                : null;
 
-                          return (
-                            <tr
-                              key={application.id || `temp-app-${index}-${application.created_at}`}
-                              className="hover:bg-gray-50 transition-colors"
-                            >
-                              <td className="py-4 px-4">
-                                <div className="font-medium text-gray-900">
-                                  {job?.title || "Job Title Not Available"}
-                                </div>
-                                {job?.description && (
-                                  <div className="text-sm text-gray-500 mt-1 line-clamp-1">
-                                    {job.description}
+                            return (
+                              <tr
+                                key={
+                                  application.id ||
+                                  `temp-app-${index}-${application.created_at}`
+                                }
+                                className="hover:bg-gray-50 transition-colors"
+                              >
+                                <td className="py-4 px-4">
+                                  <div className="font-medium text-gray-900">
+                                    {job?.title || "Job Title Not Available"}
                                   </div>
-                                )}
-                              </td>
+                                  {job?.description && (
+                                    <div className="text-sm text-gray-500 mt-1 line-clamp-1">
+                                      {job.description}
+                                    </div>
+                                  )}
+                                </td>
 
-                              <td className="py-4 px-4">
-                                <div className="flex items-center text-gray-600">
-                                  <MapPin className="h-4 w-4 mr-1 text-gray-400" />
-                                  <span className="text-sm">
-                                    {job?.location || "Not specified"}
-                                  </span>
-                                </div>
-                              </td>
-
-                              <td className="py-4 px-4">
-                                {job?.salary_range ? (
+                                <td className="py-4 px-4">
                                   <div className="flex items-center text-gray-600">
-                                    <DollarSign className="h-4 w-4 mr-1 text-gray-400" />
+                                    <MapPin className="h-4 w-4 mr-1 text-gray-400" />
                                     <span className="text-sm">
-                                      {job.salary_range}
+                                      {job?.location || "Not specified"}
                                     </span>
                                   </div>
-                                ) : (
-                                  <span className="text-sm text-gray-400">
-                                    Not specified
-                                  </span>
-                                )}
-                              </td>
+                                </td>
 
-                              <td className="py-4 px-4">
-                                <div className="flex items-center text-gray-600">
-                                  <Calendar className="h-4 w-4 mr-1 text-gray-400" />
-                                  <span className="text-sm">
-                                    {formatDate(application.created_at)}
-                                  </span>
-                                </div>
-                              </td>
-
-                              <td className="py-4 px-4">
-                                <Badge
-                                  className={`flex items-center gap-1 border w-fit ${getStatusColor(
-                                    application.status || "PENDING"
-                                  )}`}
-                                >
-                                  {getStatusIcon(
-                                    application.status || "PENDING"
+                                <td className="py-4 px-4">
+                                  {job?.salary_range ? (
+                                    <div className="flex items-center text-gray-600">
+                                      <DollarSign className="h-4 w-4 mr-1 text-gray-400" />
+                                      <span className="text-sm">
+                                        {job.salary_range}
+                                      </span>
+                                    </div>
+                                  ) : (
+                                    <span className="text-sm text-gray-400">
+                                      Not specified
+                                    </span>
                                   )}
-                                  <span className="text-xs">
-                                    {(application.status || "Pending")
-                                      .charAt(0)
-                                      .toUpperCase() +
-                                      (application.status || "Pending")
-                                        .slice(1)
-                                        .toLowerCase()}
-                                  </span>
-                                </Badge>
-                              </td>
-                            </tr>
-                          );
-                        })}
+                                </td>
+
+                                <td className="py-4 px-4">
+                                  <div className="flex items-center text-gray-600">
+                                    <Calendar className="h-4 w-4 mr-1 text-gray-400" />
+                                    <span className="text-sm">
+                                      {formatDate(application.created_at)}
+                                    </span>
+                                  </div>
+                                </td>
+
+                                <td className="py-4 px-4">
+                                  <Badge
+                                    className={`flex items-center gap-1 border w-fit ${getStatusColor(
+                                      application.status || "PENDING"
+                                    )}`}
+                                  >
+                                    {getStatusIcon(
+                                      application.status || "PENDING"
+                                    )}
+                                    <span className="text-xs">
+                                      {(application.status || "Pending")
+                                        .charAt(0)
+                                        .toUpperCase() +
+                                        (application.status || "Pending")
+                                          .slice(1)
+                                          .toLowerCase()}
+                                    </span>
+                                  </Badge>
+                                </td>
+                              </tr>
+                            );
+                          }
+                        )}
                       </tbody>
                     </table>
                   </div>

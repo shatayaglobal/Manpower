@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import {
   Building2,
@@ -37,9 +36,39 @@ interface Step {
   description: string;
 }
 
+const StatCard: React.FC<{
+  title: string;
+  value: number | string;
+  icon: React.ElementType;
+  color: "blue" | "green" | "purple" | "gray";
+}> = ({ title, value, icon: Icon, color }) => {
+  const bgClass = `bg-${color}-50`;
+  const iconClass = `text-${color}-600`;
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-2xl font-bold text-gray-900">{value}</p>
+          <p className="text-xs text-gray-600 mt-0.5">{title}</p>
+        </div>
+        <div
+          className={`w-10 h-10 ${bgClass} rounded-lg flex items-center justify-center`}
+        >
+          <Icon className={`w-5 h-5 ${iconClass}`} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Helper to get category label
+const getCategoryLabel = (categoryValue: string): string => {
+  const cat = BUSINESS_CATEGORIES.find((c) => c.value === categoryValue);
+  return cat ? cat.label : "Other";
+};
+
 const MyBusinessPage: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
-
   const {
     businesses,
     selectedBusiness,
@@ -59,6 +88,7 @@ const MyBusinessPage: React.FC = () => {
     loadBusinesses();
   }, [loadBusinesses]);
 
+  // Modal Component (unchanged logic, just moved for clarity)
   const BusinessModal: React.FC<BusinessModalProps> = ({
     business,
     onClose,
@@ -102,7 +132,6 @@ const MyBusinessPage: React.FC = () => {
 
     const validateStep = (step: number): boolean => {
       const newErrors: Record<string, string> = {};
-
       if (step === 1) {
         if (!formData.name.trim()) newErrors.name = "Business name is required";
         if (!formData.email.trim()) newErrors.email = "Email is required";
@@ -122,13 +151,11 @@ const MyBusinessPage: React.FC = () => {
             "Website must be a valid URL starting with http:// or https://";
         }
       }
-
       if (step === 2) {
         if (!formData.address.trim()) newErrors.address = "Address is required";
         if (!formData.city.trim()) newErrors.city = "City is required";
         if (!formData.country.trim()) newErrors.country = "Country is required";
       }
-
       setErrors(newErrors);
       return Object.keys(newErrors).length === 0;
     };
@@ -141,7 +168,6 @@ const MyBusinessPage: React.FC = () => {
 
     const handleSubmit = async (): Promise<void> => {
       if (!validateStep(2)) return;
-
       setSubmitting(true);
       try {
         if (business) {
@@ -193,18 +219,16 @@ const MyBusinessPage: React.FC = () => {
                 ×
               </button>
             </div>
-
             {/* Progress Steps */}
             <div className="flex items-center space-x-2 sm:space-x-4 overflow-x-auto scrollbar-hide">
-              {steps.map((step: Step, index: number) => (
+              {steps.map((step, index) => (
                 <div key={step.number} className="flex items-center min-w-0">
                   <div
-                    className={`w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-medium
-                  ${
-                    currentStep >= step.number
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-200 text-gray-600"
-                  }`}
+                    className={`w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-medium ${
+                      currentStep >= step.number
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-200 text-gray-600"
+                    }`}
                   >
                     {step.number}
                   </div>
@@ -244,7 +268,7 @@ const MyBusinessPage: React.FC = () => {
                   <input
                     type="text"
                     value={formData.name}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
                     }
                     className={`w-full px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base ${
@@ -258,7 +282,6 @@ const MyBusinessPage: React.FC = () => {
                     </p>
                   )}
                 </div>
-
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
@@ -266,7 +289,7 @@ const MyBusinessPage: React.FC = () => {
                     </label>
                     <select
                       value={formData.category}
-                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                      onChange={(e) =>
                         setFormData({
                           ...formData,
                           category: e.target
@@ -282,14 +305,13 @@ const MyBusinessPage: React.FC = () => {
                       ))}
                     </select>
                   </div>
-
                   <div>
                     <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                       Business Size
                     </label>
                     <select
                       value={formData.size}
-                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                      onChange={(e) =>
                         setFormData({
                           ...formData,
                           size: e.target.value as BusinessFormData["size"],
@@ -304,7 +326,6 @@ const MyBusinessPage: React.FC = () => {
                     </select>
                   </div>
                 </div>
-
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
@@ -313,7 +334,7 @@ const MyBusinessPage: React.FC = () => {
                     <input
                       type="email"
                       value={formData.email}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      onChange={(e) =>
                         setFormData({ ...formData, email: e.target.value })
                       }
                       className={`w-full px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base ${
@@ -327,7 +348,6 @@ const MyBusinessPage: React.FC = () => {
                       </p>
                     )}
                   </div>
-
                   <div>
                     <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                       Phone *
@@ -335,7 +355,7 @@ const MyBusinessPage: React.FC = () => {
                     <input
                       type="tel"
                       value={formData.phone}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      onChange={(e) =>
                         setFormData({ ...formData, phone: e.target.value })
                       }
                       className={`w-full px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base ${
@@ -350,29 +370,27 @@ const MyBusinessPage: React.FC = () => {
                     )}
                   </div>
                 </div>
-
                 <div>
                   <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                    Website(Optional)
+                    Website (Optional)
                   </label>
                   <input
                     type="url"
                     value={formData.website}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    onChange={(e) =>
                       setFormData({ ...formData, website: e.target.value })
                     }
                     className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                     placeholder="https://example.com"
                   />
                 </div>
-
                 <div>
                   <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                     Description
                   </label>
                   <textarea
                     value={formData.description}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                    onChange={(e) =>
                       setFormData({ ...formData, description: e.target.value })
                     }
                     rows={3}
@@ -415,8 +433,6 @@ const MyBusinessPage: React.FC = () => {
                     Start typing to search for your address
                   </p>
                 </div>
-
-                {/* City and Country are now auto-filled but still editable */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
@@ -439,7 +455,6 @@ const MyBusinessPage: React.FC = () => {
                       </p>
                     )}
                   </div>
-
                   <div>
                     <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                       Country *
@@ -461,7 +476,6 @@ const MyBusinessPage: React.FC = () => {
                       </p>
                     )}
                   </div>
-
                   <div>
                     <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                       Postal Code
@@ -480,8 +494,6 @@ const MyBusinessPage: React.FC = () => {
                     />
                   </div>
                 </div>
-
-                {/* Show coordinates preview if set */}
                 {formData.workplace_latitude &&
                   formData.workplace_longitude && (
                     <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
@@ -495,7 +507,6 @@ const MyBusinessPage: React.FC = () => {
                       </p>
                     </div>
                   )}
-
                 <div>
                   <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                     Service Hours
@@ -542,7 +553,6 @@ const MyBusinessPage: React.FC = () => {
                       />
                     </div>
                   </div>
-
                   <div className="mt-2 p-2 bg-gray-50 rounded text-xs sm:text-sm text-gray-600">
                     Hours:{" "}
                     {formData.service_time ||
@@ -557,7 +567,6 @@ const MyBusinessPage: React.FC = () => {
                 <h3 className="text-base sm:text-lg font-medium text-gray-900">
                   Review Your Information
                 </h3>
-
                 <div className="bg-gray-50 rounded-lg p-3 sm:p-4 space-y-3">
                   <div>
                     <h4 className="font-medium text-gray-900 text-sm sm:text-base">
@@ -567,12 +576,7 @@ const MyBusinessPage: React.FC = () => {
                       Name: {formData.name}
                     </p>
                     <p className="text-xs sm:text-sm text-gray-600">
-                      Category:{" "}
-                      {
-                        BUSINESS_CATEGORIES.find(
-                          (c) => c.value === formData.category
-                        )?.label
-                      }
+                      Category: {getCategoryLabel(formData.category)}
                     </p>
                     <p className="text-xs sm:text-sm text-gray-600">
                       Email: {formData.email}
@@ -581,7 +585,6 @@ const MyBusinessPage: React.FC = () => {
                       Phone: {formData.phone}
                     </p>
                   </div>
-
                   <div>
                     <h4 className="font-medium text-gray-900 text-sm sm:text-base">
                       Location
@@ -598,7 +601,6 @@ const MyBusinessPage: React.FC = () => {
                       </p>
                     )}
                   </div>
-
                   {formData.description && (
                     <div>
                       <h4 className="font-medium text-gray-900 text-sm sm:text-base">
@@ -609,7 +611,6 @@ const MyBusinessPage: React.FC = () => {
                       </p>
                     </div>
                   )}
-
                   {formData.service_time && (
                     <div>
                       <h4 className="font-medium text-gray-900 text-sm sm:text-base">
@@ -621,7 +622,6 @@ const MyBusinessPage: React.FC = () => {
                     </div>
                   )}
                 </div>
-
                 <div className="bg-blue-50 rounded-lg p-3 sm:p-4">
                   <div className="flex items-center">
                     <CheckCircle className="w-4 sm:w-5 h-4 sm:h-5 text-blue-500 mr-2" />
@@ -650,7 +650,6 @@ const MyBusinessPage: React.FC = () => {
                 </Button>
               )}
             </div>
-
             <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
               <Button
                 variant="outline"
@@ -660,7 +659,6 @@ const MyBusinessPage: React.FC = () => {
               >
                 Cancel
               </Button>
-
               {currentStep < 3 ? (
                 <Button
                   onClick={handleNext}
@@ -693,9 +691,10 @@ const MyBusinessPage: React.FC = () => {
     );
   };
 
+  // Loading State
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="bg-white flex items-center justify-center min-h-screen">
         <Loader2 className="w-6 sm:w-8 h-6 sm:h-8 animate-spin text-blue-500" />
         <p className="ml-2 text-sm sm:text-base text-gray-600">
           Loading your business...
@@ -704,10 +703,11 @@ const MyBusinessPage: React.FC = () => {
     );
   }
 
+  // No Business State
   if (!hasBusiness) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
+      <div className="w-full bg-white">
+        <div className="max-w-full px-3 sm:px-6 lg:px-8 py-6 sm:py-12">
           <div className="text-center mb-6 sm:mb-10">
             <Building2 className="w-12 sm:w-16 h-12 sm:h-16 text-blue-500 mx-auto mb-4 sm:mb-6" />
             <h1 className="text-xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
@@ -717,7 +717,6 @@ const MyBusinessPage: React.FC = () => {
               Let&apos;s get started by setting up your business profile
             </p>
           </div>
-
           <div className="text-center mb-6 sm:mb-8">
             <Button
               onClick={() => setShowCreateModal(true)}
@@ -728,7 +727,6 @@ const MyBusinessPage: React.FC = () => {
               Create Your Business Profile
             </Button>
           </div>
-
           <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-8">
             <h2 className="text-lg sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
               What you&apos;ll be able to do:
@@ -747,7 +745,6 @@ const MyBusinessPage: React.FC = () => {
                   </p>
                 </div>
               </div>
-
               <div className="flex items-start">
                 <div className="w-8 sm:w-10 h-8 sm:h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
                   <Calendar className="w-4 sm:w-5 h-4 sm:h-5 text-green-600" />
@@ -761,7 +758,6 @@ const MyBusinessPage: React.FC = () => {
                   </p>
                 </div>
               </div>
-
               <div className="flex items-start">
                 <div className="w-8 sm:w-10 h-8 sm:h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
                   <Briefcase className="w-4 sm:w-5 h-4 sm:h-5 text-purple-600" />
@@ -775,7 +771,6 @@ const MyBusinessPage: React.FC = () => {
                   </p>
                 </div>
               </div>
-
               <div className="flex items-start">
                 <div className="w-8 sm:w-10 h-8 sm:h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
                   <BarChart3 className="w-4 sm:w-5 h-4 sm:h-5 text-orange-600" />
@@ -792,7 +787,6 @@ const MyBusinessPage: React.FC = () => {
             </div>
           </div>
         </div>
-
         {showCreateModal && (
           <BusinessModal
             business={null}
@@ -804,206 +798,199 @@ const MyBusinessPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
-        {/* Error Alert */}
-        {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-            <div className="flex">
-              <AlertCircle className="h-5 w-5 text-red-600 mr-2" />
-              <div>
-                <p className="text-sm text-red-600">{error}</p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={clearBusinessError}
-                  className="mt-2"
-                >
-                  Dismiss
-                </Button>
+    <div className="bg-white rounded-lg p-6 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
+      <div className="max-w-full mx-auto px-4 sm:px-4 lg:px-4 py-6">
+        {/* Main White Card Container */}
+        <div>
+          {/* Error Alert */}
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex">
+                <AlertCircle className="h-5 w-5 text-red-600 mr-2 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm text-red-600">{error}</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={clearBusinessError}
+                    className="mt-2"
+                  >
+                    Dismiss
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* 1. Quick Stats — Top Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 sm:p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl sm:text-3xl font-bold text-gray-900">
-                  {business.staff_count || 0}
-                </p>
-                <p className="text-gray-600 text-sm">Total Staff</p>
-              </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Users className="w-7 h-7 text-blue-600" />
-              </div>
-            </div>
+          {/* Page Header with Title */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">
+              My Business
+            </h1>
+            <p className="text-sm text-gray-600">
+              Manage your business profile and settings
+            </p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 sm:p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl sm:text-3xl font-bold text-gray-900">
-                  {business.active_jobs || 0}
-                </p>
-                <p className="text-gray-600 text-sm">Active Jobs</p>
-              </div>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <Briefcase className="w-7 h-7 text-green-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 sm:p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl sm:text-3xl font-bold text-gray-900">
-                  {business.total_applications || 0}
-                </p>
-                <p className="text-gray-600 text-sm">Applications</p>
-              </div>
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <BarChart3 className="w-7 h-7 text-purple-600" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Actions — Full Width */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 sm:p-6 mb-8">
-          <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-5">
-            Quick Actions
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Link
-              href="/staff"
-              className="flex items-center p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all group"
-            >
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
-                <Users className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="font-medium text-gray-900">Manage Staff</p>
-                <p className="text-xs text-gray-600">
-                  Add or edit team members
-                </p>
-              </div>
-            </Link>
-
-            <Link
-              href="/shifts"
-              className="flex items-center p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-all group"
-            >
-              <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
-                <Calendar className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="font-medium text-gray-900">Schedule Shifts</p>
-                <p className="text-xs text-gray-600">Plan work schedules</p>
-              </div>
-            </Link>
-
-            <Link
-              href="/jobs/create"
-              className="flex items-center p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-all group"
-            >
-              <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
-                <Briefcase className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="font-medium text-gray-900">Post Job</p>
-                <p className="text-xs text-gray-600">Create new job listing</p>
-              </div>
-            </Link>
-
-            {/* Fixed: Added missing </p> and proper structure */}
-            <Link
-              href="/manage-applications"
-              className="flex items-center p-4 bg-orange-50 hover:bg-orange-100 rounded-lg transition-all group"
-            >
-              <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
-                <BarChart3 className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="font-medium text-gray-900">Applications</p>
-                <p className="text-xs text-gray-600">Review applicants</p>
-              </div>
-            </Link>
-          </div>
-        </div>
-
-        {/* 3. Business Info + Workplace Settings — Side by Side */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           {/* Business Header Card */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 sm:p-6">
-            <div className="flex items-start justify-between mb-4">
+          <div className="bg-gray-50 rounded-xl border border-gray-200 p-6 mb-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                  {business.name}
-                </h1>
-                <p className="text-sm text-gray-500 mt-1">
-                  {business.business_id}
-                </p>
+                <div className="flex items-center gap-3 mb-2">
+                  <Building2 className="w-8 h-8 text-blue-600" />
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900">
+                      {business.name}
+                    </h2>
+                    <p className="text-xs text-gray-500">
+                      ID: {business.business_id}
+                    </p>
+                  </div>
+                </div>
+                {business.description && (
+                  <p className="text-sm text-gray-600 mt-2 max-w-2xl">
+                    {business.description}
+                  </p>
+                )}
               </div>
               <Button
-                variant="outline"
-                size="sm"
                 onClick={() => {
                   selectBusiness(business);
                   setShowCreateModal(true);
                 }}
+                variant="outline"
+                className="flex-shrink-0"
               >
                 <Edit2 className="w-4 h-4 mr-2" />
                 Edit
               </Button>
             </div>
-
-            {business.description && (
-              <p className="text-gray-600 text-sm sm:text-base mb-5">
-                {business.description}
-              </p>
-            )}
-
-            <div className="space-y-3 text-sm">
-              <div className="flex items-center text-gray-700">
-                <MapPin className="w-4 h-4 mr-2 text-amber-600" />
-                {business.city}, {business.country}
+            {/* Contact Info */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4 pt-4 border-t border-gray-200">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-gray-400" />
+                <span className="text-sm text-gray-700 truncate">
+                  {business.city}, {business.country}
+                </span>
               </div>
-              <div className="flex items-center text-gray-700">
-                <Mail className="w-4 h-4 mr-2 text-amber-600" />
-                {business.email}
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-gray-400" />
+                <span className="text-sm text-gray-700 truncate">
+                  {business.email}
+                </span>
               </div>
-              <div className="flex items-center text-gray-700">
-                <Phone className="w-4 h-4 mr-2 text-amber-600" />
-                {business.phone}
-              </div>
-              <div className="flex items-center text-gray-700">
-                <Building2 className="w-4 h-4 mr-2 text-amber-600" />
-                {business.size === "SMALL" && "1–10 employees"}
-                {business.size === "MEDIUM" && "11–50 employees"}
-                {business.size === "LARGE" && "51–200 employees"}
-                {business.size === "ENTERPRISE" && "200+ employees"}
+              <div className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-gray-400" />
+                <span className="text-sm text-gray-700">{business.phone}</span>
               </div>
               {business.service_time && (
-                <div className="flex items-center text-gray-700">
-                  <Clock className="w-4 h-4 mr-220 text-amber-600" />
-                  {business.service_time}
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-gray-400" />
+                  <span className="text-sm text-gray-700">
+                    {business.service_time}
+                  </span>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Workplace Location Settings */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 sm:p-6">
-            <WorkplaceLocationSettings
-              business={business}
-              onUpdate={async (data) => {
-                await editBusiness(business.id, data);
-                loadBusinesses();
-              }}
+          {/* Stats Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <StatCard
+              title="Total Staff"
+              value={business.staff_count || 0}
+              icon={Users}
+              color="blue"
             />
+            <StatCard
+              title="Active Jobs"
+              value={business.active_jobs || 0}
+              icon={Briefcase}
+              color="green"
+            />
+            <StatCard
+              title="Applications"
+              value={business.total_applications || 0}
+              icon={BarChart3}
+              color="purple"
+            />
+            <StatCard
+              title="Category"
+              value={getCategoryLabel(business.category)}
+              icon={Building2}
+              color="gray"
+            />
+          </div>
+
+          {/* Two-Column Layout: Quick Actions + Location Settings */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Left: Quick Actions */}
+            <div className="bg-gray-50 rounded-xl border border-gray-200 p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Quick Actions
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Link
+                  href="/staff"
+                  className="flex items-center gap-3 p-4 bg-white hover:bg-blue-50 rounded-lg transition-all group border border-gray-200 hover:border-blue-300"
+                >
+                  <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0">
+                    <Users className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">Manage Staff</p>
+                    <p className="text-xs text-gray-600">View and edit team</p>
+                  </div>
+                </Link>
+                <Link
+                  href="/shifts"
+                  className="flex items-center gap-3 p-4 bg-white hover:bg-green-50 rounded-lg transition-all group border border-gray-200 hover:border-green-300"
+                >
+                  <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0">
+                    <Calendar className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">Schedule Shifts</p>
+                    <p className="text-xs text-gray-600">Manage schedules</p>
+                  </div>
+                </Link>
+                <Link
+                  href="/jobs/create"
+                  className="flex items-center gap-3 p-4 bg-white hover:bg-purple-50 rounded-lg transition-all group border border-gray-200 hover:border-purple-300"
+                >
+                  <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0">
+                    <Briefcase className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">Post New Job</p>
+                    <p className="text-xs text-gray-600">Create listing</p>
+                  </div>
+                </Link>
+                <Link
+                  href="/manage-applications"
+                  className="flex items-center gap-3 p-4 bg-white hover:bg-orange-50 rounded-lg transition-all group border border-gray-200 hover:border-orange-300"
+                >
+                  <div className="w-12 h-12 bg-orange-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0">
+                    <BarChart3 className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">Applications</p>
+                    <p className="text-xs text-gray-600">Review applicants</p>
+                  </div>
+                </Link>
+              </div>
+            </div>
+
+            {/* Right: Workplace Location Settings */}
+            <div className="bg-gray-50 rounded-xl border border-gray-200 p-6">
+              <WorkplaceLocationSettings
+                business={business}
+                onUpdate={async (data) => {
+                  await editBusiness(business.id, data);
+                  loadBusinesses();
+                }}
+              />
+            </div>
           </div>
         </div>
 

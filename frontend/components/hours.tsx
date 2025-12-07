@@ -13,7 +13,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { useWorkforce } from "@/lib/redux/use-workforce";
 import { toast } from "sonner";
-import { HoursCard } from "@/lib/workforce-types";const MyHoursPage = () => {
+import { HoursCard } from "@/lib/workforce-types";
+const MyHoursPage = () => {
   const { myHoursCards, loadMyHoursCards, signHoursCard } = useWorkforce();
   const [loading, setLoading] = useState(false);
   const [signature, setSignature] = useState("");
@@ -53,7 +54,9 @@ import { HoursCard } from "@/lib/workforce-types";const MyHoursPage = () => {
       loadMyHoursCards();
     } catch (error) {
       if (error && typeof error === "object" && "response" in error) {
-        const err = error as { response?: { data?: { error?: string; message?: string } } };
+        const err = error as {
+          response?: { data?: { error?: string; message?: string } };
+        };
         toast.error(
           err.response?.data?.error ||
             err.response?.data?.message ||
@@ -152,8 +155,8 @@ import { HoursCard } from "@/lib/workforce-types";const MyHoursPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="bg-white rounded-lg p-6 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
@@ -166,7 +169,7 @@ import { HoursCard } from "@/lib/workforce-types";const MyHoursPage = () => {
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <p className="text-sm text-gray-600">Total Hours</p>
+            <p className="text-base text-gray-600">Total Hours</p>
             <p className="text-2xl font-bold text-gray-900">
               {myHoursCards
                 .reduce((sum, card) => sum + (card.total_hours_decimal || 0), 0)
@@ -175,7 +178,7 @@ import { HoursCard } from "@/lib/workforce-types";const MyHoursPage = () => {
             </p>
           </div>
           <div className="bg-yellow-50 rounded-lg border border-yellow-200 p-4">
-            <p className="text-sm text-yellow-800">Pending Signature</p>
+            <p className="text-base text-yellow-800">Pending Signature</p>
             <p className="text-2xl font-bold text-yellow-900">
               {
                 myHoursCards.filter(
@@ -188,19 +191,18 @@ import { HoursCard } from "@/lib/workforce-types";const MyHoursPage = () => {
             </p>
           </div>
           <div className="bg-blue-50 rounded-lg border border-blue-200 p-4">
-            <p className="text-sm text-blue-800">Awaiting Approval</p>
+            <p className="text-base text-blue-800">Awaiting Approval</p>
             <p className="text-2xl font-bold text-blue-900">
               {myHoursCards.filter((c) => c.status === "SIGNED").length}
             </p>
           </div>
           <div className="bg-green-50 rounded-lg border border-green-200 p-4">
-            <p className="text-sm text-green-800">Approved</p>
+            <p className="text-base text-green-800">Approved</p>
             <p className="text-2xl font-bold text-green-900">
               {myHoursCards.filter((c) => c.status === "APPROVED").length}
             </p>
           </div>
         </div>
-
         {/* Hours Table */}
         {myHoursCards.length === 0 ? (
           <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">

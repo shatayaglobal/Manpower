@@ -248,21 +248,12 @@ export default function ManageApplicationsPage() {
   const stats = getApplicationStats();
 
   return (
-    <div className="min-h-screen bg-white py-8 -mt-7">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="bg-white rounded-lg p-6 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-6">
-          <div className="flex items-center gap-4 mb-6 mt-8">
-            <Button
-              variant="ghost"
-              onClick={() => router.back()}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-
+          <div className="flex items-center gap-4 mb-6">
             <div className="flex items-center gap-3">
-              <Users className="h-8 w-8 text-blue-500" />
               <h1 className="text-3xl font-bold text-gray-900">
                 Manage Applications
               </h1>
@@ -274,91 +265,124 @@ export default function ManageApplicationsPage() {
         </div>
 
         {/* Stats Cards - Two Rows on Mobile, Single Row on Desktop */}
-        <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 mb-2 border-b auto-rows-fr">
-          <div className="bg-white border rounded p-5 flex items-center justify-between">
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-6">
+          {/* Total */}
+          <div className="rounded-xl bg-white border border-gray-200 p-3 flex items-center justify-between">
             <div>
-              <p className="text-xs text-gray-600">Total</p>
-              <p className="text-sm font-bold text-gray-900">{stats.total}</p>
+              <p className="text-base font-medium text-gray-600 leading-none">
+                Total
+              </p>
+              <p className="mt-1.5 text-2xl font-extrabold text-gray-900 leading-none">
+                {stats.total}
+              </p>
             </div>
-            <Users className="h-3 w-3 text-gray-600" />
+            <div className="rounded-lg bg-gray-100 p-2">
+              <Users className="h-5 w-5 text-gray-600" />
+            </div>
           </div>
 
-          <div className="bg-white border rounded p-5 flex items-center justify-between">
+          {/* Pending */}
+          <div className="rounded-xl bg-white border border-gray-200 p-3 flex items-center justify-between">
             <div>
-              <p className="text-xs text-gray-600">Pending</p>
-              <p className="text-sm font-bold text-amber-600">
+              <p className="text-base font-medium text-gray-600 leading-none">
+                Pending
+              </p>
+              <p className="mt-1.5 text-2xl font-extrabold text-amber-600 leading-none">
                 {stats.pending}
               </p>
             </div>
-            <Clock className="h-3 w-3 text-amber-600" />
+            <div className="rounded-lg bg-amber-100 p-2">
+              <Clock className="h-5 w-5 text-amber-600" />
+            </div>
           </div>
 
-          <div className="bg-white border rounded p-5 flex items-center justify-between">
+          {/* Reviewed */}
+          <div className="rounded-xl bg-white border border-gray-200 p-3 flex items-center justify-between">
             <div>
-              <p className="text-xs text-gray-600">Reviewed</p>
-              <p className="text-sm font-bold text-blue-500">
+              <p className="text-base font-medium text-gray-600 leading-none">
+                Reviewed
+              </p>
+              <p className="mt-1.5 text-2xl font-extrabold text-blue-600 leading-none">
                 {stats.reviewed}
               </p>
             </div>
-            <AlertCircle className="h-3 w-3 text-blue-500" />
+            <div className="rounded-lg bg-blue-100 p-2">
+              <AlertCircle className="h-5 w-5 text-blue-600" />
+            </div>
           </div>
 
-          <div className="bg-white border rounded p-5 flex items-center justify-between col-start-1 sm:col-start-auto">
+          {/* Accepted */}
+          <div className="rounded-xl bg-white border border-gray-200 p-3 flex items-center justify-between">
             <div>
-              <p className="text-xs text-gray-600">Accepted</p>
-              <p className="text-sm font-bold text-green-600">
+              <p className="text-base font-medium text-gray-600 leading-none">
+                Accepted
+              </p>
+              <p className="mt-1.5 text-2xl font-extrabold text-green-600 leading-none">
                 {stats.accepted}
               </p>
             </div>
-            <CheckCircle className="h-3 w-3 text-green-600" />
+            <div className="rounded-lg bg-green-100 p-2">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+            </div>
           </div>
 
-          <div className="bg-white border rounded p-5 flex items-center justify-between">
+          {/* Rejected */}
+          <div className="rounded-xl bg-white border border-gray-200 p-3 flex items-center justify-between">
             <div>
-              <p className="text-xs text-gray-600">Rejected</p>
-              <p className="text-sm font-bold text-red-600">{stats.rejected}</p>
+              <p className="text-base font-medium text-gray-600 leading-none">
+                Rejected
+              </p>
+              <p className="mt-1.5 text-2xl font-extrabold text-red-600 leading-none">
+                {stats.rejected}
+              </p>
             </div>
-            <XCircle className="h-3 w-3 text-red-600" />
+            <div className="rounded-lg bg-red-100 p-2">
+              <XCircle className="h-5 w-5 text-red-600" />
+            </div>
           </div>
         </div>
 
-        {/* Filters - Compact */}
-        <div className="bg-white border rounded p-2 mb-3">
-          <div className="flex gap-2 items-center">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="h-7 w-32">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="reviewed">Reviewed</SelectItem>
-                <SelectItem value="accepted">Accepted</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
-              </SelectContent>
-            </Select>
+        {/* Full-Width Filters Bar */}
+        <div className="mb-8 border-gray-200 pb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            {/* Left side - Filters */}
+            <div className="flex flex-wrap items-center gap-3">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="h-10 w-40">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="reviewed">Reviewed</SelectItem>
+                  <SelectItem value="accepted">Accepted</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                </SelectContent>
+              </Select>
 
-            <Select value={jobFilter} onValueChange={setJobFilter}>
-              <SelectTrigger className="h-7 w-40">
-                <SelectValue placeholder="Job" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Jobs</SelectItem>
-                {getUniqueJobs().map((job) => (
-                  <SelectItem key={job?.id} value={job?.id || ""}>
-                    {job?.title || "Untitled Job"}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              <Select value={jobFilter} onValueChange={setJobFilter}>
+                <SelectTrigger className="h-10 w-64">
+                  <SelectValue placeholder="Job" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Jobs</SelectItem>
+                  {getUniqueJobs().map((job) => (
+                    <SelectItem key={job?.id} value={job?.id || ""}>
+                      {job?.title || "Untitled Job"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
+            {/* Right side - Clear button */}
             <Button
               variant="outline"
               size="sm"
               onClick={clearFilters}
-              className="h-7 px-2 text-xs"
+              className="h-10 whitespace-nowrap"
             >
-              Clear
+              Clear Filters
             </Button>
           </div>
         </div>
@@ -692,9 +716,6 @@ export default function ManageApplicationsPage() {
                     No applications match your current filters or you
                     haven&apos;t received any applications yet.
                   </p>
-                  <Button variant="outline" onClick={clearFilters}>
-                    Clear Filters
-                  </Button>
                 </div>
               )}
             </CardContent>

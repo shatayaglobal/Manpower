@@ -71,8 +71,8 @@ export default function JobDetailsPage() {
     if (!job) return;
     try {
       await pokePost(job.id);
-    } catch (error) {
-      console.error("Failed to save job:", error);
+    } catch  {
+      //console.error("Failed to save job:", error);
     }
   };
 
@@ -80,8 +80,8 @@ export default function JobDetailsPage() {
     if (!job) return;
     try {
       await likePost(job.id);
-    } catch (error) {
-      console.error("Failed to like job:", error);
+    } catch  {
+      //console.error("Failed to like job:", error);
     }
   };
 

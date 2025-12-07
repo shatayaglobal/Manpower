@@ -1,161 +1,26 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/lib/redux/store";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-import {
-  User,
-  LogOut,
-  Settings,
-  ChevronDown,
-  Briefcase,
-  Calendar,
-  Building,
-  UserCheck,
-  Search,
-  MessageCircle,
-  Clock,
-  Menu,
-  Bell,
-  FileText,
-} from "lucide-react";
 import Link from "next/link";
 import { useAuthState } from "@/lib/redux/redux";
-import { useAuthSlice } from "@/lib/redux/use-auth";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { useMessaging } from "@/lib/redux/use-messaging";
 import { websocketActions } from "@/lib/redux/websocket-actions";
 import Image from "next/image";
 import { getCurrentUserThunk } from "@/lib/redux/authSlice";
-import { InvitationBadge } from "./staff-notification-invitation-badge";
+import DashboardLayout from "@/components/dashboard-layout";
 
 interface AppLayoutProps {
   children: React.ReactNode;
 }
 
-type MobileNavAccordionProps = {
-  title: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
-};
-
-function MobileNavAccordion({
-  title,
-  icon,
-  children,
-}: MobileNavAccordionProps) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <div className="border-b border-gray-100">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between py-3 px-4 text-sm font-medium text-gray-800 hover:bg-gray-50 transition"
-      >
-        <div className="flex items-center gap-2">
-          {icon}
-          {title}
-        </div>
-        <ChevronDown
-          className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`}
-        />
-      </button>
-
-      <div
-        className={`overflow-hidden transition-all duration-200 ${
-          open ? "max-h-96" : "max-h-0"
-        }`}
-      >
-        <div className="pb-2">{children}</div>
-      </div>
-    </div>
-  );
-}
-
-type MobileNavItemProps = {
-  href: string;
-  children: React.ReactNode;
-};
-
-function MobileNavItem({ href, children }: MobileNavItemProps) {
-  return (
-    <Link
-      href={href}
-      className="flex items-center gap-2 py-2 px-8 text-sm text-gray-600 hover:text-blue-500 transition"
-    >
-      {children}
-    </Link>
-  );
-}
-
 export default function AppLayout({ children }: AppLayoutProps) {
   const { isAuthenticated, user } = useAuthState();
-  const { logout } = useAuthSlice();
-  const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-  const { unreadCount, getUnreadCount } = useMessaging();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      toast.success("Logged out successfully");
-      router.push("/");
-    } catch {
-      toast.error("Error logging out");
-    }
-  };
-
-  const getUserDisplayName = () => {
-    if (!user) return "";
-
-    if (user.first_name && user.last_name) {
-      return `${user.first_name} ${user.last_name}`;
-    }
-
-    if (user.first_name) {
-      return user.first_name;
-    }
-
-    if (user.email) {
-      return user.email.split("@")[0];
-    }
-
-    return "User";
-  };
-
-  const getUserInitials = () => {
-    if (!user) return "U";
-
-    if (user.first_name && user.last_name) {
-      return `${user.first_name.charAt(0)}${user.last_name.charAt(
-        0
-      )}`.toUpperCase();
-    }
-
-    if (user.first_name) {
-      return user.first_name.charAt(0).toUpperCase();
-    }
-
-    if (user.email) {
-      return user.email.charAt(0).toUpperCase();
-    }
-
-    return "U";
-  };
-
-  const isBusinessUser = user?.account_type === "BUSINESS";
-  const isWorkerUser = user?.account_type === "WORKER";
+  const { getUnreadCount } = useMessaging();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -175,6 +40,12 @@ export default function AppLayout({ children }: AppLayoutProps) {
     }
   }, [isAuthenticated, user?.id, dispatch, getUnreadCount, user]);
 
+  // If user is authenticated, use dashboard layout
+  if (isAuthenticated && user) {
+    return <DashboardLayout>{children}</DashboardLayout>;
+  }
+
+  // Otherwise, use public website layout
   return (
     <div className="min-h-screen bg-white">
       {/* Header/Navbar - Fixed positioning */}
@@ -203,505 +74,47 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center space-x-6">
-              {isAuthenticated ? (
-                <>
-                  {isBusinessUser && (
-                    <>
-                      <Link
-                        href="/business"
-                        className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm flex items-center gap-1"
-                      >
-                        <Building className="h-4 w-4" />
-                        My Business
-                      </Link>
-
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm flex items-center gap-1">
-                            Jobs
-                            <ChevronDown className="h-3 w-3 opacity-70" />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          <DropdownMenuItem asChild>
-                            <Link href="/jobs" className="flex items-center">
-                              <Briefcase className="mr-2 h-4 w-4" />
-                              Manage Jobs
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link
-                              href="/jobs/create"
-                              className="flex items-center"
-                            >
-                              <Briefcase className="mr-2 h-4 w-4" />
-                              Post New Job
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link
-                              href="/manage-applications"
-                              className="flex items-center"
-                            >
-                              <UserCheck className="mr-2 h-4 w-4" />
-                              Manage Applications
-                            </Link>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm flex items-center gap-1">
-                            Workforce
-                            <ChevronDown className="h-3 w-3 opacity-70" />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          <DropdownMenuItem asChild>
-                            <Link href="/staff" className="flex items-center">
-                              <UserCheck className="mr-2 h-4 w-4" />
-                              Staff Management
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link href="/shifts" className="flex items-center">
-                              <Calendar className="mr-2 h-4 w-4" />
-                              Shift Scheduling
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link href="/hours" className="flex items-center">
-                              <Clock className="mr-2 h-4 w-4" />
-                              Hours & Attendance
-                            </Link>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </>
-                  )}
-                  {isWorkerUser && (
-                    <>
-                      <Link
-                        href="/companies"
-                        className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm flex items-center gap-1"
-                      >
-                        Companies
-                      </Link>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm flex items-center gap-1 min-w-fit">
-                            Jobs
-                            <ChevronDown className="h-3 w-3 flex-shrink-0" />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          <DropdownMenuItem asChild>
-                            <Link href="/jobs" className="flex items-center">
-                              <Search className="mr-2 h-4 w-4" />
-                              Search All Jobs
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link
-                              href="/jobs/job-applications"
-                              className="flex items-center"
-                            >
-                              <Briefcase className="mr-2 h-4 w-4" />
-                              My Applications
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link
-                              href="/jobs/saved"
-                              className="flex items-center"
-                            >
-                              <UserCheck className="mr-2 h-4 w-4" />
-                              Saved Jobs
-                            </Link>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm flex items-center gap-1">
-                            My Work
-                            <ChevronDown className="h-3 w-3 opacity-70" />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          <DropdownMenuItem asChild>
-                            <Link
-                              href="/worker-dashboard"
-                              className="flex items-center"
-                            >
-                              <Clock className="mr-2 h-4 w-4" />
-                              Dashboard & Clock
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link
-                              href="/my-hours"
-                              className="flex items-center"
-                            >
-                              <FileText className="mr-2 h-4 w-4" />
-                              My Hours
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link
-                              href="/my-shifts"
-                              className="flex items-center"
-                            >
-                              <Calendar className="mr-2 h-4 w-4" />
-                              My Shifts
-                            </Link>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                      <InvitationBadge />
-                    </>
-                  )}
-                  <Link
-                    href="/messages"
-                    className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm flex items-center gap-1 relative"
-                  >
-                    <MessageCircle className="h-4 w-4" />
-                    <span className="hidden xl:inline">Messages</span>
-                    {unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center text-[10px]">
-                        {unreadCount > 99 ? "99+" : unreadCount}
-                      </span>
-                    )}
-                  </Link>
-                  <Link
-                    href="/blog"
-                    className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm"
-                  >
-                    Blog
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/home"
-                    className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm"
-                  >
-                    Home
-                  </Link>
-                  <Link
-                    href="/about"
-                    className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm"
-                  >
-                    About
-                  </Link>
-                  <Link
-                    href="/contact"
-                    className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm"
-                  >
-                    Contact
-                  </Link>
-                </>
-              )}
+              <Link
+                href="/home"
+                className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm"
+              >
+                Home
+              </Link>
+              <Link
+                href="/about"
+                className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm"
+              >
+                About
+              </Link>
+              <Link
+                href="/contact"
+                className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm"
+              >
+                Contact
+              </Link>
+              <Link
+                href="/blog"
+                className="text-gray-600 hover:text-blue-500 transition-colors font-medium text-sm"
+              >
+                Blog
+              </Link>
             </nav>
 
-            {/* Right side - Auth/Profile + Mobile Menu */}
+            {/* Right side - Auth buttons */}
             <div className="flex items-center gap-2">
-              {/* Authentication Section */}
-              {isAuthenticated && user ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="flex items-center space-x-2 px-2 py-1 hover:bg-gray-100 h-10"
-                    >
-                      <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                        {getUserInitials()}
-                      </div>
-                      <span className="text-gray-700 font-medium hidden md:block text-sm max-w-[100px] truncate">
-                        {getUserDisplayName()}
-                      </span>
-                      <ChevronDown className="h-4 w-4 text-gray-500 hidden md:block" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <div className="px-2 py-1.5">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {getUserDisplayName()}
-                      </p>
-                      <p className="text-xs text-gray-500 truncate">
-                        {user.email}
-                      </p>
-                      {user.account_type && (
-                        <p className="text-xs text-blue-500 capitalize mt-1">
-                          {user.account_type.toLowerCase()} Account
-                        </p>
-                      )}
-                    </div>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/profile" className="flex items-center">
-                        <User className="mr-2 h-4 w-4" />
-                        <span>Profile</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/settings" className="flex items-center">
-                        <Settings className="mr-2 h-4 w-4" />
-                        <span>Settings</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={handleLogout}
-                      className="text-red-600 focus:text-red-600 cursor-pointer"
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Sign Out</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <div className="hidden md:flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    className="text-gray-600 hover:text-blue-500 text-sm px-3"
-                    asChild
-                  >
-                    <Link href="/login">Sign In</Link>
-                  </Button>
-                  <Button
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 text-sm shadow-sm"
-                    asChild
-                  >
-                    <Link href="/signup">Get Started</Link>
-                  </Button>
-                </div>
-              )}
-
-              {/* Mobile Menu Button */}
-              <div className="lg:hidden">
-                <DropdownMenu
-                  open={isMobileMenuOpen}
-                  onOpenChange={setIsMobileMenuOpen}
-                >
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-10 w-10">
-                      <Menu className="h-5 w-5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-
-                  <DropdownMenuContent align="end" className="w-64">
-                    {isAuthenticated ? (
-                      <>
-                        {/* USER PROFILE HEADER */}
-                        <div className="px-4 py-2 border-b border-gray-100">
-                          <p className="text-sm font-medium text-gray-900 truncate">
-                            {getUserDisplayName()}
-                          </p>
-                          <p className="text-xs text-gray-500 truncate">
-                            {user?.email || "No email"}
-                          </p>
-                        </div>
-
-                        {/* BUSINESS USER: My Business */}
-                        {isBusinessUser && (
-                          <DropdownMenuItem asChild>
-                            <Link
-                              href="/business"
-                              className="flex items-center gap-2 py-2 px-4 text-sm"
-                            >
-                              <Building className="h-4 w-4" />
-                              My Business
-                            </Link>
-                          </DropdownMenuItem>
-                        )}
-
-                        {/* JOBS SECTION (accordion) */}
-                        <MobileNavAccordion
-                          title="Jobs"
-                          icon={<Briefcase className="h-4 w-4" />}
-                        >
-                          {isBusinessUser && (
-                            <>
-                              <MobileNavItem href="/jobs">
-                                Manage Jobs
-                              </MobileNavItem>
-                              <MobileNavItem href="/jobs/create">
-                                Post New Job
-                              </MobileNavItem>
-                              <MobileNavItem href="/manage-applications">
-                                Manage Applications
-                              </MobileNavItem>
-                            </>
-                          )}
-                          {isWorkerUser && (
-                            <>
-                              <MobileNavItem href="/jobs">
-                                Search All Jobs
-                              </MobileNavItem>
-                              <MobileNavItem href="/jobs/job-applications">
-                                My Applications
-                              </MobileNavItem>
-                              <MobileNavItem href="/jobs/saved">
-                                Saved Jobs
-                              </MobileNavItem>
-                            </>
-                          )}
-                        </MobileNavAccordion>
-                        {isWorkerUser && (
-                          <MobileNavAccordion
-                            title="My Work"
-                            icon={<Clock className="h-4 w-4" />}
-                          >
-                            <MobileNavItem href="/worker-dashboard">
-                              Dashboard & Clock
-                            </MobileNavItem>
-                            <MobileNavItem href="/my-hours">
-                              My Hours
-                            </MobileNavItem>
-                            <MobileNavItem href="/my-shifts">
-                              My Shifts
-                            </MobileNavItem>
-                          </MobileNavAccordion>
-                        )}
-
-                        {/* WORKFORCE SECTION (only business) */}
-                        {isBusinessUser && (
-                          <MobileNavAccordion
-                            title="Workforce"
-                            icon={<UserCheck className="h-4 w-4" />}
-                          >
-                            <MobileNavItem href="/staff">
-                              Staff Management
-                            </MobileNavItem>
-                            <MobileNavItem href="/shifts">
-                              Shift Scheduling
-                            </MobileNavItem>
-                            <MobileNavItem href="/hours">
-                              Hours & Attendance
-                            </MobileNavItem>
-                          </MobileNavAccordion>
-                        )}
-
-                        {/* MESSAGES */}
-                        <DropdownMenuItem asChild>
-                          <Link
-                            href="/messages"
-                            className="flex items-center justify-between py-2 px-4 text-sm"
-                          >
-                            <div className="flex items-center gap-2">
-                              <MessageCircle className="h-4 w-4" />
-                              Messages
-                            </div>
-                            {unreadCount > 0 && (
-                              <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                                {unreadCount > 99 ? "99+" : unreadCount}
-                              </span>
-                            )}
-                          </Link>
-                        </DropdownMenuItem>
-                        {isWorkerUser && (
-                          <DropdownMenuItem asChild>
-                            <Link
-                              href="/invitations"
-                              className="flex items-center gap-2 py-2 px-4 text-sm"
-                            >
-                              <Bell className="h-4 w-4" />
-                              Invitations
-                            </Link>
-                          </DropdownMenuItem>
-                        )}
-
-                        {/* BLOG */}
-                        <DropdownMenuItem asChild>
-                          <Link
-                            href="/blog"
-                            className="flex items-center gap-2 py-2 px-4 text-sm"
-                          >
-                            Blog
-                          </Link>
-                        </DropdownMenuItem>
-
-                        <DropdownMenuSeparator />
-
-                        {/* PROFILE & SETTINGS */}
-                        <DropdownMenuItem asChild>
-                          <Link
-                            href="/profile"
-                            className="flex items-center gap-2 py-2 px-4 text-sm"
-                          >
-                            <User className="h-4 w-4" />
-                            Profile
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link
-                            href="/settings"
-                            className="flex items-center gap-2 py-2 px-4 text-sm"
-                          >
-                            <Settings className="h-4 w-4" />
-                            Settings
-                          </Link>
-                        </DropdownMenuItem>
-
-                        {/* LOGOUT */}
-                        <DropdownMenuItem
-                          onClick={handleLogout}
-                          className="flex items-center gap-2 py-2 px-4 text-sm text-red-600"
-                        >
-                          <LogOut className="h-4 w-4" />
-                          Sign Out
-                        </DropdownMenuItem>
-                      </>
-                    ) : (
-                      <>
-                        <DropdownMenuItem asChild>
-                          <Link
-                            href="/home"
-                            className="flex items-center py-2 px-4 text-sm"
-                          >
-                            Home
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link
-                            href="/about"
-                            className="flex items-center py-2 px-4 text-sm"
-                          >
-                            About
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link
-                            href="/contact"
-                            className="flex items-center py-2 px-4 text-sm"
-                          >
-                            Contact
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                          <Link
-                            href="/login"
-                            className="flex items-center py-2 px-4 text-sm"
-                          >
-                            Sign In
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link
-                            href="/signup"
-                            className="flex items-center py-2 px-4 text-sm text-blue-500 font-medium"
-                          >
-                            Get Started
-                          </Link>
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+              <Button
+                variant="ghost"
+                className="text-gray-600 hover:text-blue-500 text-sm px-3"
+                asChild
+              >
+                <Link href="/login">Sign In</Link>
+              </Button>
+              <Button
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 text-sm shadow-sm"
+                asChild
+              >
+                <Link href="/signup">Get Started</Link>
+              </Button>
             </div>
           </div>
         </div>

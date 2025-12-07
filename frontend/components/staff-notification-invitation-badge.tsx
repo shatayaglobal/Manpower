@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Bell } from "lucide-react";
 import { useRouter } from "next/navigation";
 import axiosInstance from "@/lib/redux/axios";
@@ -26,19 +26,20 @@ export function InvitationBadge() {
   const router = useRouter();
   const { isAuthenticated, user } = useAuthState();
 
-  const fetchInvitations = async () => {
+  const fetchInvitations = useCallback(async () => {
     if (!isAuthenticated || user?.account_type !== "WORKER") return;
 
     try {
-      const response = await axiosInstance.get<unknown[]>("/workforce/invitations/");
+      const response = await axiosInstance.get<unknown[]>(
+        "/workforce/invitations/"
+      );
       setCount(response.data.length);
-    } catch {
-    }
-  };
+    } catch {}
+  }, [isAuthenticated, user?.account_type]);
 
   useEffect(() => {
     fetchInvitations();
-  }, [isAuthenticated, user?.account_type, fetchInvitations]);
+  }, [fetchInvitations]);
 
   useEffect(() => {
     if (!isAuthenticated || user?.account_type !== "WORKER") return;
@@ -54,8 +55,7 @@ export function InvitationBadge() {
         if (data.type === "invitation_update") {
           fetchInvitations();
         }
-      } catch {
-      }
+      } catch {}
     };
 
     const ws = window.chatWebSocket;
@@ -63,7 +63,7 @@ export function InvitationBadge() {
       ws.addEventListener("message", handleWebSocketMessage);
       return () => ws.removeEventListener("message", handleWebSocketMessage);
     }
-  }, [isAuthenticated, user?.account_type, ]);
+  }, [isAuthenticated, user?.account_type, fetchInvitations]);
 
   useEffect(() => {
     const handleInvitationChange = () => {
@@ -73,7 +73,7 @@ export function InvitationBadge() {
     window.addEventListener("invitation-changed", handleInvitationChange);
     return () =>
       window.removeEventListener("invitation-changed", handleInvitationChange);
-  }, [isAuthenticated, user?.account_type]);
+  }, [fetchInvitations]);
 
   if (!isAuthenticated || user?.account_type !== "WORKER" || count === 0) {
     return null;

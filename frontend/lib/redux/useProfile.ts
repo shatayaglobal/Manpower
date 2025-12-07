@@ -97,7 +97,6 @@ const handleApplyWithProfileCheck = useCallback(
     }
 
     if (!jobId || jobId === "undefined") {
-      console.error("Invalid jobId:", jobId);
       toast.error("Cannot apply: Invalid job ID");
       return;
     }
@@ -127,7 +126,6 @@ const handleApplyWithProfileCheck = useCallback(
       applicationData.append("cover_letter", "Applied via profile check");
       applicationData.append("additional_info", "");
 
-      console.log("FormData entries:", [...applicationData.entries()]);
       await dispatch(submitJobApplication(applicationData)).unwrap();
 
       toast.success("Successfully applied for the job!", {
@@ -151,7 +149,6 @@ const handleApplyWithProfileCheck = useCallback(
           duration: 4000,
         });
       } else {
-        console.error("Application error:", error);
         toast.error("Failed to submit application. Please try again.");
       }
     }
@@ -178,13 +175,11 @@ const handleApplyWithProfileCheck = useCallback(
     dispatch(clearProfileError());
   }, [dispatch]);
 
-  // Clear profile data
   const clearProfileData = useCallback((): void => {
     dispatch(clearProfile());
   }, [dispatch]);
 
   return {
-    // State
     profile,
     loading,
     error,
@@ -193,7 +188,6 @@ const handleApplyWithProfileCheck = useCallback(
     isWorker: user?.account_type === 'WORKER',
     isAuthenticated,
 
-    // Actions
     checkProfileComplete,
     loadProfile,
     updateProfile,
