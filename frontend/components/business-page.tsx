@@ -15,6 +15,7 @@ import {
   Briefcase,
   AlertCircle,
   Loader2,
+  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useBusiness } from "@/lib/redux/useBusiness";
@@ -45,7 +46,7 @@ const StatCard: React.FC<{
   const bgClass = `bg-${color}-50`;
   const iconClass = `text-${color}-600`;
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+    <div className="bg-white rounded-lg border border-gray-200 p-4">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-2xl font-bold text-gray-900">{value}</p>
@@ -691,7 +692,6 @@ const MyBusinessPage: React.FC = () => {
     );
   };
 
-  // Loading State
   if (loading) {
     return (
       <div className="bg-white flex items-center justify-center min-h-screen">
@@ -703,96 +703,112 @@ const MyBusinessPage: React.FC = () => {
     );
   }
 
-  // No Business State
   if (!hasBusiness) {
     return (
-      <div className="w-full bg-white">
-        <div className="max-w-full px-3 sm:px-6 lg:px-8 py-6 sm:py-12">
-          <div className="text-center mb-6 sm:mb-10">
-            <Building2 className="w-12 sm:w-16 h-12 sm:h-16 text-blue-500 mx-auto mb-4 sm:mb-6" />
-            <h1 className="text-xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
-              Welcome to Your Business Dashboard
-            </h1>
-            <p className="text-sm sm:text-lg text-gray-600">
-              Let&apos;s get started by setting up your business profile
-            </p>
-          </div>
-          <div className="text-center mb-6 sm:mb-8">
-            <Button
-              onClick={() => setShowCreateModal(true)}
-              size="lg"
-              className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white shadow-lg px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-base"
-            >
-              <Plus className="w-4 sm:w-5 h-4 sm:h-5 mr-2 text-amber-600" />
-              Create Your Business Profile
-            </Button>
-          </div>
-          <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-8">
-            <h2 className="text-lg sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
-              What you&apos;ll be able to do:
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-              <div className="flex items-start">
-                <div className="w-8 sm:w-10 h-8 sm:h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
-                  <Users className="w-4 sm:w-5 h-4 sm:h-5 text-blue-500" />
+      <div className="bg-white rounded-lg p-6 -ml-4 -mt-5 min-h-screen -mr-4">
+        <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Main Container - No Border */}
+          <div className="p-8">
+            {/* Header */}
+            <div className="text-center mb-12">
+              <h1 className="text-3xl font-bold text-gray-900 mb-3">
+                Welcome to Your Business Dashboard
+              </h1>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
+                Create your business profile to start managing your workforce
+              </p>
+
+              <Button
+                onClick={() => setShowCreateModal(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-base font-medium"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Create Business Profile
+              </Button>
+            </div>
+
+            {/* Features */}
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-6 text-center">
+                What you can do
+              </h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="border border-gray-200 rounded-lg p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Users className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-1">
+                        Manage Staff
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        Add and organize your team members with detailed
+                        profiles
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-1">
-                    Manage Staff
-                  </h3>
-                  <p className="text-xs sm:text-sm text-gray-600">
-                    Add and organize your team members with detailed profiles
-                  </p>
+
+                <div className="border border-gray-200 rounded-lg p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Calendar className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-1">
+                        Schedule Shifts
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        Create and manage work schedules efficiently
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-start">
-                <div className="w-8 sm:w-10 h-8 sm:h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
-                  <Calendar className="w-4 sm:w-5 h-4 sm:h-5 text-green-600" />
+
+                <div className="border border-gray-200 rounded-lg p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Briefcase className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-1">
+                        Post Jobs
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        Attract talented workers and manage applications
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-1">
-                    Schedule Shifts
-                  </h3>
-                  <p className="text-xs sm:text-sm text-gray-600">
-                    Create and manage work schedules efficiently
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start">
-                <div className="w-8 sm:w-10 h-8 sm:h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
-                  <Briefcase className="w-4 sm:w-5 h-4 sm:h-5 text-purple-600" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-1">
-                    Post Jobs
-                  </h3>
-                  <p className="text-xs sm:text-sm text-gray-600">
-                    Attract talented workers and manage applications
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start">
-                <div className="w-8 sm:w-10 h-8 sm:h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
-                  <BarChart3 className="w-4 sm:w-5 h-4 sm:h-5 text-orange-600" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-1">
-                    Track Performance
-                  </h3>
-                  <p className="text-xs sm:text-sm text-gray-600">
-                    Monitor hours worked and business analytics
-                  </p>
+
+                <div className="border border-gray-200 rounded-lg p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <BarChart3 className="w-5 h-5 text-orange-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-1">
+                        Track Performance
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        Monitor hours worked and business analytics
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+
+          {showCreateModal && (
+            <BusinessModal
+              business={null}
+              onClose={() => setShowCreateModal(false)}
+            />
+          )}
         </div>
-        {showCreateModal && (
-          <BusinessModal
-            business={null}
-            onClose={() => setShowCreateModal(false)}
-          />
-        )}
       </div>
     );
   }
