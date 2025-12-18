@@ -128,6 +128,32 @@ const MyBusinessPage: React.FC = () => {
       }
     }, [business]);
 
+    const convertTo12Hour = (
+      time24: string
+    ): { hour: string; minute: string; period: "AM" | "PM" } => {
+      if (!time24) return { hour: "", minute: "", period: "AM" };
+      const [hour, minute] = time24.split(":").map(Number);
+      const period = hour >= 12 ? "PM" : "AM";
+      const hour12 = hour % 12 || 12;
+      return {
+        hour: hour12.toString().padStart(2, "0"),
+        minute: minute.toString().padStart(2, "0"),
+        period,
+      };
+    };
+
+    const convertTo24Hour = (
+      hour12: string,
+      minute: string,
+      period: "AM" | "PM"
+    ): string => {
+      if (!hour12 || !minute) return "";
+      let hour = parseInt(hour12);
+      if (period === "PM" && hour !== 12) hour += 12;
+      if (period === "AM" && hour === 12) hour = 0;
+      return `${hour.toString().padStart(2, "0")}:${minute}`;
+    };
+
     const validateStep = (step: number): boolean => {
       const newErrors: Record<string, string> = {};
       if (step === 1) {
@@ -510,45 +536,128 @@ const MyBusinessPage: React.FC = () => {
                     Service Hours
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    {/* Opening Time */}
                     <div>
                       <label className="block text-xs text-gray-500 mb-1">
                         Opening Time
                       </label>
-                      <input
-                        type="time"
-                        onChange={(e) => {
-                          const openTime = e.target.value;
-                          const closeTime =
-                            formData.service_time.split(" - ")[1] || "";
-                          setFormData({
-                            ...formData,
-                            service_time: closeTime
-                              ? `${openTime} - ${closeTime}`
-                              : openTime,
-                          });
-                        }}
-                        className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
-                      />
+                      <div className="flex gap-2">
+                        {/* Native time picker (user selects in their preferred format) */}
+                        <input
+                          type="time"
+                          value={formData.service_time.split(" - ")[0] || ""}
+                          onChange={(e) => {
+                            const openTime24 = e.target.value;
+                            const closeTime =
+                              formData.service_time.split(" - ")[1]?.trim() ||
+                              "";
+                            setFormData({
+                              ...formData,
+                              service_time: closeTime
+                                ? `${openTime24} - ${closeTime}`
+                                : openTime24,
+                            });
+                          }}
+                          className="flex-1 px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                        />
+                        {/* AM/PM Selector */}
+                        <select
+                          value={
+                            convertTo12Hour(
+                              formData.service_time.split(" - ")[0] || ""
+                            ).period
+                          }
+                          onChange={(e) => {
+                            const current = convertTo12Hour(
+                              formData.service_time.split(" - ")[0] || ""
+                            );
+                            const newTime24 = convertTo24Hour(
+                              current.hour,
+                              current.minute,
+                              e.target.value as "AM" | "PM"
+                            );
+                            const closeTime =
+                              formData.service_time.split(" - ")[1]?.trim() ||
+                              "";
+                            setFormData({
+                              ...formData,
+                              service_time: closeTime
+                                ? `${newTime24} - ${closeTime}`
+                                : newTime24,
+                            });
+                          }}
+                          className="px-3 py-1.5 sm:py-2 border border-gray-300 rounded-lg text-sm sm:text-base bg-white"
+                        >
+                          <option value="AM">AM</option>
+                          <option value="PM">PM</option>
+                        </select>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Select time + AM/PM
+                      </p>
                     </div>
+
+                    {/* Closing Time - Repeat the same pattern */}
                     <div>
                       <label className="block text-xs text-gray-500 mb-1">
                         Closing Time
                       </label>
-                      <input
-                        type="time"
-                        onChange={(e) => {
-                          const closeTime = e.target.value;
-                          const openTime =
-                            formData.service_time.split(" - ")[0] || "";
-                          setFormData({
-                            ...formData,
-                            service_time: openTime
-                              ? `${openTime} - ${closeTime}`
-                              : closeTime,
-                          });
-                        }}
-                        className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
-                      />
+                      <div className="flex gap-2">
+                        <input
+                          type="time"
+                          value={
+                            formData.service_time.split(" - ")[1]?.trim() || ""
+                          }
+                          onChange={(e) => {
+                            const closeTime24 = e.target.value;
+                            const openTime =
+                              formData.service_time.split(" - ")[0]?.trim() ||
+                              "";
+                            setFormData({
+                              ...formData,
+                              service_time: openTime
+                                ? `${openTime} - ${closeTime24}`
+                                : closeTime24,
+                            });
+                          }}
+                          className="flex-1 px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                        />
+                        <select
+                          value={
+                            convertTo12Hour(
+                              formData.service_time.split(" - ")[1]?.trim() ||
+                                ""
+                            ).period
+                          }
+                          onChange={(e) => {
+                            const current = convertTo12Hour(
+                              formData.service_time.split(" - ")[1]?.trim() ||
+                                ""
+                            );
+                            const newTime24 = convertTo24Hour(
+                              current.hour,
+                              current.minute,
+                              e.target.value as "AM" | "PM"
+                            );
+                            const openTime =
+                              formData.service_time.split(" - ")[0]?.trim() ||
+                              "";
+                            setFormData({
+                              ...formData,
+                              service_time: openTime
+                                ? `${openTime} - ${newTime24}`
+                                : newTime24,
+                            });
+                          }}
+                          className="px-3 py-1.5 sm:py-2 border border-gray-300 rounded-lg text-sm sm:text-base bg-white"
+                        >
+                          <option value="AM">AM</option>
+                          <option value="PM">PM</option>
+                        </select>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Select time + AM/PM
+                      </p>
                     </div>
                   </div>
                   <div className="mt-2 p-2 bg-gray-50 rounded text-xs sm:text-sm text-gray-600">
