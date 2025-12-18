@@ -15,7 +15,6 @@ import {
   Briefcase,
   AlertCircle,
   Loader2,
-  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useBusiness } from "@/lib/redux/useBusiness";
@@ -62,7 +61,6 @@ const StatCard: React.FC<{
   );
 };
 
-// Helper to get category label
 const getCategoryLabel = (categoryValue: string): string => {
   const cat = BUSINESS_CATEGORIES.find((c) => c.value === categoryValue);
   return cat ? cat.label : "Other";
@@ -89,7 +87,6 @@ const MyBusinessPage: React.FC = () => {
     loadBusinesses();
   }, [loadBusinesses]);
 
-  // Modal Component (unchanged logic, just moved for clarity)
   const BusinessModal: React.FC<BusinessModalProps> = ({
     business,
     onClose,
