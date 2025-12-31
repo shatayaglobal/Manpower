@@ -255,8 +255,8 @@ const handleSubmit = async (e: React.FormEvent) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="bg-white rounded-lg p-2 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header Navigation */}
         <div className="mb-6">
           <Button
@@ -271,7 +271,6 @@ const handleSubmit = async (e: React.FormEvent) => {
 
         {/* Job Summary Card */}
         {job && (
-          <Card className="mb-6">
             <CardHeader>
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -290,11 +289,9 @@ const handleSubmit = async (e: React.FormEvent) => {
                 </div>
               </div>
             </CardHeader>
-          </Card>
         )}
 
         {/* Application Form */}
-        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-2xl">
               <User className="h-6 w-6 text-blue-700" />
@@ -463,7 +460,6 @@ const handleSubmit = async (e: React.FormEvent) => {
               </div>
             </form>
           </CardContent>
-        </Card>
       </div>
     </div>
   );

@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -65,7 +65,7 @@ export default function ProfilePage() {
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const [isNewProfile, setIsNewProfile] = useState(false);
   const [activeTab, setActiveTab] = useState("personal");
-  const [applicationCount, setApplicationCount] = useState(0);
+  const [livePercentage, setLivePercentage] = useState<number | null>(null);
   const [formData, setFormData] = useState<FormData>({
     first_name: user?.first_name || "",
     last_name: user?.last_name || "",
@@ -99,6 +99,77 @@ export default function ProfilePage() {
     { id: "skills", label: "Skills & Docs", icon: Award },
   ];
 
+  const displayPercentage =
+    livePercentage ?? Math.round(completionStatus?.completion_percentage || 0);
+
+  const calculateLivePercentage = useCallback((): number => {
+    let completed = 0;
+    const total = 20;
+
+    if (user?.first_name?.trim()) completed += 1;
+    if (user?.last_name?.trim()) completed += 1;
+    if (formData.phone?.trim()) completed += 1;
+    if (formData.bio?.trim()) completed += 1;
+    if (formData.city?.trim()) completed += 1;
+    if (formData.country?.trim()) completed += 1;
+    if (formData.profession?.trim()) completed += 1;
+    if (formData.employment_status) completed += 1;
+    if (formData.experience_level) completed += 1;
+    if (formData.skills?.trim()) completed += 1;
+
+    if (
+      Array.isArray(profile?.work_experience) &&
+      profile.work_experience.length > 0
+    )
+      completed += 1;
+    if (Array.isArray(profile?.education) && profile.education.length > 0)
+      completed += 1;
+    if (Array.isArray(profile?.languages) && profile.languages.length > 0)
+      completed += 1;
+    if (
+      Array.isArray(profile?.certifications) &&
+      profile.certifications.length > 0
+    )
+      completed += 1;
+
+    if (files.avatar || profile?.avatar) completed += 1;
+    if (files.resume || profile?.resume) completed += 1;
+    if (formData.date_of_birth) completed += 1;
+    if (formData.linkedin_url?.trim()) completed += 1;
+    if (formData.expected_salary_min?.trim()) completed += 1;
+
+    return Math.round((completed / total) * 100);
+  }, [
+    user?.first_name,
+    user?.last_name,
+    formData.phone,
+    formData.bio,
+    formData.city,
+    formData.country,
+    formData.profession,
+    formData.employment_status,
+    formData.experience_level,
+    formData.skills,
+    formData.date_of_birth,
+    formData.linkedin_url,
+    formData.expected_salary_min,
+    files.avatar,
+    files.resume,
+    profile?.avatar,
+    profile?.resume,
+    profile?.work_experience,
+    profile?.education,
+    profile?.languages,
+    profile?.certifications,
+  ]);
+  useEffect(() => {
+    if (isEditing) {
+      setLivePercentage(calculateLivePercentage());
+    } else {
+      setLivePercentage(null);
+    }
+  }, [isEditing, calculateLivePercentage]);
+
   // Lifecycle Effects
   useEffect(() => {
     if (!isAuthenticated || !user) {
@@ -106,7 +177,8 @@ export default function ProfilePage() {
       return;
     }
     loadProfile();
-  }, [isAuthenticated, user, router, loadProfile]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, user]);
 
   useEffect(() => {
     if (!loading) {
@@ -362,14 +434,10 @@ export default function ProfilePage() {
               <div className="flex items-center gap-3">
                 {completionStatus && (
                   <Badge
-                    variant={
-                      completionStatus.completion_percentage >= 80
-                        ? "default"
-                        : "secondary"
-                    }
+                    variant={displayPercentage >= 80 ? "default" : "secondary"}
                     className="px-3 py-1 text-sm font-medium"
                   >
-                    {Math.round(completionStatus.completion_percentage)}%
+                    {displayPercentage}%
                   </Badge>
                 )}
                 <Button
@@ -991,12 +1059,7 @@ export default function ProfilePage() {
                           fill="none"
                           strokeDasharray={`${2 * Math.PI * 36}`}
                           strokeDashoffset={`${
-                            2 *
-                            Math.PI *
-                            36 *
-                            (1 -
-                              (completionStatus?.completion_percentage || 0) /
-                                100)
+                            2 * Math.PI * 36 * (1 - displayPercentage / 100)
                           }`}
                           strokeLinecap="round"
                           className="transition-all duration-500"
@@ -1004,10 +1067,7 @@ export default function ProfilePage() {
                       </svg>
                       <div className="absolute inset-0 flex items-center justify-center">
                         <span className="text-2xl font-bold text-gray-900">
-                          {Math.round(
-                            completionStatus?.completion_percentage || 0
-                          )}
-                          %
+                          {displayPercentage}%
                         </span>
                       </div>
                     </div>
@@ -1015,11 +1075,11 @@ export default function ProfilePage() {
                       Profile Strength
                     </h3>
                     <p className="text-xs text-gray-600">
-                      {(completionStatus?.completion_percentage ?? 0) === 100
+                      {displayPercentage === 100
                         ? "Your profile is complete!"
-                        : (completionStatus?.completion_percentage ?? 0) >= 80
+                        : displayPercentage >= 80
                         ? "Almost there!"
-                        : (completionStatus?.completion_percentage ?? 0) >= 50
+                        : displayPercentage >= 50
                         ? "Keep going!"
                         : "Let's build your profile"}
                     </p>
@@ -1028,54 +1088,50 @@ export default function ProfilePage() {
               </Card>
 
               {/* Profile Tips */}
-              {completionStatus &&
-                completionStatus.completion_percentage < 100 && (
-                  <Card>
-                    <CardContent className="p-5">
-                      <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                        <span className="text-lg">💡</span>
-                        Profile Tips
-                      </h3>
-                      <div className="space-y-3">
-                        {completionStatus.missing_fields
-                          .slice(0, 2)
-                          .map((field, i) => (
-                            <div
-                              key={i}
-                              className="text-xs text-gray-600 flex items-start gap-2"
-                            >
-                              <div className="w-1 h-1 rounded-full bg-blue-600 mt-1.5 flex-shrink-0"></div>
-                              <span className="capitalize">
-                                Add your {field.replace(/_/g, " ")}
-                              </span>
-                            </div>
-                          ))}
-                        {completionStatus.completion_percentage < 80 && (
-                          <Button
-                            size="sm"
-                            className="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white text-xs"
-                            onClick={() => {
-                              const first = completionStatus.missing_fields[0];
-                              if (
-                                first?.includes("profession") ||
-                                first?.includes("employment")
-                              )
-                                startEdit("professional");
-                              else if (
-                                first?.includes("phone") ||
-                                first?.includes("personal")
-                              )
-                                startEdit("personal");
-                              else startEdit("skills");
-                            }}
+              {displayPercentage < 100 && (
+                <Card>
+                  <CardContent className="p-5">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <span className="text-lg">💡</span>
+                      Profile Tips
+                    </h3>
+                    <div className="space-y-3">
+                      {completionStatus?.missing_fields
+                        ?.slice(0, 2)
+                        .map((field, i) => (
+                          <div
+                            key={i}
+                            className="text-xs text-gray-600 flex items-start gap-2"
                           >
-                            Complete Profile
-                          </Button>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
+                            <div className="w-1 h-1 rounded-full bg-blue-600 mt-1.5 flex-shrink-0"></div>
+                            <span className="capitalize">
+                              Add your {field.replace(/_/g, " ")}
+                            </span>
+                          </div>
+                        ))}
+                      {displayPercentage < 80 && (
+                        <Button
+                          size="sm"
+                          className="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white text-xs"
+                          onClick={() => {
+                            const first = completionStatus?.missing_fields?.[0];
+                            if (
+                              first?.includes("profession") ||
+                              first?.includes("employment")
+                            )
+                              startEdit("professional");
+                            else if (first?.includes("phone"))
+                              startEdit("personal");
+                            else startEdit("skills");
+                          }}
+                        >
+                          Complete Profile
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </div>
         </div>

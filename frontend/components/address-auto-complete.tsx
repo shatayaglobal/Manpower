@@ -8,6 +8,7 @@ interface AddressAutocompleteProps {
   onChange: (address: string) => void;
   onPlaceSelected: (place: {
     address: string;
+    street: string;
     city: string;
     country: string;
     latitude: number;
@@ -21,6 +22,27 @@ interface AddressAutocompleteProps {
 interface Prediction {
   description: string;
   place_id: string;
+  structured_formatting?: {
+    main_text: string;
+    secondary_text: string;
+    main_text_matched_substrings?: Array<{
+      offset: number;
+      length: number;
+    }>;
+    secondary_text_matched_substrings?: Array<{
+      offset: number;
+      length: number;
+    }>;
+  };
+  matched_substrings?: Array<{
+    offset: number;
+    length: number;
+  }>;
+  terms?: Array<{
+    offset: number;
+    value: string;
+  }>;
+  types?: string[];
 }
 
 export function AddressAutocomplete({
@@ -110,25 +132,35 @@ export function AddressAutocomplete({
 
         if (
           status !== window.google.maps.places.PlacesServiceStatus.OK ||
-          !place
+          !place ||
+          !place.geometry?.location
         ) {
           return;
         }
 
-        if (!place.geometry || !place.geometry.location) {
-          return;
-        }
+        const fullAddress = place.formatted_address || description;
 
-        const address = place.formatted_address || description;
+        let street = "";
         let city = "";
         let country = "";
         let postal_code = "";
+
+        const streetParts: string[] = [];
 
         place.address_components?.forEach(
           (component: google.maps.GeocoderAddressComponent) => {
             const types = component.types;
 
+            if (types.includes("street_number")) {
+              streetParts.push(component.long_name);
+            }
+            if (types.includes("route")) {
+              streetParts.push(component.long_name);
+            }
+
             if (types.includes("locality")) {
+              city = component.long_name;
+            } else if (types.includes("sublocality") && !city) {
               city = component.long_name;
             } else if (types.includes("administrative_area_level_1") && !city) {
               city = component.long_name;
@@ -144,16 +176,27 @@ export function AddressAutocomplete({
           }
         );
 
+        if (streetParts.length > 0) {
+          street = streetParts.join(" ");
+        } else {
+          const firstComma = fullAddress.indexOf(",");
+          if (firstComma > 0) {
+            street = fullAddress.substring(0, firstComma).trim();
+          }
+        }
+
+        street = street.trim();
         const placeData = {
-          address,
-          city,
-          country,
+          address: fullAddress,
+          street,
+          city: city || "",
+          country: country || "",
           latitude: Number(place.geometry.location.lat().toFixed(6)),
           longitude: Number(place.geometry.location.lng().toFixed(6)),
-          postal_code,
+          postal_code: postal_code || undefined,
         };
 
-        onChange(address);
+        onChange(fullAddress);
         onPlaceSelected(placeData);
         setPredictions([]);
       }
@@ -247,10 +290,12 @@ export function AddressAutocomplete({
               <Navigation className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-gray-900 font-medium truncate">
-                  {prediction.description.split(",")[0]}
+                  {prediction.structured_formatting?.main_text ||
+                    prediction.description.split(",")[0]}
                 </p>
                 <p className="text-xs text-gray-500 truncate">
-                  {prediction.description.split(",").slice(1).join(",")}
+                  {prediction.structured_formatting?.secondary_text ||
+                    prediction.description.split(",").slice(1).join(",")}
                 </p>
               </div>
             </button>

@@ -184,11 +184,11 @@ export default function JobApplicationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+     <div className="bg-white rounded-lg p-2 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header Navigation */}
         {/* Header */}
-        <div className="mb-6 mt-10">
+        <div className="mb-6 mt-2">
           <div className="flex items-center gap-2 mb-2">
             <Button
               variant="ghost"

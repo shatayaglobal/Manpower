@@ -51,6 +51,11 @@ class Business(UUIDModel):
     phone = models.CharField(max_length=20)
     website = models.URLField(blank=True)
     address = models.TextField(max_length=500)
+    street = models.CharField(
+    max_length=255,
+    blank=True,
+    help_text="Street name and number (e.g., Plot 45 John Babiha Avenue)"
+)
     city = models.CharField(max_length=100)
     country = models.CharField(max_length=100)
     postal_code = models.CharField(max_length=20, blank=True)

@@ -185,23 +185,21 @@ export default function JobDetailsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="bg-white rounded-lg p-2 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
+      <div className="max-w-full mx-auto px-2 sm:px-6 lg:px-8 py-8">
         {/* Header Navigation */}
         <div className="mb-4">
           <Button
             variant="ghost"
             onClick={() => router.push("/jobs")}
-            className="text-blue-700 hover:text-blue-800 hover:bg-blue-50"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="h-4 w-4 mr-2 hover:text-blue-800 hover:bg-blue-50" />
             Back to Jobs
           </Button>
         </div>
 
         {/* Main Content Card */}
-        <Card className="shadow-lg">
-          <CardHeader className="pb-6">
+          <CardHeader className="pb-6 p-2">
             {/* Job Header */}
             <div className="flex items-start gap-4 mb-4">
               <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
@@ -294,7 +292,7 @@ export default function JobDetailsPage() {
             </div>
           </CardHeader>
 
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 p-2">
             {/* Job Description */}
             <div>
               <h2 className="text-xl font-semibold text-gray-900 mb-3">
@@ -379,7 +377,6 @@ export default function JobDetailsPage() {
               </div>
             </div>
           </CardContent>
-        </Card>
       </div>
     </div>
   );

@@ -70,7 +70,6 @@ const MyBusinessPage: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
   const {
     businesses,
-    selectedBusiness,
     loading,
     error,
     loadBusinesses,
@@ -101,6 +100,7 @@ const MyBusinessPage: React.FC = () => {
       phone: business?.phone ?? "",
       website: business?.website ?? "",
       address: business?.address ?? "",
+      street: business?.street ?? "",
       city: business?.city ?? "",
       country: business?.country ?? "Uganda",
       postal_code: business?.postal_code ?? "",
@@ -108,25 +108,6 @@ const MyBusinessPage: React.FC = () => {
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [submitting, setSubmitting] = useState<boolean>(false);
-
-    useEffect(() => {
-      if (business) {
-        setFormData({
-          name: business.name ?? "",
-          category: business.category ?? "OTHER",
-          size: business.size ?? "SMALL",
-          description: business.description ?? "",
-          email: business.email ?? "",
-          phone: business.phone ?? "",
-          website: business.website ?? "",
-          address: business.address ?? "",
-          city: business.city ?? "",
-          country: business.country ?? "Uganda",
-          postal_code: business.postal_code ?? "",
-          service_time: business.service_time ?? "",
-        });
-      }
-    }, [business]);
 
     const convertTo12Hour = (
       time24: string
@@ -440,6 +421,7 @@ const MyBusinessPage: React.FC = () => {
                       setFormData({
                         ...formData,
                         address: place.address,
+                        street: place.street,
                         city: place.city,
                         country: place.country,
                         postal_code: place.postal_code || formData.postal_code,
@@ -457,7 +439,23 @@ const MyBusinessPage: React.FC = () => {
                     Start typing to search for your address
                   </p>
                 </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  {/* ← ADD THIS NEW STREET INPUT HERE */}
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                      Street Address
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.street || ""}
+                      onChange={(e) =>
+                        setFormData({ ...formData, street: e.target.value })
+                      }
+                      className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                      placeholder="e.g. Plot 123, Acacia Avenue"
+                    />
+                  </div>
                   <div>
                     <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                       City *
@@ -699,6 +697,11 @@ const MyBusinessPage: React.FC = () => {
                     <p className="text-xs sm:text-sm text-gray-600">
                       {formData.address}
                     </p>
+                    {formData.street && (
+                      <p className="text-xs sm:text-sm text-gray-600">
+                        Street: {formData.street}
+                      </p>
+                    )}
                     <p className="text-xs sm:text-sm text-gray-600">
                       {formData.city}, {formData.country}
                     </p>
@@ -920,7 +923,7 @@ const MyBusinessPage: React.FC = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg p-6 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
+    <div className="bg-white rounded-lg p-2 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
       <div className="max-w-full mx-auto px-4 sm:px-4 lg:px-4 py-6">
         {/* Main White Card Container */}
         <div>
@@ -965,7 +968,7 @@ const MyBusinessPage: React.FC = () => {
                       {business.name}
                     </h2>
                     <p className="text-xs text-gray-500">
-                      ID: {business.business_id}
+                      CATEGORY: {business.category}
                     </p>
                   </div>
                 </div>
@@ -977,7 +980,6 @@ const MyBusinessPage: React.FC = () => {
               </div>
               <Button
                 onClick={() => {
-                  selectBusiness(business);
                   setShowCreateModal(true);
                 }}
                 variant="outline"
@@ -992,7 +994,7 @@ const MyBusinessPage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-gray-400" />
                 <span className="text-sm text-gray-700 truncate">
-                  {business.city}, {business.country}
+                  {business.address}
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -1119,10 +1121,9 @@ const MyBusinessPage: React.FC = () => {
         {/* Modal */}
         {showCreateModal && (
           <BusinessModal
-            business={selectedBusiness}
+            business={business}
             onClose={() => {
               setShowCreateModal(false);
-              selectBusiness(null);
             }}
           />
         )}

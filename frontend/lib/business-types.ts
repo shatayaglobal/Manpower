@@ -11,6 +11,7 @@ export interface Business {
   website?: string;
   address: string;
   city: string;
+  street?: string;
   country: string;
   postal_code?: string;
   service_time?: string;
@@ -64,12 +65,13 @@ export interface BusinessFormData {
   address: string;
   city: string;
   country: string;
+  street?: string;
   postal_code: string;
   service_time: string;
   is_verified?: boolean;
   workplace_latitude?: number;
   workplace_longitude?: number;
-  clock_in_radius_meters?: number; 
+  clock_in_radius_meters?: number;
   require_location_for_clock_in?: boolean;
 }
 
@@ -85,6 +87,7 @@ export interface CreateBusinessRequest {
   address: string;
   city: string;
   country: string;
+  street?: string;
   postal_code?: string;
   service_time?: string;
 }

@@ -608,8 +608,8 @@ const ShiftManagementPage: React.FC = () => {
   const activeShifts = shifts.filter((s) => s.is_active).length;
 
   return (
-    <div className="bg-white rounded-lg p-6 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
-      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="bg-white rounded-lg p-2 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
+      <div className="max-w-full mx-auto px-2 sm:px-6 lg:px-8 py-8">
         {shiftError && (
           <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
             <div className="flex items-center">

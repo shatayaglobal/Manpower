@@ -14,10 +14,10 @@ class BusinessSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'user', 'user_name', 'name', 'business_id', 'slug',
             'category', 'size', 'description', 'email', 'phone', 'website',
-            'address', 'city', 'country', 'postal_code', 'service_time',
+            'address', 'street','city', 'country', 'postal_code', 'service_time',
             'is_verified', 'is_active', 'total_staff','workplace_latitude',
             'workplace_longitude',
-            'clock_in_radius_meters',   
+            'clock_in_radius_meters',
             'require_location_for_clock_in',  'total_active_staff',
             'created_at', 'updated_at'
         ]
@@ -40,7 +40,7 @@ class BusinessListSerializer(serializers.ModelSerializer):
         model = Business
         fields = [
             'id', 'user', 'user_name', 'name', 'business_id', 'slug',
-            'category', 'size', 'description', 'email', 'phone', 'website',
+            'category', 'size', 'description', 'email', 'phone', 'website', 'street',
             'address', 'city', 'country', 'postal_code', 'service_time',
             'is_verified', 'is_active', 'total_staff', 'workplace_latitude', 'workplace_longitude',
             'clock_in_radius_meters', 'require_location_for_clock_in',

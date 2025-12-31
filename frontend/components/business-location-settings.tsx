@@ -24,6 +24,7 @@ interface BusinessUpdateData {
   address: string;
   city: string;
   country: string;
+  street: string;
   postal_code: string;
   workplace_latitude: number | null;
   workplace_longitude: number | null;
@@ -38,6 +39,7 @@ export function WorkplaceLocationSettings({
   const [formData, setFormData] = useState({
     address: business?.address || "",
     city: business?.city || "",
+    street: business?.street || "",
     country: business?.country || "",
     postal_code: business?.postal_code || "",
     latitude: business?.workplace_latitude?.toString() || "",
@@ -53,16 +55,18 @@ export function WorkplaceLocationSettings({
   const getCurrentLocation = async () => {
     setGettingLocation(true);
     try {
-      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-        if ("geolocation" in navigator) {
-          navigator.geolocation.getCurrentPosition(resolve, reject, {
-            enableHighAccuracy: true,
-            timeout: 10000,
-          });
-        } else {
-          reject(new Error("Geolocation is not supported"));
+      const position = await new Promise<GeolocationPosition>(
+        (resolve, reject) => {
+          if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              enableHighAccuracy: true,
+              timeout: 10000,
+            });
+          } else {
+            reject(new Error("Geolocation is not supported"));
+          }
         }
-      });
+      );
 
       const latitude = Number(position.coords.latitude.toFixed(6));
       const longitude = Number(position.coords.longitude.toFixed(6));
@@ -91,7 +95,10 @@ export function WorkplaceLocationSettings({
 
                   if (types.includes("locality")) {
                     city = component.long_name;
-                  } else if (types.includes("administrative_area_level_1") && !city) {
+                  } else if (
+                    types.includes("administrative_area_level_1") &&
+                    !city
+                  ) {
                     city = component.long_name;
                   }
 
@@ -122,7 +129,9 @@ export function WorkplaceLocationSettings({
                 latitude: latitude.toString(),
                 longitude: longitude.toString(),
               });
-              toast.success("Location captured. Please type the address to confirm.");
+              toast.success(
+                "Location captured. Please type the address to confirm."
+              );
             }
             setGettingLocation(false);
           }
@@ -138,13 +147,17 @@ export function WorkplaceLocationSettings({
       }
     } catch (error) {
       setGettingLocation(false);
-      const errorMessage = error instanceof Error ? error.message : "Failed to get location";
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to get location";
       toast.error("Failed to get location: " + errorMessage);
     }
   };
 
   const handleSave = async () => {
-    if (formData.requireLocation && (!formData.latitude || !formData.longitude)) {
+    if (
+      formData.requireLocation &&
+      (!formData.latitude || !formData.longitude)
+    ) {
       toast.error("Please set workplace coordinates");
       return;
     }
@@ -155,6 +168,7 @@ export function WorkplaceLocationSettings({
         address: formData.address,
         city: formData.city,
         country: formData.country,
+        street: formData.street || "",
         postal_code: formData.postal_code,
         workplace_latitude: formData.latitude
           ? parseFloat(parseFloat(formData.latitude).toFixed(6))
@@ -168,7 +182,8 @@ export function WorkplaceLocationSettings({
 
       toast.success("Workplace location settings updated");
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to update settings";
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to update settings";
       toast.error(errorMessage);
     } finally {
       setSaving(false);
@@ -196,7 +211,9 @@ export function WorkplaceLocationSettings({
 
       {!isExpanded && (
         <div className="mt-3">
-          {formData.requireLocation && formData.latitude && formData.longitude ? (
+          {formData.requireLocation &&
+          formData.latitude &&
+          formData.longitude ? (
             <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
               <CheckCircle className="w-3 h-3 mr-1" />
               Location Tracking Enabled
@@ -231,7 +248,10 @@ export function WorkplaceLocationSettings({
                 type="checkbox"
                 checked={formData.requireLocation}
                 onChange={(e) =>
-                  setFormData({ ...formData, requireLocation: e.target.checked })
+                  setFormData({
+                    ...formData,
+                    requireLocation: e.target.checked,
+                  })
                 }
                 className="sr-only peer"
               />
@@ -267,24 +287,47 @@ export function WorkplaceLocationSettings({
                 </p>
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Street Address
+                </label>
+                <input
+                  type="text"
+                  value={formData.street || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, street: e.target.value })
+                  }
+                  //placeholder="e.g. John Babiha Avenue, Plot 45"
+                  className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                />
+              </div>
+
               {/* City & Country */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    City
+                  </label>
                   <input
                     type="text"
                     value={formData.city}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, city: e.target.value })
+                    }
                     placeholder="Kampala"
                     className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Country</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Country
+                  </label>
                   <input
                     type="text"
                     value={formData.country}
-                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, country: e.target.value })
+                    }
                     placeholder="Uganda"
                     className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                   />
@@ -301,7 +344,9 @@ export function WorkplaceLocationSettings({
                     type="number"
                     step="0.000001"
                     value={formData.latitude}
-                    onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, latitude: e.target.value })
+                    }
                     placeholder="0.321126"
                     className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                   />
@@ -314,7 +359,9 @@ export function WorkplaceLocationSettings({
                     type="number"
                     step="0.000001"
                     value={formData.longitude}
-                    onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, longitude: e.target.value })
+                    }
                     placeholder="32.591053"
                     className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                   />
@@ -329,14 +376,17 @@ export function WorkplaceLocationSettings({
                 <input
                   type="number"
                   value={formData.radius}
-                  onChange={(e) => setFormData({ ...formData, radius: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, radius: e.target.value })
+                  }
                   placeholder="100"
                   min="10"
                   max="1000"
                   className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Workers must be within this radius to clock in (recommended: 50-200m)
+                  Workers must be within this radius to clock in (recommended:
+                  50-200m)
                 </p>
               </div>
 
@@ -348,7 +398,9 @@ export function WorkplaceLocationSettings({
                     Workplace Location Set
                   </p>
                   {formData.address && (
-                    <p className="text-xs text-green-700 mb-1">Address: {formData.address}</p>
+                    <p className="text-xs text-green-700 mb-1">
+                      Address: {formData.address}
+                    </p>
                   )}
                   <p className="text-xs text-green-700">
                     Coordinates: {parseFloat(formData.latitude).toFixed(6)},{" "}

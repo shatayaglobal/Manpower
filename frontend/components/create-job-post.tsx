@@ -23,6 +23,7 @@ import {
   DollarSign,
   MapPin,
   Loader2,
+  ChevronDown,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { usePosts } from "@/lib/redux/usePosts";
@@ -32,6 +33,7 @@ import {
   PRIORITY_LEVELS,
   ACCOUNT_TYPES,
 } from "@/lib/types";
+import { AddressAutocomplete } from "@/components/address-auto-complete";
 
 interface AuthState {
   user: {
@@ -217,7 +219,7 @@ export default function JobCreationForm({
           router.push("/jobs?success=created");
         }
       }
-    } catch  {
+    } catch {
       //console.error("Error creating job:", error);
     }
   };
@@ -257,8 +259,8 @@ export default function JobCreationForm({
   ];
 
   return (
-    <div className="bg-white rounded-lg p-6 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
-      <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="bg-white rounded-lg p-2 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-10">
           <div className="flex items-center gap-4">
@@ -300,130 +302,208 @@ export default function JobCreationForm({
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Row 1: Job Title + Location */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Job Title */}
             <div>
               <Label htmlFor="title">
                 Job Title <span className="text-red-600">*</span>
               </Label>
-              <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) => handleInputChange("title", e.target.value)}
-                className={errors.title ? "border-red-300" : ""}
-                disabled={loading}
-              />
+              <div className="relative">
+                <input
+                  id="title"
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => handleInputChange("title", e.target.value)}
+                  disabled={loading}
+                  placeholder="e.g. Senior Frontend Developer"
+                  className={`
+                    w-full px-4 py-2.5 pl-11 pr-11 border rounded-lg
+                    transition-all duration-200 placeholder:text-gray-400
+                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                    disabled:bg-gray-100 disabled:cursor-not-allowed
+                    ${
+                      errors.title
+                        ? "border-red-300 focus:ring-red-300"
+                        : "border-gray-300"
+                    }
+                    ${loading ? "bg-gray-100" : "bg-white"}
+                  `}
+                />
+              </div>
               {errors.title && (
                 <p className="mt-1 text-sm text-red-600">{errors.title}</p>
               )}
             </div>
 
+            {/* Job Location */}
             <div>
               <Label htmlFor="location">
-                Location <span className="text-red-600">*</span>
+                Job Location <span className="text-red-600">*</span>
               </Label>
               <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                <Input
-                  id="location"
+                <AddressAutocomplete
                   value={formData.location || ""}
-                  onChange={(e) =>
-                    handleInputChange("location", e.target.value)
+                  onChange={(address) => handleInputChange("location", address)}
+                  onPlaceSelected={(place) =>
+                    handleInputChange("location", place.address)
                   }
-                  className={`pl-10 ${errors.location ? "border-red-300" : ""}`}
-                  disabled={loading}
+                  placeholder="Search for job location..."
+                  className={`
+                    w-full px-4 py-2.5 pl-11 pr-11 border rounded-lg
+                    transition-all duration-200 placeholder:text-gray-400
+                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                    disabled:bg-gray-100 disabled:cursor-not-allowed
+                    ${
+                      errors.location
+                        ? "border-red-300 focus:ring-red-300"
+                        : "border-gray-300"
+                    }
+                    ${loading ? "bg-gray-100" : "bg-white"}
+                  `}
                 />
               </div>
               {errors.location && (
                 <p className="mt-1 text-sm text-red-600">{errors.location}</p>
               )}
+              <p className="mt-1 text-xs text-gray-500">
+                Start typing to search for the workplace location
+              </p>
             </div>
           </div>
 
-          {/* Row 2: Post Type + Priority Level – FORCED SAME WIDTH & HEIGHT */}
+          {/* Row 2: Post Type + Priority Level */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Post Type */}
             <div>
               <Label>Post Type</Label>
-              <Select
-                value={formData.post_type}
-                onValueChange={(v) => handleInputChange("post_type", v)}
-                disabled={loading}
-              >
-                <SelectTrigger className="h-10 w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {postTypeOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      <div>
+              <div className="relative">
+                <Select
+                  value={formData.post_type}
+                  onValueChange={(v) => handleInputChange("post_type", v)}
+                  disabled={loading}
+                >
+                  <SelectTrigger
+                    className={`
+                      w-full px-4 py-5 pl-11 pr-11 border rounded-lg
+                      transition-all duration-200
+                      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                       disabled:cursor-not-allowed
+                      ${loading ? "bg-gray-100 opacity-70" : "bg-white"}
+                      [&>span:last-child]:hidden
+                    `}
+                  >
+                    <SelectValue placeholder="Select post type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {postTypeOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
                         <div className="font-medium">{option.label}</div>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
+            {/* Priority Level */}
             <div>
               <Label>Priority Level</Label>
-              <Select
-                value={formData.priority}
-                onValueChange={(v) => handleInputChange("priority", v)}
-                disabled={loading}
-              >
-                <SelectTrigger className="h-10 w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {priorityOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      <div>
+              <div className="relative">
+                <Select
+                  value={formData.priority}
+                  onValueChange={(v) => handleInputChange("priority", v)}
+                  disabled={loading}
+                >
+                  <SelectTrigger
+                    className={`
+                      w-full px-4 py-5 pl-11 pr-11 border rounded-lg
+                      transition-all duration-200
+                      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                     disabled:cursor-not-allowed
+                      ${loading ? "bg-gray-100 opacity-70" : "bg-white"}
+                      [&>span:last-child]:hidden
+                    `}
+                  >
+                    <SelectValue placeholder="Select post type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {priorityOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
                         <div className="font-medium">{option.label}</div>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 
-          {/* Row 3: Salary Range + Expiry Date – SAME LINE */}
+          {/* Row 3: Salary Range + Expiry Date */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Salary Range */}
             <div>
               <Label htmlFor="salary_range">Salary Range</Label>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                <Input
+                <input
                   id="salary_range"
+                  type="text"
                   value={formData.salary_range || ""}
                   onChange={(e) =>
                     handleInputChange("salary_range", e.target.value)
                   }
-                  className={`pl-10 ${
-                    errors.salary_range ? "border-red-300" : ""
-                  }`}
                   disabled={loading}
+                  placeholder="e.g. USh 1,000,000 - 2,000,000"
+                  className={`
+                    w-full px-4 py-2.5 pl-11 pr-11 border rounded-lg
+                    transition-all duration-200 placeholder:text-gray-400
+                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                    disabled:bg-gray-100 disabled:cursor-not-allowed
+                    ${
+                      errors.salary_range
+                        ? "border-red-300 focus:ring-red-300"
+                        : "border-gray-300"
+                    }
+                    ${loading ? "bg-gray-100" : "bg-white"}
+                  `}
                 />
               </div>
+              {errors.salary_range && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.salary_range}
+                </p>
+              )}
               <p className="mt-1 text-xs text-gray-500">Optional</p>
             </div>
 
+            {/* Expiry Date */}
             <div>
               <Label htmlFor="expires_at">Expiry Date</Label>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                <Input
+                <input
                   id="expires_at"
                   type="date"
                   value={formData.expires_at || ""}
                   onChange={(e) =>
                     handleInputChange("expires_at", e.target.value)
                   }
-                  className={`pl-10 ${
-                    errors.expires_at ? "border-red-300" : ""
-                  }`}
-                  min={new Date().toISOString().split("T")[0]}
                   disabled={loading}
+                  min={new Date().toISOString().split("T")[0]}
+                  className={`
+                    w-full px-4 py-2.5 pl-11 pr-4 border rounded-lg
+                    transition-all duration-200
+                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                    disabled:bg-gray-100 disabled:cursor-not-allowed
+                    ${
+                      errors.expires_at
+                        ? "border-red-300 focus:ring-red-300"
+                        : "border-gray-300"
+                    }
+                    ${loading ? "bg-gray-100" : "bg-white"}
+                  `}
                 />
               </div>
+              {errors.expires_at && (
+                <p className="mt-1 text-sm text-red-600">{errors.expires_at}</p>
+              )}
               <p className="mt-1 text-xs text-gray-500">Optional</p>
             </div>
           </div>
@@ -437,10 +517,20 @@ export default function JobCreationForm({
               id="description"
               value={formData.description}
               onChange={(e) => handleInputChange("description", e.target.value)}
-              rows={10}
-              className={`resize-none ${
-                errors.description ? "border-red-300" : ""
-              }`}
+              rows={20}
+              placeholder="Describe the role, responsibilities, and what you're looking for..."
+              className={`
+                w-full px-4 py-3 border rounded-lg resize-none  min-h-30   h-30
+                transition-all duration-200
+                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                disabled:bg-gray-100 disabled:cursor-not-allowed
+                ${
+                  errors.description
+                    ? "border-red-300 focus:ring-red-300"
+                    : "border-gray-300"
+                }
+                ${loading ? "bg-gray-100" : "bg-white"}
+              `}
               disabled={loading}
             />
             <div className="flex justify-end mt-1">
@@ -448,6 +538,9 @@ export default function JobCreationForm({
                 {formData.description.length}/1000
               </p>
             </div>
+            {errors.description && (
+              <p className="mt-1 text-sm text-red-600">{errors.description}</p>
+            )}
           </div>
 
           <div>
@@ -459,9 +552,19 @@ export default function JobCreationForm({
                 handleInputChange("requirements", e.target.value)
               }
               rows={8}
-              className={`resize-none ${
-                errors.requirements ? "border-red-300" : ""
-              }`}
+              placeholder="List key skills, qualifications, and experience needed..."
+              className={`
+                w-full px-4 py-3 border rounded-lg resize-none  min-h-30   h-30
+                transition-all duration-200
+                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                disabled:bg-gray-100 disabled:cursor-not-allowed
+                ${
+                  errors.requirements
+                    ? "border-red-300 focus:ring-red-300"
+                    : "border-gray-300"
+                }
+                ${loading ? "bg-gray-100" : "bg-white"}
+              `}
               disabled={loading}
             />
             <div className="flex justify-end mt-1">
@@ -469,6 +572,9 @@ export default function JobCreationForm({
                 {(formData.requirements || "").length}/500
               </p>
             </div>
+            {errors.requirements && (
+              <p className="mt-1 text-sm text-red-600">{errors.requirements}</p>
+            )}
           </div>
 
           {/* Buttons */}
@@ -477,7 +583,7 @@ export default function JobCreationForm({
               type="button"
               variant="outline"
               onClick={() => (onCancel ? onCancel() : router.push("/jobs"))}
-              className="flex-1 h-11"
+              className="flex-1 h-11 rounded-2xl"
               disabled={loading}
             >
               Cancel
@@ -485,7 +591,7 @@ export default function JobCreationForm({
             <Button
               type="submit"
               disabled={loading}
-              className="flex-1 h-11 bg-blue-600 hover:bg-blue-700"
+              className="flex-1 h-11 bg-blue-600 hover:bg-blue-700 rounded-2xl"
             >
               {loading ? (
                 <>

@@ -16,7 +16,6 @@ import {
   Edit,
   Trash2,
   Heart,
-  Briefcase,
   Loader2,
 } from "lucide-react";
 import { usePosts } from "@/lib/redux/usePosts";
@@ -191,7 +190,7 @@ export default function Jobs() {
   };
 
   return (
-    <div className="bg-white rounded-lg p-6 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
+    <div className="bg-white rounded-lg p-3 -ml-4 -mt-5 min-h-screen -mr-4">
       <div className="max-w-full mx-auto px-4 sm:px-4 lg:px-4 py-6">
         {/* Page Header */}
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between mb-10">
@@ -228,14 +227,14 @@ export default function Jobs() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                className="h-12 pl-10 bg-white border-gray-300 shadow-sm"
+                className="h-12 pl-10 bg-white border-gray-300"
               />
             </div>
 
             <select
               value={selectedLocation}
               onChange={(e) => handleLocationChange(e.target.value)}
-              className="h-12 rounded-lg border border-gray-300 bg-white px-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="h-12 rounded-lg border border-gray-300 bg-white px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Locations</option>
               {getUniqueLocations().map((loc) => (
@@ -248,7 +247,7 @@ export default function Jobs() {
             <select
               value={selectedType}
               onChange={(e) => handleTypeChange(e.target.value)}
-              className="h-12 rounded-lg border border-gray-300 bg-white px-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="h-12 rounded-lg border border-gray-300 bg-white px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Types</option>
               {jobTypes.map((type) => (
@@ -261,7 +260,7 @@ export default function Jobs() {
             <Button
               variant="outline"
               onClick={clearFilters}
-              className="h-12 shadow-sm hover:bg-gray-50"
+              className="h-12 hover:bg-gray-50"
             >
               Clear Filters
             </Button>
@@ -275,7 +274,7 @@ export default function Jobs() {
           </p>
         </div>
 
-        {/* Loading / Empty State / Jobs Grid */}
+        {/* Jobs Grid */}
         {loading ? (
           <div className="flex justify-center py-20">
             <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
@@ -291,21 +290,21 @@ export default function Jobs() {
           </div>
         ) : (
           <>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {jobs.map((job) => (
                 <div
                   key={job.id}
                   onClick={() => showJobDetails(job)}
-                  className="group cursor-pointer overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all hover:shadow-lg"
+                  className="cursor-pointer overflow-hidden rounded-xl border border-gray-200 bg-white transition-all hover:border-blue-300 hover:bg-blue-50/30"
                 >
-                  <div className="p-6">
+                  <div className="p-5">
                     {/* Header */}
-                    <div className="mb-5 flex items-start justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-blue-100">
-                          <Building className="h-8 w-8 text-blue-600" />
+                    <div className="mb-4 flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-blue-100">
+                          <Building className="h-6 w-6 text-blue-600" />
                         </div>
-                        <h3 className="text-xl font-semibold text-gray-900 line-clamp-2 group-hover:text-blue-600">
+                        <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 group-hover:text-blue-600">
                           {job.title}
                         </h3>
                       </div>
@@ -320,7 +319,7 @@ export default function Jobs() {
                             size="sm"
                             onClick={() => handleSaveJob(job.id)}
                           >
-                            <Heart className="h-5 w-5" />
+                            <Heart className="h-4 w-4" />
                           </Button>
                         )}
                         {isBusinessUser &&
@@ -336,14 +335,14 @@ export default function Jobs() {
                                   router.push(`/jobs/${job.id}/edit`)
                                 }
                               >
-                                <Edit className="h-5 w-5" />
+                                <Edit className="h-4 w-4" />
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleDeleteJob(job.id)}
                               >
-                                <Trash2 className="h-5 w-5 text-red-500" />
+                                <Trash2 className="h-4 w-4 text-red-500" />
                               </Button>
                             </>
                           )}
@@ -351,7 +350,7 @@ export default function Jobs() {
                     </div>
 
                     {/* Info */}
-                    <div className="space-y-3 text-sm text-gray-600">
+                    <div className="space-y-2 text-sm text-gray-600">
                       <div className="flex items-center gap-2">
                         <MapPin className="h-4 w-4 text-amber-600" />
                         {job.location || "Remote"}
@@ -368,8 +367,8 @@ export default function Jobs() {
                       </div>
                     </div>
 
-                    <div className="mt-5 flex items-center justify-between">
-                      <Badge variant="secondary" className="font-medium">
+                    <div className="mt-4 flex items-center justify-between">
+                      <Badge variant="secondary" className="text-xs font-medium">
                         {formatJobType(job.priority)}
                       </Badge>
                       <span className="text-xs text-gray-500">
@@ -377,15 +376,16 @@ export default function Jobs() {
                       </span>
                     </div>
 
-                    <p className="mt-4 line-clamp-3 text-gray-600">
+                    <p className="mt-3 line-clamp-2 text-sm text-gray-600">
                       {job.description}
                     </p>
 
                     {/* Actions */}
-                    <div className="mt-6 space-y-3 border-t pt-5">
+                    <div className="mt-5 space-y-2 pt-4">
                       <Button
                         variant="outline"
-                        className="w-full"
+                        size="sm"
+                        className="w-full text-sm"
                         onClick={(e) => {
                           e.stopPropagation();
                           showJobDetails(job);
@@ -396,7 +396,8 @@ export default function Jobs() {
                       </Button>
                       {!isBusinessUser && (
                         <Button
-                          className="w-full bg-blue-600 hover:bg-blue-700"
+                          size="sm"
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-sm"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleApplyWithProfileCheck(job.id, job.title);

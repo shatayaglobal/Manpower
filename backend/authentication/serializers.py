@@ -153,12 +153,33 @@ class UserProfileSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source='user.full_name', read_only=True)
     account_type = serializers.CharField(source='user.account_type', read_only=True)
 
-
+    completion_percentage = serializers.SerializerMethodField()
+    missing_required_fields = serializers.SerializerMethodField()
+    is_complete = serializers.SerializerMethodField()
+    is_application_ready = serializers.SerializerMethodField()
+    missing_application_fields = serializers.SerializerMethodField()
     def validate_avatar(self, value):
         if value:
             # FORCE lowercase .jpg
             value.name = f"{uuid.uuid4()}.jpg"
         return value
+
+
+     # Methods to expose model properties
+    def get_completion_percentage(self, obj):
+        return round(obj.completion_percentage)
+
+    def get_missing_required_fields(self, obj):
+        return obj.missing_required_fields
+
+    def get_is_complete(self, obj):
+        return obj.is_complete
+
+    def get_is_application_ready(self, obj):
+        return obj.is_application_ready
+
+    def get_missing_application_fields(self, obj):
+        return obj.missing_application_fields
 
     class Meta:
         model = UserProfile
@@ -188,7 +209,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
             # Emergency contact
             'emergency_contact_name', 'emergency_contact_phone', 'emergency_contact_relationship',
             # Timestamps
-            'created_at', 'updated_at'
+            'created_at', 'updated_at',
+
+            'completion_percentage',
+            'missing_required_fields',
+            'is_complete',
+            'is_application_ready',
+            'missing_application_fields',
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 

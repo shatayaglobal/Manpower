@@ -20,7 +20,7 @@ class BusinessAdmin(admin.ModelAdmin):
             'fields': ('email', 'phone', 'website')
         }),
         ('Location', {
-            'fields': ('address', 'city', 'country', 'postal_code')
+            'fields': ('address', 'street', 'city', 'country', 'postal_code')
         }),
         ('Workplace Location Settings', {
             'fields': (
