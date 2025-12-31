@@ -421,6 +421,20 @@ def create_application_message(job_application, old_status, new_status):
 
     return message
 
+def create_application_submission_message(job_application):
+    """Create initial message when worker submits application"""
+    message_text = f"Hi! I've just applied for your '{job_application.job.title}' position. I'm excited about this opportunity and happy to answer any questions you might have."
+
+    message = Messages.objects.create(
+        sender=job_application.applicant,
+        receiver=job_application.job.user,
+        message=message_text,
+        message_type='CHAT',
+        job_application=job_application
+    )
+
+    return message
+
 
 # You can also add this helper view to get message statistics
 @extend_schema(

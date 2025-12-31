@@ -9,12 +9,11 @@ import type { store } from "./store";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+// FIXED: Create axiosInstance WITHOUT default Content-Type header
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: API_URL.endsWith("/") ? API_URL : `${API_URL}/`,
   timeout: 10000,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  // Removed headers: { "Content-Type": "application/json" } ← this was the problem
 });
 
 let interceptorsSetup = false;
@@ -24,7 +23,10 @@ let failedQueue: Array<{
   reject: (reason?: unknown) => void;
 }> = [];
 
-const processQueue = (error: AxiosError | null, token: string | null = null) => {
+const processQueue = (
+  error: AxiosError | null,
+  token: string | null = null
+) => {
   failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);
@@ -40,9 +42,8 @@ export const setupInterceptors = (storeInstance: typeof store) => {
     return;
   }
 
-
   axiosInstance.interceptors.request.use(
-    (config: InternalAxiosRequestConfig) => {
+    (config) => {
       const state = storeInstance.getState();
       const token = state.auth.accessToken;
 
@@ -50,25 +51,24 @@ export const setupInterceptors = (storeInstance: typeof store) => {
         config.headers.Authorization = `Bearer ${token}`;
       }
 
+      // Only remove Content-Type for FormData — let Axios handle JSON automatically
       if (config.data instanceof FormData && config.headers) {
         delete config.headers["Content-Type"];
       }
+      // ← No else clause — we removed forced "application/json"
 
       return config;
     },
-    (error) => {
-      return Promise.reject(error);
-    }
+    (error) => Promise.reject(error)
   );
 
   axiosInstance.interceptors.response.use(
-    (response: AxiosResponse) => {
-      return response;
-    },
+    (response: AxiosResponse) => response,
     async (error: AxiosError) => {
       const originalRequest = error.config as InternalAxiosRequestConfig & {
         _retry?: boolean;
       };
+
       const excludedUrls = [
         "token/refresh",
         "login",
@@ -82,26 +82,24 @@ export const setupInterceptors = (storeInstance: typeof store) => {
       const isExcludedUrl = excludedUrls.some((url) =>
         originalRequest?.url?.toLowerCase().includes(url.toLowerCase())
       );
+
       if (
         error.response?.status === 401 &&
         !originalRequest?._retry &&
         !isExcludedUrl &&
         originalRequest
       ) {
-
         if (isRefreshing) {
           return new Promise((resolve, reject) => {
             failedQueue.push({ resolve, reject });
           })
             .then((token) => {
               if (originalRequest.headers && token) {
-                originalRequest.headers.Authorization = `Bearer ${token}`;
+                originalRequest.headers.Authorization = `Bearer ${token as string}`;
               }
               return axiosInstance(originalRequest);
             })
-            .catch((err) => {
-              return Promise.reject(err);
-            });
+            .catch((err) => Promise.reject(err));
         }
 
         originalRequest._retry = true;
@@ -109,6 +107,7 @@ export const setupInterceptors = (storeInstance: typeof store) => {
 
         const state = storeInstance.getState();
         const refreshToken = state.auth.refreshToken;
+
         if (!refreshToken) {
           isRefreshing = false;
           processQueue(error, null);
@@ -125,7 +124,7 @@ export const setupInterceptors = (storeInstance: typeof store) => {
           );
 
           if (refreshTokenThunk.fulfilled.match(result)) {
-            const { access } = result.payload;
+            const { access } = result.payload as { access: string };
 
             if (originalRequest.headers) {
               originalRequest.headers.Authorization = `Bearer ${access}`;
@@ -140,13 +139,10 @@ export const setupInterceptors = (storeInstance: typeof store) => {
         } catch (refreshError) {
           processQueue(error, null);
           isRefreshing = false;
-
           await storeInstance.dispatch(logoutThunk());
-
           if (typeof window !== "undefined") {
             window.location.href = "/login";
           }
-
           return Promise.reject(refreshError);
         }
       }

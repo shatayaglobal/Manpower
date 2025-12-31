@@ -18,6 +18,7 @@ import { useSelector } from "react-redux";
 import { usePosts } from "@/lib/redux/usePosts";
 import { useApplications } from "@/lib/redux/use-applications";
 import { JobApplication } from "@/lib/types";
+import { toast } from "sonner";
 
 interface AuthState {
   user: {
@@ -62,6 +63,7 @@ export default function JobApplicationsPage() {
     loading: applicationsLoading,
     error: applicationsError,
     loadJobApplications,
+    updateApplicationStatus,
   } = useApplications();
 
   const [expandedApplications, setExpandedApplications] = useState<Set<string>>(
@@ -184,9 +186,8 @@ export default function JobApplicationsPage() {
   }
 
   return (
-     <div className="bg-white rounded-lg p-2 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
+    <div className="bg-white rounded-lg p-2 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header Navigation */}
         {/* Header */}
         <div className="mb-6 mt-2">
           <div className="flex items-center gap-2 mb-2">
@@ -326,13 +327,40 @@ export default function JobApplicationsPage() {
                               <Button
                                 size="sm"
                                 variant="outline"
+                                onClick={async () => {
+                                  try {
+                                    await updateApplicationStatus(
+                                      application.id,
+                                      "ACCEPTED"
+                                    );
+                                    toast.success("Application accepted!");
+                                    loadJobApplications(jobId);
+                                  } catch (err) {
+                                    toast.error("Failed to accept application");
+                                  }
+                                }}
+                                disabled={applicationsLoading}
                                 className="px-3 py-1 text-xs border-green-300 text-green-700 hover:bg-green-50"
                               >
                                 Accept
                               </Button>
+
                               <Button
                                 size="sm"
                                 variant="outline"
+                                onClick={async () => {
+                                  try {
+                                    await updateApplicationStatus(
+                                      application.id,
+                                      "REJECTED"
+                                    );
+                                    toast.success("Application rejected.");
+                                    loadJobApplications(jobId);
+                                  } catch (err) {
+                                    toast.error("Failed to reject application");
+                                  }
+                                }}
+                                disabled={applicationsLoading}
                                 className="px-3 py-1 text-xs border-red-300 text-red-700 hover:bg-red-50"
                               >
                                 Reject

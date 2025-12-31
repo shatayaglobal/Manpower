@@ -305,7 +305,7 @@ const StaffManagementPage = () => {
   const onLeaveStaff = staff.filter((s) => s.status === "ON_LEAVE").length;
 
   return (
-    <div className="bg-white rounded-lg p-3 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
+    <div className="bg-white rounded-lg p-2 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {staffError && (
           <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
@@ -477,7 +477,7 @@ const StaffManagementPage = () => {
           </div>
         ) : (
           <>
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-lg  overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">

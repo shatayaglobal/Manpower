@@ -249,7 +249,7 @@ export default function ManageApplicationsPage() {
 
   return (
     <div className="bg-white rounded-lg p-3 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
-      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-full mx-auto px-2 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center gap-4 mb-6">
@@ -408,304 +408,290 @@ export default function ManageApplicationsPage() {
             <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
           </div>
         ) : (
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-semibold text-gray-900">
-                Applications ({filteredApplications.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
+          <div className="bg-white rounded-lg overflow-hidden">
+            {" "}
+            {/* Table Content */}
+            <div className="overflow-x-auto">
               {filteredApplications.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-gray-50 border-b border-gray-200">
-                      <tr>
-                        <th className="text-left py-3 px-4 font-medium text-gray-900">
-                          Applicant
-                        </th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-900">
-                          Job Title
-                        </th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-900">
-                          Applied Date
-                        </th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-900">
-                          Status
-                        </th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-900">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {filteredApplications.map(
-                        (application: JobApplication) => (
-                          <tr
-                            key={application.id}
-                            className="hover:bg-gray-50 transition-colors"
-                          >
-                            <td className="py-4 px-4">
-                              <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
-                                  <User className="h-5 w-5 text-blue-500" />
-                                </div>
-                                <div>
-                                  <div className="font-medium text-gray-900">
-                                    {application.applicant_name ||
-                                      "Unknown Applicant"}
-                                  </div>
-                                </div>
-                              </div>
-                            </td>
-
-                            <td className="py-4 px-4">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">
+                        Applicant
+                      </th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">
+                        Job Title
+                      </th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">
+                        Applied Date
+                      </th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">
+                        Status
+                      </th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {filteredApplications.map((application: JobApplication) => (
+                      <tr
+                        key={application.id}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="py-4 px-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
+                              <User className="h-5 w-5 text-blue-500" />
+                            </div>
+                            <div>
                               <div className="font-medium text-gray-900">
-                                {typeof application.job === "object" &&
-                                application.job?.title
-                                  ? application.job.title
-                                  : "Job Title Not Available"}
+                                {application.applicant_name ||
+                                  "Unknown Applicant"}
                               </div>
-                              {typeof application.job === "object" &&
-                                application.job?.location && (
-                                  <div className="text-sm text-gray-500 flex items-center gap-1 mt-1">
-                                    <MapPin className="h-3 w-3" />
-                                    {application.job.location}
-                                  </div>
-                                )}
-                            </td>
+                            </div>
+                          </div>
+                        </td>
 
-                            <td className="py-4 px-4">
-                              <div className="flex items-center text-gray-600">
-                                <Calendar className="h-4 w-4 mr-1 text-gray-400" />
-                                <span className="text-sm">
-                                  {formatDate(application.created_at)}
-                                </span>
+                        <td className="py-4 px-4">
+                          <div className="font-medium text-gray-900">
+                            {typeof application.job === "object" &&
+                            application.job?.title
+                              ? application.job.title
+                              : "Job Title Not Available"}
+                          </div>
+                          {typeof application.job === "object" &&
+                            application.job?.location && (
+                              <div className="text-sm text-gray-500 flex items-center gap-1 mt-1">
+                                <MapPin className="h-3 w-3" />
+                                {application.job.location}
                               </div>
-                            </td>
+                            )}
+                        </td>
 
-                            <td className="py-4 px-4">
-                              <Badge
-                                className={`flex items-center gap-1 border w-fit ${getStatusColor(
-                                  application.status || "PENDING"
-                                )}`}
-                              >
-                                {getStatusIcon(application.status || "PENDING")}
-                                <span className="text-xs">
-                                  {(application.status || "Pending")
-                                    .charAt(0)
-                                    .toUpperCase() +
-                                    (application.status || "Pending")
-                                      .slice(1)
-                                      .toLowerCase()}
-                                </span>
-                              </Badge>
-                            </td>
+                        <td className="py-4 px-4">
+                          <div className="flex items-center text-gray-600">
+                            <Calendar className="h-4 w-4 mr-1 text-gray-400" />
+                            <span className="text-sm">
+                              {formatDate(application.created_at)}
+                            </span>
+                          </div>
+                        </td>
 
-                            <td className="py-4 px-4">
-                              <div className="flex items-center gap-2">
-                                {/* View Details Dialog */}
-                                <Dialog>
-                                  <DialogTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() =>
-                                        setSelectedApplication(application)
-                                      }
-                                    >
-                                      <Eye className="h-4 w-4" />
-                                    </Button>
-                                  </DialogTrigger>
-                                  <DialogContent className="max-w-2xl">
-                                    <DialogHeader>
-                                      <DialogTitle>
-                                        Application Details
-                                      </DialogTitle>
-                                      <DialogDescription>
-                                        Review applicant information and
-                                        application details
-                                      </DialogDescription>
-                                    </DialogHeader>
-                                    {selectedApplication && (
-                                      <div className="space-y-6">
-                                        {/* Applicant Info */}
-                                        <div>
-                                          <h4 className="font-medium text-gray-900 mb-3">
-                                            Applicant Information
-                                          </h4>
-                                          <div className="bg-gray-50 rounded-lg p-4">
-                                            <div className="grid grid-cols-2 gap-4">
-                                              <div>
-                                                <label className="text-sm font-medium text-gray-600">
-                                                  Name
-                                                </label>
-                                                <p className="text-gray-900">
-                                                  {
-                                                    selectedApplication.applicant_name
-                                                  }
-                                                </p>
-                                              </div>
-                                              <div>
-                                                <label className="text-sm font-medium text-gray-600">
-                                                  Applied Date
-                                                </label>
-                                                <p className="text-gray-900">
-                                                  {formatDate(
-                                                    selectedApplication.created_at
-                                                  )}
-                                                </p>
-                                              </div>
-                                            </div>
+                        <td className="py-4 px-4">
+                          <Badge
+                            className={`flex items-center gap-1 border w-fit ${getStatusColor(
+                              application.status || "PENDING"
+                            )}`}
+                          >
+                            {getStatusIcon(application.status || "PENDING")}
+                            <span className="text-xs">
+                              {(application.status || "Pending")
+                                .charAt(0)
+                                .toUpperCase() +
+                                (application.status || "Pending")
+                                  .slice(1)
+                                  .toLowerCase()}
+                            </span>
+                          </Badge>
+                        </td>
+
+                        <td className="py-4 px-4">
+                          <div className="flex items-center gap-2">
+                            {/* View Details Dialog */}
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() =>
+                                    setSelectedApplication(application)
+                                  }
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-2xl">
+                                <DialogHeader>
+                                  <DialogTitle>Application Details</DialogTitle>
+                                  <DialogDescription>
+                                    Review applicant information and application
+                                    details
+                                  </DialogDescription>
+                                </DialogHeader>
+                                {selectedApplication && (
+                                  <div className="space-y-6">
+                                    {/* Applicant Info */}
+                                    <div>
+                                      <h4 className="font-medium text-gray-900 mb-3">
+                                        Applicant Information
+                                      </h4>
+                                      <div className="bg-gray-50 rounded-lg p-4">
+                                        <div className="grid grid-cols-2 gap-4">
+                                          <div>
+                                            <label className="text-sm font-medium text-gray-600">
+                                              Name
+                                            </label>
+                                            <p className="text-gray-900">
+                                              {
+                                                selectedApplication.applicant_name
+                                              }
+                                            </p>
+                                          </div>
+                                          <div>
+                                            <label className="text-sm font-medium text-gray-600">
+                                              Applied Date
+                                            </label>
+                                            <p className="text-gray-900">
+                                              {formatDate(
+                                                selectedApplication.created_at
+                                              )}
+                                            </p>
                                           </div>
                                         </div>
+                                      </div>
+                                    </div>
 
-                                        {/* Cover Letter */}
-                                        {selectedApplication.cover_letter && (
-                                          <div>
-                                            <h4 className="font-medium text-gray-900 mb-3">
-                                              Cover Letter
-                                            </h4>
-                                            <div className="bg-gray-50 rounded-lg p-4">
-                                              <p className="text-gray-700 whitespace-pre-wrap">
-                                                {
-                                                  selectedApplication.cover_letter
-                                                }
-                                              </p>
-                                            </div>
-                                          </div>
-                                        )}
-
-                                        {/* Resume */}
-                                        {selectedApplication.resume && (
-                                          <div>
-                                            <h4 className="font-medium text-gray-900 mb-3">
-                                              Resume
-                                            </h4>
-                                            <Button
-                                              variant="outline"
-                                              onClick={() => {
-                                                if (
-                                                  selectedApplication.resume
-                                                ) {
-                                                  window.open(
-                                                    selectedApplication.resume,
-                                                    "_blank"
-                                                  );
-                                                }
-                                              }}
-                                              className="flex items-center gap-2"
-                                            >
-                                              <FileText className="h-4 w-4" />
-                                              View Resume
-                                            </Button>
-                                          </div>
-                                        )}
-
-                                        {/* Action Buttons */}
-                                        {canTakeAction(
-                                          selectedApplication.status
-                                        ) && (
-                                          <div className="flex gap-3 pt-4 border-t">
-                                            <Button
-                                              onClick={() =>
-                                                handleStatusUpdate(
-                                                  selectedApplication.id,
-                                                  "ACCEPTED"
-                                                )
-                                              }
-                                              disabled={
-                                                isUpdating ===
-                                                selectedApplication.id
-                                              }
-                                              className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
-                                            >
-                                              <Check className="h-4 w-4" />
-                                              Accept
-                                            </Button>
-                                            <Button
-                                              variant="outline"
-                                              onClick={() =>
-                                                handleStatusUpdate(
-                                                  selectedApplication.id,
-                                                  "REJECTED"
-                                                )
-                                              }
-                                              disabled={
-                                                isUpdating ===
-                                                selectedApplication.id
-                                              }
-                                              className="flex items-center gap-2 text-red-600 border-red-600 hover:bg-red-50"
-                                            >
-                                              <X className="h-4 w-4" />
-                                              Reject
-                                            </Button>
-                                          </div>
-                                        )}
-
-                                        {!canTakeAction(
-                                          selectedApplication.status
-                                        ) && (
-                                          <div className="pt-4 border-t">
-                                            <Badge
-                                              className={`${getStatusColor(
-                                                selectedApplication.status
-                                              )} text-sm px-3 py-1`}
-                                            >
-                                              {getStatusIcon(
-                                                selectedApplication.status
-                                              )}
-                                              <span className="ml-2">
-                                                Application{" "}
-                                                {selectedApplication.status.toLowerCase()}
-                                              </span>
-                                            </Badge>
-                                          </div>
-                                        )}
+                                    {/* Cover Letter */}
+                                    {selectedApplication.cover_letter && (
+                                      <div>
+                                        <h4 className="font-medium text-gray-900 mb-3">
+                                          Cover Letter
+                                        </h4>
+                                        <div className="bg-gray-50 rounded-lg p-4">
+                                          <p className="text-gray-700 whitespace-pre-wrap">
+                                            {selectedApplication.cover_letter}
+                                          </p>
+                                        </div>
                                       </div>
                                     )}
-                                  </DialogContent>
-                                </Dialog>
 
-                                {/* Quick Actions */}
-                                {canTakeAction(application.status) && (
-                                  <>
-                                    <Button
-                                      size="sm"
-                                      onClick={() =>
-                                        handleStatusUpdate(
-                                          application.id,
-                                          "ACCEPTED"
-                                        )
-                                      }
-                                      disabled={isUpdating === application.id}
-                                      className="bg-green-600 hover:bg-green-700"
-                                    >
-                                      <Check className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() =>
-                                        handleStatusUpdate(
-                                          application.id,
-                                          "REJECTED"
-                                        )
-                                      }
-                                      disabled={isUpdating === application.id}
-                                      className="text-red-600 border-red-600 hover:bg-red-50"
-                                    >
-                                      <X className="h-4 w-4" />
-                                    </Button>
-                                  </>
+                                    {/* Resume */}
+                                    {selectedApplication.resume && (
+                                      <div>
+                                        <h4 className="font-medium text-gray-900 mb-3">
+                                          Resume
+                                        </h4>
+                                        <Button
+                                          variant="outline"
+                                          onClick={() => {
+                                            if (selectedApplication.resume) {
+                                              window.open(
+                                                selectedApplication.resume,
+                                                "_blank"
+                                              );
+                                            }
+                                          }}
+                                          className="flex items-center gap-2"
+                                        >
+                                          <FileText className="h-4 w-4" />
+                                          View Resume
+                                        </Button>
+                                      </div>
+                                    )}
+
+                                    {/* Action Buttons */}
+                                    {canTakeAction(
+                                      selectedApplication.status
+                                    ) && (
+                                      <div className="flex gap-3 pt-4 border-t">
+                                        <Button
+                                          onClick={() =>
+                                            handleStatusUpdate(
+                                              selectedApplication.id,
+                                              "ACCEPTED"
+                                            )
+                                          }
+                                          disabled={
+                                            isUpdating ===
+                                            selectedApplication.id
+                                          }
+                                          className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                                        >
+                                          <Check className="h-4 w-4" />
+                                          Accept
+                                        </Button>
+                                        <Button
+                                          variant="outline"
+                                          onClick={() =>
+                                            handleStatusUpdate(
+                                              selectedApplication.id,
+                                              "REJECTED"
+                                            )
+                                          }
+                                          disabled={
+                                            isUpdating ===
+                                            selectedApplication.id
+                                          }
+                                          className="flex items-center gap-2 text-red-600 border-red-600 hover:bg-red-50"
+                                        >
+                                          <X className="h-4 w-4" />
+                                          Reject
+                                        </Button>
+                                      </div>
+                                    )}
+
+                                    {!canTakeAction(
+                                      selectedApplication.status
+                                    ) && (
+                                      <div className="pt-4 border-t">
+                                        <Badge
+                                          className={`${getStatusColor(
+                                            selectedApplication.status
+                                          )} text-sm px-3 py-1`}
+                                        >
+                                          {getStatusIcon(
+                                            selectedApplication.status
+                                          )}
+                                          <span className="ml-2">
+                                            Application{" "}
+                                            {selectedApplication.status.toLowerCase()}
+                                          </span>
+                                        </Badge>
+                                      </div>
+                                    )}
+                                  </div>
                                 )}
-                              </div>
-                            </td>
-                          </tr>
-                        )
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                              </DialogContent>
+                            </Dialog>
+                            {/* Quick Actions */}
+                            {canTakeAction(application.status) && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  onClick={() =>
+                                    handleStatusUpdate(
+                                      application.id,
+                                      "ACCEPTED"
+                                    )
+                                  }
+                                  disabled={isUpdating === application.id}
+                                  className="bg-green-600 hover:bg-green-700"
+                                >
+                                  <Check className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() =>
+                                    handleStatusUpdate(
+                                      application.id,
+                                      "REJECTED"
+                                    )
+                                  }
+                                  disabled={isUpdating === application.id}
+                                  className="text-red-600 border-red-600 hover:bg-red-50"
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               ) : (
                 <div className="text-center py-12">
                   <Users className="h-16 w-16 text-gray-300 mx-auto mb-4" />
@@ -718,8 +704,8 @@ export default function ManageApplicationsPage() {
                   </p>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )}
       </div>
     </div>

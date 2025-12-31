@@ -69,7 +69,7 @@ export interface HoursCard {
   clock_in_latitude?: string | null;
   clock_in_longitude?: string | null;
   clock_in_distance_meters?: number | null;
-  clock_in_datetime?: string;  
+  clock_in_datetime?: string;
   clock_out_datetime?: string;
 
   clocked_in_by?: string | null;
@@ -113,10 +113,10 @@ export interface StaffFormData {
 }
 
 export interface ShiftFormData {
-  staff: string;
+  staff: string[];
   name: string;
   shift_type: ShiftType;
-  day_of_week: DayOfWeek;
+  day_of_week: DayOfWeek[];
   start_time: string;
   end_time: string;
   break_duration?: string;

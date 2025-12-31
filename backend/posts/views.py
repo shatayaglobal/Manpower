@@ -253,8 +253,26 @@ class JobApplicationCreateView(CreateAPIView):
         if JobApplication.objects.filter(job=job, applicant=self.request.user).exists():
             raise ValidationError("You have already applied for this job")
 
-        serializer.save(applicant=self.request.user, job=job)
+        # Save the application
+        application = serializer.save(applicant=self.request.user, job=job)
 
+        # CREATE INITIAL CONVERSATION - ADD THIS:
+        self.create_application_submission_message(application)
+
+    def create_application_submission_message(self, job_application):
+        """Create initial message when worker submits application"""
+        from messaging.models import Messages
+
+        message_text = f"Hi! I've just applied for your '{job_application.job.title}' position. I'm excited about this opportunity and happy to answer any questions you might have."
+
+        # Create the message from worker to business
+        Messages.objects.create(
+            sender=job_application.applicant,  # Worker sends
+            receiver=job_application.job.user,  # Business receives
+            message=message_text,
+            message_type='CHAT',
+            job_application=job_application
+        )
 
 
 class ToggleLikeView(APIView):
@@ -324,6 +342,11 @@ class JobApplicationListView(ListCreateAPIView):
             return JobApplicationListSerializer  # We'll create this
         return JobApplicationSerializer
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
 
 class JobApplicationUpdateView(UpdateAPIView):
     serializer_class = JobApplicationSerializer
@@ -373,6 +396,11 @@ class BusinessApplicationsListView(ListAPIView):
             job__user=self.request.user,
             job__is_active=True
         ).select_related('job', 'applicant')
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
 
 
 class ApplicationStatusUpdateView(UpdateAPIView):

@@ -119,7 +119,7 @@ export default function ApplicationsPage() {
 
   return (
     <div className="bg-white rounded-lg p-2 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
-      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-full mx-auto px-2 sm:px-6 lg:px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-start gap-4">
@@ -167,124 +167,124 @@ export default function ApplicationsPage() {
           <>
             {/* Applications Table */}
             {applications.length > 0 ? (
-              <Card className="bg-white border border-gray-200">
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold text-gray-900">
+              <div className="bg-white rounded-lg">
+                {" "}
+                {/* Optional: keep rounded corners and white bg */}
+                <div className="border-b border-gray-200 px-6 py-4">
+                  {" "}
+                  <h3 className="text-lg font-semibold text-gray-900">
                     Applications ({applications.length})
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-gray-50 border-b border-gray-200">
-                        <tr>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">
-                            Job Title
-                          </th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">
-                            Location
-                          </th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">
-                            Salary
-                          </th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">
-                            Applied Date
-                          </th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">
-                            Status
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200">
-                        {applications.map(
-                          (application: JobApplication, index: number) => {
-                            // Type guard to check if job is an object
-                            const job =
-                              typeof application.job === "object" &&
-                              application.job !== null
-                                ? application.job
-                                : null;
+                  </h3>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 border-b border-gray-200">
+                      <tr>
+                        <th className="text-left py-3 px-4 font-medium text-gray-900">
+                          Job Title
+                        </th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-900">
+                          Location
+                        </th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-900">
+                          Salary
+                        </th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-900">
+                          Applied Date
+                        </th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-900">
+                          Status
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {applications.map(
+                        (application: JobApplication, index: number) => {
+                          const job =
+                            typeof application.job === "object" &&
+                            application.job !== null
+                              ? application.job
+                              : null;
 
-                            return (
-                              <tr
-                                key={
-                                  application.id ||
-                                  `temp-app-${index}-${application.created_at}`
-                                }
-                                className="hover:bg-gray-50 transition-colors"
-                              >
-                                <td className="py-4 px-4">
-                                  <div className="font-medium text-gray-900">
-                                    {job?.title || "Job Title Not Available"}
+                          return (
+                            <tr
+                              key={
+                                application.id ||
+                                `temp-app-${index}-${application.created_at}`
+                              }
+                              className="hover:bg-gray-50 transition-colors"
+                            >
+                              <td className="py-4 px-4">
+                                <div className="font-medium text-gray-900">
+                                  {job?.title || "Job Title Not Available"}
+                                </div>
+                                {job?.description && (
+                                  <div className="text-sm text-gray-500 mt-1 line-clamp-1">
+                                    {job.description}
                                   </div>
-                                  {job?.description && (
-                                    <div className="text-sm text-gray-500 mt-1 line-clamp-1">
-                                      {job.description}
-                                    </div>
-                                  )}
-                                </td>
+                                )}
+                              </td>
 
-                                <td className="py-4 px-4">
+                              <td className="py-4 px-4">
+                                <div className="flex items-center text-gray-600">
+                                  <MapPin className="h-4 w-4 mr-1 text-gray-400" />
+                                  <span className="text-sm">
+                                    {job?.location || "Not specified"}
+                                  </span>
+                                </div>
+                              </td>
+
+                              <td className="py-4 px-4">
+                                {job?.salary_range ? (
                                   <div className="flex items-center text-gray-600">
-                                    <MapPin className="h-4 w-4 mr-1 text-gray-400" />
+                                    <DollarSign className="h-4 w-4 mr-1 text-gray-400" />
                                     <span className="text-sm">
-                                      {job?.location || "Not specified"}
+                                      {job.salary_range}
                                     </span>
                                   </div>
-                                </td>
+                                ) : (
+                                  <span className="text-sm text-gray-400">
+                                    Not specified
+                                  </span>
+                                )}
+                              </td>
 
-                                <td className="py-4 px-4">
-                                  {job?.salary_range ? (
-                                    <div className="flex items-center text-gray-600">
-                                      <DollarSign className="h-4 w-4 mr-1 text-gray-400" />
-                                      <span className="text-sm">
-                                        {job.salary_range}
-                                      </span>
-                                    </div>
-                                  ) : (
-                                    <span className="text-sm text-gray-400">
-                                      Not specified
-                                    </span>
+                              <td className="py-4 px-4">
+                                <div className="flex items-center text-gray-600">
+                                  <Calendar className="h-4 w-4 mr-1 text-gray-400" />
+                                  <span className="text-sm">
+                                    {formatDate(application.created_at)}
+                                  </span>
+                                </div>
+                              </td>
+
+                              <td className="py-4 px-4">
+                                <Badge
+                                  className={`flex items-center gap-1 border w-fit ${getStatusColor(
+                                    application.status || "PENDING"
+                                  )}`}
+                                >
+                                  {getStatusIcon(
+                                    application.status || "PENDING"
                                   )}
-                                </td>
-
-                                <td className="py-4 px-4">
-                                  <div className="flex items-center text-gray-600">
-                                    <Calendar className="h-4 w-4 mr-1 text-gray-400" />
-                                    <span className="text-sm">
-                                      {formatDate(application.created_at)}
-                                    </span>
-                                  </div>
-                                </td>
-
-                                <td className="py-4 px-4">
-                                  <Badge
-                                    className={`flex items-center gap-1 border w-fit ${getStatusColor(
-                                      application.status || "PENDING"
-                                    )}`}
-                                  >
-                                    {getStatusIcon(
-                                      application.status || "PENDING"
-                                    )}
-                                    <span className="text-xs">
-                                      {(application.status || "Pending")
-                                        .charAt(0)
-                                        .toUpperCase() +
-                                        (application.status || "Pending")
-                                          .slice(1)
-                                          .toLowerCase()}
-                                    </span>
-                                  </Badge>
-                                </td>
-                              </tr>
-                            );
-                          }
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </CardContent>
-              </Card>
+                                  <span className="text-xs">
+                                    {(application.status || "Pending")
+                                      .charAt(0)
+                                      .toUpperCase() +
+                                      (application.status || "Pending")
+                                        .slice(1)
+                                        .toLowerCase()}
+                                  </span>
+                                </Badge>
+                              </td>
+                            </tr>
+                          );
+                        }
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             ) : (
               /* Empty State */
               <div className="text-center py-16">

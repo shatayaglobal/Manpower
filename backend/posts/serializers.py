@@ -118,9 +118,44 @@ class JobApplicationSerializer(serializers.ModelSerializer):
     resume = serializers.FileField(required=False, allow_null=True)
     additional_info = serializers.CharField(required=False, allow_blank=True)
 
+    # Add these read-only fields
+    applicant_name = serializers.CharField(source='applicant.full_name', read_only=True)
+    resume_url = serializers.SerializerMethodField(read_only=True)
+    status = serializers.CharField(read_only=True)  # if you don't want applicants changing it
+    created_at = serializers.DateTimeField(read_only=True)
+    reviewed_at = serializers.DateTimeField(read_only=True, allow_null=True)
+
     class Meta:
         model = JobApplication
-        fields = ['cover_letter', 'resume', 'additional_info']
+        fields = [
+            'id',
+            'applicant_name',
+            'cover_letter',
+            'resume',
+            'additional_info',
+            'status',
+            'created_at',
+            'reviewed_at',
+            'resume_url',
+        ]
+        read_only_fields = [
+            'id',
+            'applicant_name',
+            'status',
+            'created_at',
+            'reviewed_at',
+            'resume_url',
+        ]
+
+    def get_resume_url(self, obj):
+        """Return full absolute URL for resume download"""
+        if obj.resume:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.resume.url)
+            # Fallback (e.g. in tests)
+            return obj.resume.url
+        return None
 
     def validate(self, attrs):
         request = self.context['request']
@@ -155,7 +190,7 @@ class JobApplicationListSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobApplication
         fields = [
-            'id', 'applicant', 'applicant_name', 'cover_letter','job',
+            'id', 'applicant', 'applicant_name', 'cover_letter', 'job',
             'resume', 'resume_url', 'additional_info', 'status',
             'created_at', 'updated_at', 'reviewed_at'
         ]
@@ -168,9 +203,11 @@ class JobApplicationListSerializer(serializers.ModelSerializer):
 
     def get_resume_url(self, obj):
         if obj.resume:
-            return obj.resume.url
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.resume.url)
+            return obj.resume.url  
         return None
-
 
 
 class ApplicationStatusUpdateSerializer(serializers.ModelSerializer):

@@ -207,7 +207,7 @@ export const useWorkforce = () => {
   );
 
   const addShift = useCallback(
-    (data: ShiftFormData) => {
+    (data: ShiftFormData & { business: string }) => {
       return dispatch(createShift(data));
     },
     [dispatch]

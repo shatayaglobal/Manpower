@@ -154,7 +154,7 @@ const StaffDetailPage: React.FC = () => {
     );
   }
   return (
-    <div className="bg-white rounded-lg p-6 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
+    <div className="bg-white rounded-lg p-2 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <Button

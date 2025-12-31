@@ -272,25 +272,25 @@ export default function WorkerDashboardPage() {
                   onClick={isClockedIn ? handleClockOut : handleClockIn}
                   disabled={loading}
                   size="lg"
-                  className={`w-full max-w-xs h-12 text-lg font-medium rounded-xl shadow-md transition-all hover:shadow-lg ${
+                  className={`w-full max-w-xs h-10 text-lg font-medium rounded-xl shadow-md transition-all hover:shadow-lg ${
                     isClockedIn
                       ? "bg-red-600 hover:bg-red-700 text-white"
-                      : "bg-emerald-600 hover:bg-emerald-700 text-white"
+                      : "bg-blue-600 hover:bg-blue-700 text-white"
                   }`}
                 >
                   {loading ? (
                     <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Processing...
                     </>
                   ) : isClockedIn ? (
                     <>
-                      <LogOut className="mr-2 h-5 w-5" />
+                      <LogOut className="mr-2 h-4 w-4" />
                       Clock Out
                     </>
                   ) : (
                     <>
-                      <LogIn className="mr-2 h-5 w-5" />
+                      <LogIn className="mr-2 h-4 w-4" />
                       Clock In
                     </>
                   )}

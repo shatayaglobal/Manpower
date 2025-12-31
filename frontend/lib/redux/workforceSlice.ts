@@ -224,7 +224,7 @@ export const clockInAction = createAsyncThunk(
       return rejectWithValue(errorData);
     }
   }
-  
+
 );
 export const clockOutAction = createAsyncThunk(
   "workforce/clockOut",
@@ -356,7 +356,7 @@ export const fetchShift = createAsyncThunk(
 
 export const createShift = createAsyncThunk(
   "workforce/createShift",
-  async (data: ShiftFormData) => {
+  async (data: ShiftFormData & { business: string }) => {
     return await workforceApi.createShift(data);
   }
 );

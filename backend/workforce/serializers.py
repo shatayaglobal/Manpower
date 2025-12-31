@@ -66,18 +66,41 @@ class ShiftSerializer(serializers.ModelSerializer):
     business_name = serializers.CharField(source='business.name', read_only=True)
     duration_hours = serializers.SerializerMethodField()
 
+    # For writing - accept lists
+    staff = serializers.ListField(
+        child=serializers.UUIDField(),
+        write_only=True,
+        required=True
+    )
+    day_of_week = serializers.ListField(
+        child=serializers.ChoiceField(choices=Shift.DAYS_OF_WEEK),
+        write_only=True,
+        required=True
+    )
+
+    # For reading - return single values
+    staff_id = serializers.UUIDField(source='staff.id', read_only=True)
+    day_of_week_value = serializers.CharField(source='day_of_week', read_only=True)
+
     class Meta:
         model = Shift
         fields = [
-            'id', 'business', 'business_name', 'staff', 'staff_name',
-            'name', 'shift_type', 'day_of_week', 'start_time', 'end_time',
+            'id', 'business', 'business_name',
+            'staff', 'staff_id', 'staff_name',  # Keep these
+            'name', 'shift_type',
+            'day_of_week', 'day_of_week_value',  # Keep these
+            'start_time', 'end_time',
             'break_duration', 'duration_hours', 'is_active', 'created_at'
         ]
         read_only_fields = ['id', 'created_at']
+        extra_kwargs = {
+            'staff': {'write_only': True},
+            'day_of_week': {'write_only': True}
+        }
 
     @extend_schema_field(serializers.FloatField)
     def get_duration_hours(self, obj) -> float:
-        from datetime import datetime, timedelta
+        from datetime import datetime
         start = datetime.combine(datetime.today(), obj.start_time)
         end = datetime.combine(datetime.today(), obj.end_time)
         duration = end - start
@@ -85,6 +108,181 @@ class ShiftSerializer(serializers.ModelSerializer):
             duration -= obj.break_duration
         return duration.total_seconds() / 3600
 
+    def to_representation(self, instance):
+        """Map read fields back to expected names"""
+        data = super().to_representation(instance)
+        data['staff'] = data.pop('staff_id')
+        data['day_of_week'] = data.pop('day_of_week_value')
+        return data
+
+    def create(self, validated_data):
+        staff_ids = validated_data.pop('staff')
+        days_list = validated_data.pop('day_of_week')
+
+        shifts = []
+        for staff_id in staff_ids:
+            for day in days_list:
+                shift = Shift.objects.create(
+                    staff_id=staff_id,
+                    day_of_week=day,
+                    **validated_data
+                )
+                shifts.append(shift)
+
+        return shifts[0] if shifts else None
+
+    def update(self, instance, validated_data):
+        staff_ids = validated_data.pop('staff', None)
+        days_list = validated_data.pop('day_of_week', None)
+
+        if staff_ids:
+            instance.staff_id = staff_ids[0]
+        if days_list:
+            instance.day_of_week = days_list[0]
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+        return instance
+
+    @extend_schema_field(serializers.FloatField)
+    def get_duration_hours(self, obj) -> float:
+        from datetime import datetime
+        start = datetime.combine(datetime.today(), obj.start_time)
+        end = datetime.combine(datetime.today(), obj.end_time)
+        duration = end - start
+        if obj.break_duration:
+            duration -= obj.break_duration
+        return duration.total_seconds() / 3600
+
+    def to_representation(self, instance):
+        """Return single values for read operations"""
+        data = super().to_representation(instance)
+        # Map read-only fields to expected names
+        data['staff'] = data.pop('staff_id')
+        data['day_of_week'] = data.pop('day_of_week_value')
+        return data
+
+    def create(self, validated_data):
+    # Extract arrays (now they're UUIDs, not objects)
+        staff_ids = validated_data.pop('staff')
+        days_list = validated_data.pop('day_of_week')
+
+        shifts = []
+        for staff_id in staff_ids:
+            for day in days_list:
+                shift = Shift.objects.create(
+                    staff_id=staff_id,  # Use staff_id to assign by UUID
+                    day_of_week=day,
+                    **validated_data
+                )
+                shifts.append(shift)
+
+        return shifts[0] if shifts else None
+
+    def update(self, instance, validated_data):
+        staff_list = validated_data.pop('staff', None)
+        days_list = validated_data.pop('day_of_week', None)
+
+        if staff_list:
+            instance.staff = staff_list[0]
+        if days_list:
+            instance.day_of_week = days_list[0]
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+        return instance
+
+
+class ShiftSerializer(serializers.ModelSerializer):
+    staff_name = serializers.CharField(source='staff.name', read_only=True)
+    business_name = serializers.CharField(source='business.name', read_only=True)
+    duration_hours = serializers.SerializerMethodField()
+
+    # For reading only
+    staff = serializers.UUIDField(source='staff.id', read_only=True)
+    day_of_week = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = Shift
+        fields = [
+            'id', 'business', 'business_name',
+            'staff', 'staff_name',
+            'name', 'shift_type',
+            'day_of_week',
+            'start_time', 'end_time',
+            'break_duration', 'duration_hours', 'is_active', 'created_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'staff', 'day_of_week']
+
+    @extend_schema_field(serializers.FloatField)
+    def get_duration_hours(self, obj) -> float:
+        from datetime import datetime
+        start = datetime.combine(datetime.today(), obj.start_time)
+        end = datetime.combine(datetime.today(), obj.end_time)
+        duration = end - start
+        if obj.break_duration:
+            duration -= obj.break_duration
+        return duration.total_seconds() / 3600
+
+    def to_internal_value(self, data):
+        # Intercept and validate arrays before they hit model validation
+        staff_list = data.get('staff')
+        day_list = data.get('day_of_week')
+
+        # Validate arrays
+        if not staff_list or not isinstance(staff_list, list):
+            raise serializers.ValidationError({'staff': 'Staff must be a list'})
+        if not day_list or not isinstance(day_list, list):
+            raise serializers.ValidationError({'day_of_week': 'Days must be a list'})
+
+        # Remove from data to avoid model validation
+        data_copy = data.copy()
+        data_copy.pop('staff', None)
+        data_copy.pop('day_of_week', None)
+
+        # Get validated data from parent
+        validated = super().to_internal_value(data_copy)
+
+        # Add our arrays back
+        validated['staff_list'] = staff_list
+        validated['day_list'] = day_list
+
+        return validated
+
+    def create(self, validated_data):
+        staff_ids = validated_data.pop('staff_list')
+        days_list = validated_data.pop('day_list')
+
+        shifts = []
+        for staff_id in staff_ids:
+            for day in days_list:
+                shift = Shift.objects.create(
+                    staff_id=staff_id,
+                    day_of_week=day,
+                    **validated_data
+                )
+                shifts.append(shift)
+
+        return shifts[0] if shifts else None
+
+    def update(self, instance, validated_data):
+        staff_ids = validated_data.pop('staff_list', None)
+        days_list = validated_data.pop('day_list', None)
+
+        if staff_ids:
+            instance.staff_id = staff_ids[0]
+        if days_list:
+            instance.day_of_week = days_list[0]
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+        return instance
 
 class HoursCardSerializer(serializers.ModelSerializer):
     staff_name = serializers.CharField(source='staff.name', read_only=True)
@@ -105,7 +303,7 @@ class HoursCardSerializer(serializers.ModelSerializer):
     class Meta:
         model = HoursCard
         fields = [
-            'id', 'staff', 'staff_name', 'shift', 'shift_name',  
+            'id', 'staff', 'staff_name', 'shift', 'shift_name',
             'date',
             'clock_in', 'clock_out',
             'clock_in_datetime', 'clock_out_datetime',

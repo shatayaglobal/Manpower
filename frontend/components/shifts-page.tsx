@@ -7,7 +7,6 @@ import {
   Edit2,
   Trash2,
   Search,
-  Filter,
   Clock,
   AlertCircle,
   Loader2,
@@ -37,6 +36,7 @@ import { toast } from "sonner";
 import { useBusiness } from "@/lib/redux/useBusiness";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import MultiSelect from "./multiple-shift-select";
 
 interface ShiftModalProps {
   shift: Shift | null;
@@ -124,12 +124,12 @@ const ShiftManagementPage: React.FC = () => {
     setCurrentPage(1);
   }, [localSearchTerm, localDayFilter, localShiftTypeFilter, localStaffFilter]);
 
-  const handleDeleteShift = async (shiftId: string, shiftName: string) => {
+  const handleDeleteShift = async (shiftIds: string[], shiftName: string) => {
     if (
       window.confirm(`Are you sure you want to delete shift: ${shiftName}?`)
     ) {
       try {
-        await removeShift(shiftId);
+        await Promise.all(shiftIds.map((id) => removeShift(id)));
         toast.success("Shift deleted successfully");
         loadShifts({
           page: currentPage,
@@ -144,16 +144,26 @@ const ShiftManagementPage: React.FC = () => {
           ordering: sortDirection === "desc" ? `-${sortField}` : sortField,
         });
       } catch {
-        toast("Failed to delete shift");
+        toast.error("Failed to delete shift");
       }
     }
   };
 
-  const handleEditShift = (shift: Shift) => {
-    selectShift(shift);
+  const handleEditShift = (
+    shift: Shift & { days: DayOfWeek[]; shift_ids: string[] }
+  ) => {
+    const shiftToEdit: Shift = {
+      ...shift,
+      day_of_week: shift.days[0],
+    };
+
+    selectShift({
+      ...shiftToEdit,
+      days: shift.days,
+    } as Shift);
+
     setShowCreateModal(true);
   };
-
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -213,6 +223,14 @@ const ShiftManagementPage: React.FC = () => {
   };
 
   const getDayBadge = (day: DayOfWeek) => {
+    if (!day) {
+      return (
+        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-50 text-gray-600 border border-gray-200">
+          N/A
+        </span>
+      );
+    }
+
     const dayColors: Record<DayOfWeek, string> = {
       MONDAY: "bg-blue-50 text-blue-500 border border-blue-200",
       TUESDAY: "bg-green-50 text-green-600 border border-green-200",
@@ -230,6 +248,25 @@ const ShiftManagementPage: React.FC = () => {
         {day.charAt(0) + day.slice(1).toLowerCase()}
       </span>
     );
+  };
+
+  const groupShiftsByNameAndStaff = (shifts: Shift[]) => {
+    const grouped = shifts.reduce((acc, shift) => {
+      const key = `${shift.name}-${shift.staff}-${shift.shift_type}`;
+      if (!acc[key]) {
+        acc[key] = {
+          ...shift,
+          days: [shift.day_of_week],
+          shift_ids: [shift.id],
+        };
+      } else {
+        acc[key].days.push(shift.day_of_week);
+        acc[key].shift_ids.push(shift.id);
+      }
+      return acc;
+    }, {} as Record<string, Shift & { days: DayOfWeek[]; shift_ids: string[] }>);
+
+    return Object.values(grouped);
   };
 
   const SortableHeader = ({
@@ -262,16 +299,23 @@ const ShiftManagementPage: React.FC = () => {
     staffList,
   }) => {
     const [formData, setFormData] = useState<ShiftFormData>({
-      staff: shift?.staff || "",
+      staff: shift?.staff
+        ? Array.isArray(shift.staff)
+          ? shift.staff
+          : [shift.staff]
+        : [],
       name: shift?.name || "",
       shift_type: shift?.shift_type || "MORNING",
-      day_of_week: shift?.day_of_week || "MONDAY",
+      day_of_week: shift?.day_of_week
+        ? Array.isArray(shift.day_of_week)
+          ? shift.day_of_week
+          : [shift.day_of_week]
+        : [],
       start_time: shift?.start_time || "",
       end_time: shift?.end_time || "",
       break_duration: shift?.break_duration || "",
       is_active: shift?.is_active !== undefined ? shift.is_active : true,
     });
-
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [submitting, setSubmitting] = useState<boolean>(false);
 
@@ -279,11 +323,23 @@ const ShiftManagementPage: React.FC = () => {
 
     useEffect(() => {
       if (shift) {
+        const shiftWithDays = shift as Shift & { days?: DayOfWeek[] };
+
         setFormData({
-          staff: shift.staff || "",
+          staff: Array.isArray(shift.staff)
+            ? shift.staff
+            : shift.staff
+            ? [shift.staff]
+            : [],
           name: shift.name || "",
           shift_type: shift.shift_type || "MORNING",
-          day_of_week: shift.day_of_week || "MONDAY",
+          day_of_week: shiftWithDays.days
+            ? shiftWithDays.days
+            : Array.isArray(shift.day_of_week)
+            ? shift.day_of_week
+            : shift.day_of_week
+            ? [shift.day_of_week]
+            : [],
           start_time: shift.start_time || "",
           end_time: shift.end_time || "",
           break_duration: shift.break_duration || "",
@@ -376,26 +432,22 @@ const ShiftManagementPage: React.FC = () => {
               <div className="grid grid-cols-1 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Staff Member *
+                    Staff Members *
                   </label>
-                  <select
-                    value={formData.staff}
-                    onChange={(e) =>
-                      setFormData({ ...formData, staff: e.target.value })
-                    }
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.staff ? "border-red-300" : "border-gray-300"
-                    }`}
-                  >
-                    <option value="">Select staff member</option>
-                    {staffList
+                  <MultiSelect
+                    options={staffList
                       .filter((s) => s.status === "ACTIVE")
-                      .map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.name} - {s.job_title}
-                        </option>
-                      ))}
-                  </select>
+                      .map((s) => ({
+                        value: s.id,
+                        label: `${s.name} - ${s.job_title}`,
+                      }))}
+                    selected={formData.staff}
+                    onChange={(values) =>
+                      setFormData({ ...formData, staff: values })
+                    }
+                    placeholder="Select staff members"
+                    error={!!errors.staff}
+                  />
                   {errors.staff && (
                     <p className="text-red-600 text-sm mt-1">{errors.staff}</p>
                   )}
@@ -447,44 +499,89 @@ const ShiftManagementPage: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Day of Week *
+                    Days of Week *
                   </label>
-                  <select
-                    value={formData.day_of_week}
-                    onChange={(e) =>
+                  <MultiSelect
+                    options={[
+                      { value: "MONDAY", label: "Monday" },
+                      { value: "TUESDAY", label: "Tuesday" },
+                      { value: "WEDNESDAY", label: "Wednesday" },
+                      { value: "THURSDAY", label: "Thursday" },
+                      { value: "FRIDAY", label: "Friday" },
+                      { value: "SATURDAY", label: "Saturday" },
+                      { value: "SUNDAY", label: "Sunday" },
+                    ]}
+                    selected={formData.day_of_week}
+                    onChange={(values) =>
                       setFormData({
                         ...formData,
-                        day_of_week: e.target.value as DayOfWeek,
+                        day_of_week: values as DayOfWeek[],
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="MONDAY">Monday</option>
-                    <option value="TUESDAY">Tuesday</option>
-                    <option value="WEDNESDAY">Wednesday</option>
-                    <option value="THURSDAY">Thursday</option>
-                    <option value="FRIDAY">Friday</option>
-                    <option value="SATURDAY">Saturday</option>
-                    <option value="SUNDAY">Sunday</option>
-                  </select>
+                    placeholder="Select days"
+                    error={!!errors.day_of_week}
+                  />
+                  {errors.day_of_week && (
+                    <p className="text-red-600 text-sm mt-1">
+                      {errors.day_of_week}
+                    </p>
+                  )}
                 </div>
               </div>
-
               <div className="grid grid-cols-1 gap-4">
+                {/* Start Time */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Start Time *
                   </label>
-                  <input
-                    type="time"
-                    value={formData.start_time}
-                    onChange={(e) =>
-                      setFormData({ ...formData, start_time: e.target.value })
-                    }
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.start_time ? "border-red-300" : "border-gray-300"
-                    }`}
-                  />
+                  <div className="flex gap-3">
+                    <input
+                      type="time"
+                      value={formData.start_time}
+                      onChange={(e) =>
+                        setFormData({ ...formData, start_time: e.target.value })
+                      }
+                      className={`flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        errors.start_time ? "border-red-300" : "border-gray-300"
+                      }`}
+                    />
+                    {/* AM/PM Picker */}
+                    <select
+                      value={
+                        formData.start_time
+                          ? parseInt(formData.start_time.split(":")[0]) >= 12
+                            ? "PM"
+                            : "AM"
+                          : ""
+                      }
+                      onChange={(e) => {
+                        if (!formData.start_time) return;
+
+                        const [hourStr, minuteStr] =
+                          formData.start_time.split(":");
+                        let hour = parseInt(hourStr, 10);
+                        const minute = parseInt(minuteStr, 10);
+
+                        if (e.target.value === "PM" && hour < 12) hour += 12;
+                        if (e.target.value === "AM" && hour >= 12) hour -= 12;
+
+                        const newTime = `${hour
+                          .toString()
+                          .padStart(2, "0")}:${minute
+                          .toString()
+                          .padStart(2, "0")}`;
+
+                        setFormData({ ...formData, start_time: newTime });
+                      }}
+                      className={`w-24 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        errors.start_time ? "border-red-300" : "border-gray-300"
+                      }`}
+                    >
+                      <option value="">--</option>
+                      <option value="AM">AM</option>
+                      <option value="PM">PM</option>
+                    </select>
+                  </div>
                   {errors.start_time && (
                     <p className="text-red-600 text-sm mt-1">
                       {errors.start_time}
@@ -492,20 +589,59 @@ const ShiftManagementPage: React.FC = () => {
                   )}
                 </div>
 
+                {/* End Time */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     End Time *
                   </label>
-                  <input
-                    type="time"
-                    value={formData.end_time}
-                    onChange={(e) =>
-                      setFormData({ ...formData, end_time: e.target.value })
-                    }
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.end_time ? "border-red-300" : "border-gray-300"
-                    }`}
-                  />
+                  <div className="flex gap-3">
+                    <input
+                      type="time"
+                      value={formData.end_time}
+                      onChange={(e) =>
+                        setFormData({ ...formData, end_time: e.target.value })
+                      }
+                      className={`flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        errors.end_time ? "border-red-300" : "border-gray-300"
+                      }`}
+                    />
+                    {/* AM/PM Picker */}
+                    <select
+                      value={
+                        formData.end_time
+                          ? parseInt(formData.end_time.split(":")[0]) >= 12
+                            ? "PM"
+                            : "AM"
+                          : ""
+                      }
+                      onChange={(e) => {
+                        if (!formData.end_time) return;
+
+                        const [hourStr, minuteStr] =
+                          formData.end_time.split(":");
+                        let hour = parseInt(hourStr, 10);
+                        const minute = parseInt(minuteStr, 10);
+
+                        if (e.target.value === "PM" && hour < 12) hour += 12;
+                        if (e.target.value === "AM" && hour >= 12) hour -= 12;
+
+                        const newTime = `${hour
+                          .toString()
+                          .padStart(2, "0")}:${minute
+                          .toString()
+                          .padStart(2, "0")}`;
+
+                        setFormData({ ...formData, end_time: newTime });
+                      }}
+                      className={`w-24 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        errors.end_time ? "border-red-300" : "border-gray-300"
+                      }`}
+                    >
+                      <option value="">--</option>
+                      <option value="AM">AM</option>
+                      <option value="PM">PM</option>
+                    </select>
+                  </div>
                   {errors.end_time && (
                     <p className="text-red-600 text-sm mt-1">
                       {errors.end_time}
@@ -513,7 +649,6 @@ const ShiftManagementPage: React.FC = () => {
                   )}
                 </div>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Break Duration (Optional)
@@ -606,6 +741,9 @@ const ShiftManagementPage: React.FC = () => {
   }
 
   const activeShifts = shifts.filter((s) => s.is_active).length;
+  const groupedShifts = groupShiftsByNameAndStaff(shifts);
+  const totalGroupedShifts = groupedShifts.length;
+  const activeGroupedShifts = groupedShifts.filter((s) => s.is_active).length;
 
   return (
     <div className="bg-white rounded-lg p-2 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
@@ -662,7 +800,7 @@ const ShiftManagementPage: React.FC = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900">
-                {shiftPagination.count}
+                {totalGroupedShifts}
               </p>
               <p className="text-sm text-gray-600">Total Shifts</p>
             </div>
@@ -674,7 +812,9 @@ const ShiftManagementPage: React.FC = () => {
               <Clock className="w-6 h-6 text-green-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{activeShifts}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {activeGroupedShifts}
+              </p>
               <p className="text-sm text-gray-600">Active Shifts</p>
             </div>
           </div>
@@ -784,7 +924,7 @@ const ShiftManagementPage: React.FC = () => {
           </div>
         ) : (
           <>
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <div className="bg-white overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
@@ -805,7 +945,7 @@ const ShiftManagementPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {shifts.map((shift) => {
+                    {groupShiftsByNameAndStaff(shifts).map((shift) => {
                       const staffMember = staff.find(
                         (s) => s.id === shift.staff
                       );
@@ -831,8 +971,27 @@ const ShiftManagementPage: React.FC = () => {
                               {staffMember?.job_title}
                             </div>
                           </td>
-                          <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                            {getDayBadge(shift.day_of_week)}
+                          <td className="px-4 sm:px-6 py-4">
+                            <div className="flex flex-wrap gap-1">
+                              {shift.days
+                                .sort((a, b) => {
+                                  const dayOrder = [
+                                    "MONDAY",
+                                    "TUESDAY",
+                                    "WEDNESDAY",
+                                    "THURSDAY",
+                                    "FRIDAY",
+                                    "SATURDAY",
+                                    "SUNDAY",
+                                  ];
+                                  return (
+                                    dayOrder.indexOf(a) - dayOrder.indexOf(b)
+                                  );
+                                })
+                                .map((day) => (
+                                  <span key={day}>{getDayBadge(day)}</span>
+                                ))}
+                            </div>
                           </td>
                           <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                             {getShiftTypeBadge(shift.shift_type)}
@@ -876,7 +1035,10 @@ const ShiftManagementPage: React.FC = () => {
                                 <DropdownMenuItem
                                   className="text-red-600"
                                   onClick={() =>
-                                    handleDeleteShift(shift.id, shift.name)
+                                    handleDeleteShift(
+                                      shift.shift_ids,
+                                      shift.name
+                                    )
                                   }
                                 >
                                   <Trash2 className="w-4 h-4 mr-2 text-red-600" />
