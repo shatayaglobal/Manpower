@@ -16,17 +16,17 @@ import {
   Clock,
   ArrowRight,
   TrendingUp,
-  ChevronUp,
-  ChevronDown,
+  ChevronRight,
+  CheckCircle2,
+  Building2,
+  Sparkles,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuthState } from "@/lib/redux/redux";
-import { useState } from "react";
 
 export default function HomePage() {
   const router = useRouter();
   const { isAuthenticated, user } = useAuthState();
-  const [expandedCard, setExpandedCard] = useState<number | null>(null);
 
   const handleFeatureClick = (featurePath: string) => {
     if (isAuthenticated && user) {
@@ -47,206 +47,285 @@ export default function HomePage() {
       icon: Users,
       title: "Talent Management",
       description:
-        "Connect with qualified professionals through advanced matching.",
-      color: "bg-blue-500",
+        "Connect with qualified professionals through AI-powered matching algorithms.",
+      color: "from-blue-500 to-blue-600",
+      iconBg: "bg-blue-500",
       path: "/talent-management",
-      fullDescription:
-        "Effective talent management is key to every successful manpower organization. Modern manpower applications are revolutionizing how companies recruit and manage skilled workers. Through advanced matching technology, employers can easily connect with qualified professionals based on their experience and skills. This smart system streamlines recruitment, improves worker performance, and strengthens engagement between employees and employers saving time, reducing turnover, and enhancing overall workforce quality.",
+      benefits: [
+        "Smart candidate matching",
+        "Skills-based filtering",
+        "Real-time availability",
+      ],
     },
     {
       icon: Briefcase,
       title: "Job Placement",
       description:
-        "Smart algorithms that match skills with opportunities perfectly.",
-      color: "bg-yellow-400",
+        "Seamless recruitment process that connects the right talent with the right opportunity.",
+      color: "from-amber-500 to-amber-600",
+      iconBg: "bg-amber-600",
       path: "/job-placement",
-      fullDescription:
-        "Digital applications make hiring faster, smarter, and more transparent. With smart algorithms, they instantly match workers' skills and experience with the right job opportunities, ensuring the best fit for both sides. This technology saves time, improves candidate quality, and gives workers quick access to suitable jobs. It also enables real-time communication and performance tracking, creating a smooth and efficient connection between workers and businesses.",
+      benefits: [
+        "Instant job posting",
+        "Automated screening",
+        "Quick placements",
+      ],
     },
     {
       icon: Calendar,
       title: "Shift Scheduling",
       description:
-        "Intelligent workforce scheduling with real-time optimization.",
-      color: "bg-blue-500",
+        "Intelligent scheduling system with automated conflict resolution and optimization.",
+      color: "from-purple-500 to-purple-600",
+      iconBg: "bg-purple-500",
       path: "/shift-scheduling",
-      fullDescription:
-        "The application provides businesses with a powerful tool to efficiently manage their workforce and daily operations. Through its smart management features, companies can easily schedule shifts, assign specific tasks or missions, and monitor working hours — from the exact time employees start their job until they finish. This system helps businesses maintain clear organization, avoid scheduling conflicts, and ensure that every task is completed on time. It also allows managers to track attendance, performance, and productivity in real time, giving them valuable insights for better decision-making. Overall, the application creates a seamless workflow that enhances communication, boosts efficiency, and supports a more reliable and well-coordinated workforce.",
+      benefits: [
+        "Drag-and-drop scheduling",
+        "Automated notifications",
+        "Time tracking",
+      ],
     },
     {
       icon: TrendingUp,
-      title: "Analytics",
-      description: "Data-driven insights for better workforce decisions.",
-      color: "bg-yellow-400",
+      title: "Analytics & Reports",
+      description:
+        "Comprehensive workforce insights with real-time dashboards and custom reports.",
+      color: "from-emerald-500 to-green-600",
+      iconBg: "bg-emerald-500",
       path: "/analytics",
-      fullDescription:
-        "The application also includes an advanced analysis system that helps businesses understand and improve their overall performance. It can analyze working hours, job efficiency, and individual worker performance, providing valuable insights into how each team member is contributing. Through detailed reports and data visualization, managers can identify strengths, detect challenges, and make smarter decisions to enhance productivity. This powerful analytical feature allows businesses to continuously improve operations, optimize workforce performance, and strengthen their overall growth and success.",
+      benefits: [
+        "Performance metrics",
+        "Custom reports",
+        "Predictive insights",
+      ],
     },
   ];
 
-  const toggleCard = (index: number) => {
-    setExpandedCard(expandedCard === index ? null : index);
-  };
+  const industries = [
+    { name: "Construction", icon: Building2, jobs: "2,500+" },
+    { name: "Hospitality", icon: Users, jobs: "1,800+" },
+    { name: "Logistics", icon: TrendingUp, jobs: "3,200+" },
+    { name: "Security", icon: CheckCircle2, jobs: "1,500+" },
+    { name: "Cleaning", icon: Sparkles, jobs: "1,100+" },
+  ];
+
+  const jobs = [
+    {
+      title: "Construction Workers",
+      company: "Multiple construction sites",
+      location: "Kampala & Entebbe",
+      type: "Full-time",
+      salary: "UGX 800K - 1.5M",
+      posted: "2 days ago",
+      tags: ["Urgent", "High Demand"],
+    },
+    {
+      title: "Hotel Staff",
+      company: "5-star hotels & resorts",
+      location: "Kampala",
+      type: "Full-time",
+      salary: "UGX 600K - 1.2M",
+      posted: "3 days ago",
+      tags: ["Immediate Start"],
+    },
+    {
+      title: "Warehouse Operators",
+      company: "Logistics companies",
+      location: "Industrial Area",
+      type: "Shifts",
+      salary: "UGX 700K - 1M",
+      posted: "1 week ago",
+      tags: ["Night Shift Available"],
+    },
+  ];
 
   return (
-    <div>
-      {/* Hero Section - FULL WIDTH */}
-      <section className="w-full pt-12 sm:pt-20 lg:pt-24 pb-16 sm:pb-24 lg:pb-32 bg-gradient-to-br from-blue-50 via-white to-yellow-50/20 -mt-8 sm:-mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-4xl mx-auto space-y-6 sm:space-y-8">
-            <h1 className="font-bold text-3xl sm:text-4xl md:text-5xl lg:text-7xl text-gray-900 leading-tight tracking-tight animate-fade-in">
-              Connect Talent with{" "}
-              <span className="bg-gradient-to-r from-blue-500 to-yellow-400 bg-clip-text text-transparent">
-                Opportunity
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="relative pt-24 pb-20 overflow-hidden bg-white">
+        {/* Subtle decorative elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-50 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-amber-50 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center max-w-5xl mx-auto">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-50 to-amber-50 border border-blue-100 px-5 py-2.5 rounded-full text-sm font-semibold text-gray-700 mb-8 shadow-sm">
+              <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-amber-500 rounded-full animate-pulse"></div>
+              <span>#1 Trusted Manpower Platform</span>
+            </div>
+
+            {/* Main heading */}
+            <h1 className="font-extrabold text-5xl sm:text-6xl lg:text-7xl text-gray-900 leading-[1.1] tracking-tight mb-8">
+              Connect Top Talent with
+              <br />
+              <span className="bg-gradient-to-r from-blue-600 via-blue-500 to-amber-500 bg-clip-text text-transparent">
+                Great Opportunities
               </span>
             </h1>
-            <p className="text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto px-4 animate-fade-in-delay">
-              At Shataya Global, our mission is simple: connect talent with
-              opportunity. We believe every skilled worker deserves a chance to
-              grow, and every business deserves the right people to succeed.
-              Together, we build stronger communities, one job at a time.
+
+            <p className="text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto mb-12 font-medium">
+              The fastest way to hire skilled workers or find your next job.
+              Trusted by thousands of businesses and professionals across
+              Uganda.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-2 sm:pt-4 px-4">
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
               {isAuthenticated && user ? (
-                // Logged in users see "Find Jobs" or "Post Jobs" based on account type
                 <>
                   {user.account_type === "WORKER" ? (
                     <Button
                       size="lg"
                       onClick={() => router.push("/jobs")}
-                      className="group relative bg-blue-500 hover:bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-110 hover:-translate-y-2 w-full sm:w-auto animate-slide-up overflow-hidden"
+                      className="group relative bg-blue-600 hover:bg-blue-700 text-white px-10 py-7 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
                     >
-                      <span className="relative z-10 flex items-center justify-center">
-                        Find Jobs
-                        <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-hover:translate-x-2" />
-                      </span>
-                      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      Browse Available Jobs
+                      <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   ) : (
                     <Button
                       size="lg"
                       onClick={() => router.push("/jobs/create")}
-                      className="group relative bg-blue-500 hover:bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-110 hover:-translate-y-2 w-full sm:w-auto animate-slide-up overflow-hidden"
+                      className="group relative bg-blue-600 hover:bg-blue-700 text-white px-10 py-7 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
                     >
-                      <span className="relative z-10 flex items-center justify-center">
-                        Post a Job
-                        <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-hover:translate-x-2" />
-                      </span>
-                      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      Post a Job Opening
+                      <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   )}
-
                   <Button
                     size="lg"
                     variant="outline"
                     onClick={() => router.push("/profile")}
-                    className="group relative border-2 border-blue-500 text-blue-600 hover:text-white hover:border-blue-600 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium bg-white w-full sm:w-auto transition-all duration-500 hover:scale-110 hover:-translate-y-2 hover:shadow-2xl animate-slide-up-delay overflow-hidden"
+                    className="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 px-10 py-7 text-lg font-semibold rounded-xl transition-all duration-300"
                   >
-                    <span className="relative z-10 flex items-center justify-center">
-                      My Profile
-                      <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-hover:translate-x-2" />
-                    </span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    View My Profile
                   </Button>
                 </>
               ) : (
                 <>
                   <Button
                     size="lg"
-                    onClick={() => router.push("/login")}
-                    className="group relative bg-blue-500 hover:bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-110 hover:-translate-y-2 w-full sm:w-auto animate-slide-up overflow-hidden"
+                    onClick={() => router.push("/signup")}
+                    className="group relative bg-blue-600 hover:bg-blue-700 text-white px-10 py-7 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
                   >
-                    <span className="relative z-10 flex items-center justify-center">
-                      Sign In
-                      <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-hover:translate-x-2" />
-                    </span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    Get Started Free
+                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                   </Button>
                   <Button
                     size="lg"
                     variant="outline"
-                    onClick={() => router.push("/signup")}
-                    className="group relative border-2 border-blue-500 text-blue-600 hover:text-white hover:border-blue-600 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium bg-white w-full sm:w-auto transition-all duration-500 hover:scale-110 hover:-translate-y-2 hover:shadow-2xl animate-slide-up-delay overflow-hidden"
+                    onClick={() => router.push("/login")}
+                    className="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 px-10 py-7 text-lg font-semibold rounded-xl transition-all duration-300"
                   >
-                    <span className="relative z-10 flex items-center justify-center">
-                      Sign Up
-                      <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-hover:translate-x-2" />
-                    </span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    Sign In
                   </Button>
                 </>
               )}
             </div>
+
+            {/* Trust indicators */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-3xl mx-auto">
+              <div className="flex flex-col items-center gap-3 p-6 rounded-2xl bg-gradient-to-br from-blue-50 to-white border border-blue-100">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                  <Users className="w-6 h-6 text-blue-600" />
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900">
+                    15,000+
+                  </div>
+                  <div className="text-sm text-gray-600 font-medium">
+                    Active Workers
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col items-center gap-3 p-6 rounded-2xl bg-gradient-to-br from-amber-50 to-white border border-amber-100">
+                <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
+                  <Building2 className="w-6 h-6 text-amber-600" />
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900">500+</div>
+                  <div className="text-sm text-gray-600 font-medium">
+                    Partner Companies
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col items-center gap-3 p-6 rounded-2xl bg-gradient-to-br from-green-50 to-white border border-green-100">
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                  <CheckCircle2 className="w-6 h-6 text-green-600" />
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900">98%</div>
+                  <div className="text-sm text-gray-600 font-medium">
+                    Success Rate
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
-      {/* Features Grid - CONSTRAINED */}
-      <section className="py-12 sm:py-16 lg:py-24 bg-white -mt-18">
+
+      {/* Features Section */}
+      <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10 sm:mb-12 lg:mb-16 space-y-3 sm:space-y-4">
-            <h2 className="font-bold text-2xl sm:text-3xl lg:text-4xl text-gray-900 px-4">
-              Complete Workforce Solutions
+          <div className="text-center mb-16">
+            <h2 className="font-bold text-4xl text-gray-900 mb-4">
+              Everything You Need to Manage Your Workforce
             </h2>
-            <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-              Everything your organization needs to manage and optimize your
-              workforce efficiently.
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Powerful tools designed to streamline hiring, scheduling, and
+              workforce management.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
               <Card
                 key={index}
-                className="group border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-lg transition-all duration-300 bg-white"
+                onClick={() => handleFeatureClick(feature.path)}
+                className="group relative border-2 border-gray-100 hover:border-blue-200 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden"
               >
-                <CardContent className="p-6 sm:p-8 space-y-3 sm:space-y-4">
-                  {/* Icon - Clickable */}
+                {/* Gradient background on hover */}
+                <div
+                  className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}
+                ></div>
+
+                <CardContent className="p-8 relative">
+                  {/* Icon */}
                   <div
-                    className="text-center cursor-pointer"
-                    onClick={() => handleFeatureClick(feature.path)}
+                    className={`w-14 h-14 ${feature.iconBg} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}
                   >
-                    <div
-                      className={`w-12 h-12 sm:w-14 sm:h-14 ${feature.color} rounded-xl flex items-center justify-center mx-auto group-hover:scale-105 transition-transform duration-300`}
-                    >
-                      <feature.icon className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
-                    </div>
+                    <feature.icon className="h-7 w-7 text-white" />
                   </div>
 
-                  {/* Title and Description */}
-                  <div className="space-y-2 text-center">
-                    <h3 className="font-semibold text-base sm:text-lg text-gray-900">
-                      {feature.title}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
-                      {feature.description}
-                    </p>
-                  </div>
+                  {/* Content */}
+                  <h3 className="font-bold text-xl text-gray-900 mb-3">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm leading-relaxed mb-6">
+                    {feature.description}
+                  </p>
 
-                  {/* Expanded Content */}
-                  {expandedCard === index && (
-                    <div className="pt-3 border-t border-gray-200 animate-in fade-in slide-in-from-top-2 duration-300">
-                      <p className="text-xs sm:text-sm text-gray-700 leading-relaxed text-left">
-                        {feature.fullDescription}
-                      </p>
-                    </div>
-                  )}
+                  {/* Benefits */}
+                  <ul className="space-y-2 mb-6">
+                    {feature.benefits.map((benefit, i) => (
+                      <li
+                        key={i}
+                        className="flex items-center text-sm text-gray-600"
+                      >
+                        <CheckCircle2 className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
+                        <span>{benefit}</span>
+                      </li>
+                    ))}
+                  </ul>
 
-                  {/* Action Buttons */}
-                  <div className="flex flex-col gap-2 pt-2">
-                    <button
-                      onClick={() => toggleCard(index)}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-2 text-xs sm:text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200"
-                    >
-                      {expandedCard === index ? (
-                        <>
-                          Show Less <ChevronUp className="h-4 w-4" />
-                        </>
-                      ) : (
-                        <>
-                          Read More <ChevronDown className="h-4 w-4" />
-                        </>
-                      )}
-                    </button>
+                  {/* Learn more link */}
+                  <div className="flex items-center text-blue-600 font-medium text-sm group-hover:text-blue-700">
+                    Learn more
+                    <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </CardContent>
               </Card>
@@ -254,301 +333,214 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-      {/* Core Benefits - FULL WIDTH */}
-      <section className="w-full py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-gray-50 to-blue-50/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
-            <div className="space-y-6 sm:space-y-8 order-2 lg:order-1">
-              <div className="space-y-4 sm:space-y-6">
-                <h2 className="font-bold text-2xl sm:text-3xl lg:text-4xl xl:text-5xl text-gray-900 leading-tight">
-                  Building Stronger Teams.{" "}
-                  <span className="text-blue-500">
-                    Creating Brighter Futures.
-                  </span>
-                </h2>
-                <p className="text-sm sm:text-base lg:text-lg text-gray-600 leading-relaxed">
-                  At Shataya Global, we connect skilled and motivated
-                  individuals with companies that need dependable manpower.
-                  Whether you&apos;re an employer searching for reliable staff
-                  or a worker ready to start your next opportunity, we make
-                  hiring simple, fast, and effective.
-                </p>
-                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-                  From construction sites to luxury hotels, from logistics hubs
-                  to security services — we power industries with people who get
-                  the job done.
-                </p>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2 sm:pt-4">
-                <Button
-                  size="lg"
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 shadow-lg hover:shadow-xl transition-all w-full sm:w-auto"
-                >
-                  Find Your Workforce
-                  <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-2 border-yellow-400 text-yellow-600 hover:bg-yellow-50 px-6 sm:px-8 py-3 sm:py-4 bg-white w-full sm:w-auto"
-                >
-                  Find a Job
-                </Button>
-              </div>
-            </div>
-            <div className="relative order-1 lg:order-2">
-              <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl p-6 sm:p-8 border border-gray-200">
-                <div className="grid grid-cols-2 gap-4 sm:gap-6">
-                  {[
-                    {
-                      icon: Users,
-                      label: "Talent Management",
-                      color: "bg-blue-500",
-                    },
-                    {
-                      icon: Briefcase,
-                      label: "Job Placement",
-                      color: "bg-yellow-400",
-                    },
-                    {
-                      icon: Calendar,
-                      label: "Scheduling",
-                      color: "bg-blue-500",
-                    },
-                    {
-                      icon: TrendingUp,
-                      label: "Analytics",
-                      color: "bg-yellow-400",
-                    },
-                  ].map((item, index) => (
-                    <div
-                      key={index}
-                      className="text-center space-y-2 sm:space-y-3"
-                    >
-                      <div
-                        className={`w-12 h-12 sm:w-14 sm:h-14 ${item.color} rounded-lg sm:rounded-xl flex items-center justify-center mx-auto`}
-                      >
-                        <item.icon className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
-                      </div>
-                      <div className="text-xs sm:text-sm font-medium text-gray-900">
-                        {item.label}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-6 sm:mt-8 text-center border-t border-gray-200 pt-4 sm:pt-6">
-                  <div className="text-xs sm:text-sm font-semibold text-gray-900">
-                    Trusted Across Industries
-                  </div>
-                  <div className="text-gray-600 text-xs mt-1">
-                    Construction • Hospitality • Logistics • Security
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Featured Jobs - CONSTRAINED */}
-      {/* Featured Opportunities - CONSTRAINED */}
-      <section className="py-12 sm:py-16 lg:py-24 bg-white">
+      {/* Industries Section */}
+      <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10 sm:mb-12 lg:mb-16 space-y-3 sm:space-y-4">
-            <h2 className="font-bold text-2xl sm:text-3xl lg:text-4xl text-gray-900 px-4">
-              Featured Opportunities
+          <div className="text-center mb-12">
+            <h2 className="font-bold text-3xl lg:text-4xl text-gray-900 mb-3">
+              Serving Multiple Industries
             </h2>
-            <p className="text-sm sm:text-base lg:text-lg text-gray-600 px-4">
-              Find your next opportunity across multiple industries
+            <p className="text-lg text-gray-600">
+              Connecting talent across diverse sectors
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-            {[
-              {
-                title: "Construction",
-                company: "Skilled trades & site workers",
-                location: "Multiple Locations",
-                type: "Various",
-                salary: "Competitive rates",
-                posted: "Active",
-                industry: "Construction",
-              },
-              {
-                title: "Cleaning & Maintenance",
-                company: "Residential, commercial & industrial",
-                location: "Multiple Locations",
-                type: "Various",
-                salary: "Competitive rates",
-                posted: "Active",
-                industry: "Cleaning",
-              },
-              {
-                title: "Hospitality",
-                company: "Hotels, restaurants & service staff",
-                location: "Multiple Locations",
-                type: "Various",
-                salary: "Competitive rates",
-                posted: "Active",
-                industry: "Hospitality",
-              },
-              {
-                title: "Logistics & Transport",
-                company: "Drivers, warehouse & delivery",
-                location: "Multiple Locations",
-                type: "Various",
-                salary: "Competitive rates",
-                posted: "Active",
-                industry: "Logistics",
-              },
-              {
-                title: "Security",
-                company: "Guards, supervisors & monitoring staff",
-                location: "Multiple Locations",
-                type: "Various",
-                salary: "Competitive rates",
-                posted: "Active",
-                industry: "Security",
-              },
-            ].map((job, index) => (
-              <Card
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            {industries.map((industry, index) => (
+              <div
                 key={index}
-                className="group border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 bg-white"
+                className="bg-white border border-gray-200 rounded-xl p-8 text-center hover:border-blue-300 hover:shadow-lg transition-all cursor-pointer"
               >
-                <CardHeader className="pb-3 sm:pb-4">
-                  <div className="flex items-start justify-between mb-2 sm:mb-3 gap-2">
-                    <div className="space-y-1 sm:space-y-2 flex-1 min-w-0">
-                      <CardTitle className="font-semibold text-base sm:text-lg text-gray-900 group-hover:text-blue-500 transition-colors line-clamp-2">
-                        {job.title}
-                      </CardTitle>
-                      <CardDescription className="text-blue-600 font-medium text-xs sm:text-sm line-clamp-1">
-                        {job.company}
-                      </CardDescription>
-                    </div>
-                    <Badge
-                      variant="secondary"
-                      className="bg-yellow-50 text-yellow-600 border-0 font-medium text-xs flex-shrink-0"
-                    >
-                      {job.type}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3 sm:space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center text-gray-600 text-xs sm:text-sm">
-                      <MapPin className="h-3 w-3 sm:h-4 sm:w-4 mr-2 text-gray-400 flex-shrink-0" />
-                      <span className="truncate">{job.location}</span>
-                    </div>
-                    <div className="flex items-center text-gray-900 font-medium text-xs sm:text-sm">
-                      <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-2 text-gray-400 flex-shrink-0" />
-                      <span>{job.salary}</span>
-                    </div>
-                  </div>
-                  <div className="pt-3 sm:pt-4 border-t border-gray-100">
-                    <Button
-                      size="sm"
-                      className="w-full bg-blue-500 hover:bg-blue-600 text-white text-xs sm:text-sm py-2"
-                    >
-                      View Opportunities
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                <div className="w-16 h-16 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <industry.icon className="w-8 h-8 text-blue-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 text-base mb-2">
+                  {industry.name}
+                </h3>
+                <p className="text-sm text-gray-500 font-medium">
+                  {industry.jobs} jobs
+                </p>
+              </div>
             ))}
           </div>
+        </div>
+      </section>
 
-          <div className="text-center mt-8 sm:mt-10 lg:mt-12 px-4">
+      {/* Featured Jobs */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-12">
+            <div>
+              <h2 className="font-bold text-4xl text-gray-900 mb-2">
+                Featured Opportunities
+              </h2>
+              <p className="text-lg text-gray-600">
+                Latest openings from top employers
+              </p>
+            </div>
             <Button
-              size="lg"
               variant="outline"
-              className="border-2 border-blue-500 text-blue-600 hover:bg-blue-50 px-6 sm:px-8 py-2 sm:py-3 bg-white w-full sm:w-auto"
+              className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50"
+              onClick={() => router.push("/jobs")}
             >
-              View All Jobs
+              View All
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {jobs.map((job, index) => (
+              <Card
+                key={index}
+                className="group border-2 border-gray-100 hover:border-blue-200 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer"
+              >
+                <CardHeader>
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <CardTitle className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors mb-2">
+                        {job.title}
+                      </CardTitle>
+                      <CardDescription className="text-blue-600 font-medium">
+                        {job.company}
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {job.tags.map((tag, i) => (
+                      <Badge
+                        key={i}
+                        variant="secondary"
+                        className="bg-amber-50 text-amber-700 border border-amber-200 font-medium"
+                      >
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3 mb-6">
+                    <div className="flex items-center text-gray-600">
+                      <MapPin className="h-4 w-4 mr-2 text-gray-400" />
+                      <span className="text-sm">{job.location}</span>
+                    </div>
+                    <div className="flex items-center text-gray-900 font-semibold">
+                      <Clock className="h-4 w-4 mr-2 text-gray-400" />
+                      <span className="text-sm">{job.salary}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm text-gray-500">
+                      <span>{job.type}</span>
+                      <span>{job.posted}</span>
+                    </div>
+                  </div>
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                    Apply Now
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Stats Section - FULL WIDTH */}
-      <section className="w-full py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-blue-500 to-blue-600 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-40"></div>
+      {/* Stats Section */}
+      <section className="py-20 bg-gradient-to-br from-blue-600 to-blue-700 relative overflow-hidden">
+        {/* Decorative pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')]"></div>
+        </div>
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center">
-            <div className="space-y-1 sm:space-y-2">
-              <div className="font-bold text-3xl sm:text-4xl lg:text-5xl text-white">
-                15,000+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
+            <div>
+              <div className="font-extrabold text-5xl text-white mb-2">
+                15K+
               </div>
-              <div className="text-blue-100 text-xs sm:text-sm lg:text-base font-medium">
+              <div className="text-blue-100 font-medium">
                 Active Professionals
               </div>
             </div>
-            <div className="space-y-1 sm:space-y-2">
-              <div className="font-bold text-3xl sm:text-4xl lg:text-5xl text-yellow-400">
+            <div>
+              <div className="font-extrabold text-5xl text-amber-400 mb-2">
                 500+
               </div>
-              <div className="text-blue-100 text-xs sm:text-sm lg:text-base font-medium">
-                Partner Companies
+              <div className="text-blue-100 font-medium">Partner Companies</div>
+            </div>
+            <div>
+              <div className="font-extrabold text-5xl text-white mb-2">
+                75K+
+              </div>
+              <div className="text-blue-100 font-medium">
+                Successful Placements
               </div>
             </div>
-            <div className="space-y-1 sm:space-y-2">
-              <div className="font-bold text-3xl sm:text-4xl lg:text-5xl text-white">
-                75,000+
-              </div>
-              <div className="text-blue-100 text-xs sm:text-sm lg:text-base font-medium">
-                Successful Matches
-              </div>
-            </div>
-            <div className="space-y-1 sm:space-y-2">
-              <div className="font-bold text-3xl sm:text-4xl lg:text-5xl text-yellow-400">
+            <div>
+              <div className="font-extrabold text-5xl text-amber-400 mb-2">
                 98%
               </div>
-              <div className="text-blue-100 text-xs sm:text-sm lg:text-base font-medium">
-                Satisfaction Rate
-              </div>
+              <div className="text-blue-100 font-medium">Satisfaction Rate</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section - CONSTRAINED */}
-      <section className="py-12 sm:py-16 lg:py-24 bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6 sm:space-y-8">
-          <div className="space-y-3 sm:space-y-4">
-            <h2 className="font-bold text-2xl sm:text-3xl lg:text-4xl text-gray-900">
+      {/* CTA Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="font-bold text-3xl lg:text-4xl text-gray-900 mb-3">
               Ready to Get Started?
             </h2>
-            <h3 className="font-semibold text-xl sm:text-2xl lg:text-3xl text-blue-500">
-              Let&apos;s Build Success Together!
-            </h3>
-          </div>
-          <div className="space-y-4 sm:space-y-6 max-w-3xl mx-auto">
-            <p className="text-sm sm:text-base lg:text-lg text-gray-700 leading-relaxed">
-              <strong className="text-gray-900">Employers:</strong> Post your
-              job openings and find qualified candidates fast.
-            </p>
-            <p className="text-sm sm:text-base lg:text-lg text-gray-700 leading-relaxed">
-              <strong className="text-gray-900">Job Seekers:</strong> Register
-              now and get matched with employers who value your skills.
-            </p>
-            <p className="text-sm sm:text-base lg:text-lg text-gray-600 leading-relaxed pt-2">
-              Start today and experience the Shataya Global difference — where
-              opportunity meets dedication.
+            <p className="text-lg text-gray-600">
+              Choose your path and join our community today.
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-2 sm:pt-4">
-            <Button
-              size="lg"
-              className="bg-blue-500 hover:bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 shadow-lg hover:shadow-xl transition-all w-full sm:w-auto"
-            >
-              Post a Job
-            </Button>
-            <Button
-              size="lg"
-              className="bg-yellow-400 hover:bg-yellow-500 text-white px-6 sm:px-8 py-3 sm:py-4 shadow-lg hover:shadow-xl transition-all w-full sm:w-auto"
-            >
-              Apply for Work
-            </Button>
+
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            {/* Employers Card */}
+            <Card className="border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all">
+              <CardContent className="p-8 text-center">
+                <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-7 h-7 text-blue-600" />
+                </div>
+                <h3 className="font-semibold text-xl text-gray-900 mb-2">
+                  For Employers
+                </h3>
+                <p className="text-gray-600 text-sm mb-6">
+                  Find qualified workers and manage your team efficiently.
+                </p>
+                <Button
+                  onClick={() => router.push("/signup")}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                  size="lg"
+                >
+                  Post a Job
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Job Seekers Card */}
+            <Card className="border border-gray-200 hover:border-amber-300 hover:shadow-lg transition-all">
+              <CardContent className="p-8 text-center">
+                <div className="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <Briefcase className="w-7 h-7 text-amber-600" />
+                </div>
+                <h3 className="font-semibold text-xl text-gray-900 mb-2">
+                  For Job Seekers
+                </h3>
+                <p className="text-gray-600 text-sm mb-6">
+                  Browse opportunities and start your career journey.
+                </p>
+                <Button
+                  onClick={() => router.push("/signup")}
+                  className="w-full bg-amber-600 hover:bg-amber-700 text-white"
+                  size="lg"
+                >
+                  Find Jobs
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
