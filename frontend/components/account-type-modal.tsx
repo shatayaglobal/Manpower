@@ -38,7 +38,7 @@ export default function AccountTypeModal({
           max-h-[85vh] overflow-y-auto
 
           /* Desktop – restores your original styling */
-          sm:max-w-[600px] sm:p-6 sm:max-h-none
+          sm:max-w-[600px] sm:p-6 sm:max-h-none sm:text-base
         "
       >
         {/* Header – mobile smaller, desktop original */}

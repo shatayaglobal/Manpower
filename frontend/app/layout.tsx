@@ -27,6 +27,9 @@ export const metadata: Metadata = {
   description:
     "Empowering workers and businesses to thrive together through seamless job matching, shift management, and professional networking.",
   generator: "v0.app",
+  verification: {
+    google: "2yyudKy42qp2yhDFovIi8EbW75ukndI2HtC4iZwO7Zo",
+  },
 };
 
 export default function RootLayout({
@@ -43,7 +46,7 @@ export default function RootLayout({
         <ReduxProvider>
           <GoogleMapsProvider>
             <Navbar>
-              {children} 
+              {children}
               <Toaster position="top-right" duration={3000} theme="light" />
             </Navbar>
           </GoogleMapsProvider>

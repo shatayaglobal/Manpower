@@ -923,198 +923,208 @@ const MyBusinessPage: React.FC = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg p-2 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
-      <div className="max-w-full mx-auto px-4 sm:px-4 lg:px-4 py-6">
-        {/* Main White Card Container */}
-        <div>
-          {/* Error Alert */}
-          {error && (
-            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-              <div className="flex">
-                <AlertCircle className="h-5 w-5 text-red-600 mr-2 flex-shrink-0" />
-                <div className="flex-1">
-                  <p className="text-sm text-red-600">{error}</p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={clearBusinessError}
-                    className="mt-2"
-                  >
-                    Dismiss
-                  </Button>
-                </div>
+    <div className="bg-white min-h-screen">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6">
+        {/* Error Alert */}
+        {error && (
+          <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
+            <div className="flex">
+              <AlertCircle className="h-5 w-5 text-red-600 mr-2 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm text-red-600">{error}</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearBusinessError}
+                  className="mt-2"
+                >
+                  Dismiss
+                </Button>
               </div>
             </div>
-          )}
-
-          {/* Page Header with Title */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">
-              My Business
-            </h1>
-            <p className="text-sm text-gray-600">
-              Manage your business profile and settings
-            </p>
           </div>
+        )}
 
-          {/* Business Header Card */}
-          <div className="bg-gray-50 rounded-xl border border-gray-200 p-6 mb-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <Building2 className="w-8 h-8 text-blue-600" />
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-900">
-                      {business.name}
-                    </h2>
-                    <p className="text-xs text-gray-500">
-                      CATEGORY: {business.category}
-                    </p>
-                  </div>
-                </div>
-                {business.description && (
-                  <p className="text-sm text-gray-600 mt-2 max-w-2xl">
-                    {business.description}
+        {/* Page Header */}
+        <div className="mb-4 sm:mb-6">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
+            My Business
+          </h1>
+          <p className="text-xs sm:text-sm text-gray-600">
+            Manage your business profile and settings
+          </p>
+        </div>
+
+        {/* Business Header Card */}
+        <div className="bg-gray-50 rounded-lg border border-gray-200 p-4 sm:p-6 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+            <div className="w-full sm:w-auto">
+              <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                <Building2 className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 flex-shrink-0" />
+                <div className="min-w-0">
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-900 truncate">
+                    {business.name}
+                  </h2>
+                  <p className="text-xs text-gray-500">
+                    CATEGORY: {business.category}
                   </p>
-                )}
-              </div>
-              <Button
-                onClick={() => {
-                  setShowCreateModal(true);
-                }}
-                variant="outline"
-                className="flex-shrink-0"
-              >
-                <Edit2 className="w-4 h-4 mr-2" />
-                Edit
-              </Button>
-            </div>
-            {/* Contact Info */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4 pt-4 border-t border-gray-200">
-              <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-gray-400" />
-                <span className="text-sm text-gray-700 truncate">
-                  {business.address}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-gray-400" />
-                <span className="text-sm text-gray-700 truncate">
-                  {business.email}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-gray-400" />
-                <span className="text-sm text-gray-700">{business.phone}</span>
-              </div>
-              {business.service_time && (
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-gray-700">
-                    {business.service_time}
-                  </span>
                 </div>
+              </div>
+              {business.description && (
+                <p className="text-xs sm:text-sm text-gray-600 mt-2 line-clamp-2 sm:line-clamp-none">
+                  {business.description}
+                </p>
               )}
             </div>
+            <Button
+              onClick={() => setShowCreateModal(true)}
+              variant="outline"
+              className="w-full sm:w-auto flex-shrink-0 text-sm"
+              size="sm"
+            >
+              <Edit2 className="w-4 h-4 mr-2" />
+              Edit
+            </Button>
           </div>
 
-          {/* Stats Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <StatCard
-              title="Total Staff"
-              value={business.staff_count || 0}
-              icon={Users}
-              color="blue"
-            />
-            <StatCard
-              title="Active Jobs"
-              value={business.active_jobs || 0}
-              icon={Briefcase}
-              color="green"
-            />
-            <StatCard
-              title="Applications"
-              value={business.total_applications || 0}
-              icon={BarChart3}
-              color="purple"
-            />
-            <StatCard
-              title="Category"
-              value={getCategoryLabel(business.category)}
-              icon={Building2}
-              color="gray"
-            />
-          </div>
-
-          {/* Two-Column Layout: Quick Actions + Location Settings */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Left: Quick Actions */}
-            <div className="bg-gray-50 rounded-xl border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                Quick Actions
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Link
-                  href="/staff"
-                  className="flex items-center gap-3 p-4 bg-white hover:bg-blue-50 rounded-lg transition-all group border border-gray-200 hover:border-blue-300"
-                >
-                  <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0">
-                    <Users className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">Manage Staff</p>
-                    <p className="text-xs text-gray-600">View and edit team</p>
-                  </div>
-                </Link>
-                <Link
-                  href="/shifts"
-                  className="flex items-center gap-3 p-4 bg-white hover:bg-green-50 rounded-lg transition-all group border border-gray-200 hover:border-green-300"
-                >
-                  <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0">
-                    <Calendar className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">Schedule Shifts</p>
-                    <p className="text-xs text-gray-600">Manage schedules</p>
-                  </div>
-                </Link>
-                <Link
-                  href="/jobs/create"
-                  className="flex items-center gap-3 p-4 bg-white hover:bg-purple-50 rounded-lg transition-all group border border-gray-200 hover:border-purple-300"
-                >
-                  <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0">
-                    <Briefcase className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">Post New Job</p>
-                    <p className="text-xs text-gray-600">Create listing</p>
-                  </div>
-                </Link>
-                <Link
-                  href="/manage-applications"
-                  className="flex items-center gap-3 p-4 bg-white hover:bg-orange-50 rounded-lg transition-all group border border-gray-200 hover:border-orange-300"
-                >
-                  <div className="w-12 h-12 bg-orange-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0">
-                    <BarChart3 className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">Applications</p>
-                    <p className="text-xs text-gray-600">Review applicants</p>
-                  </div>
-                </Link>
+          {/* Contact Info */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200">
+            <div className="flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
+              <span className="text-xs sm:text-sm text-gray-700 truncate">
+                {business.address}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Mail className="w-4 h-4 text-gray-400 flex-shrink-0" />
+              <span className="text-xs sm:text-sm text-gray-700 truncate">
+                {business.email}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Phone className="w-4 h-4 text-gray-400 flex-shrink-0" />
+              <span className="text-xs sm:text-sm text-gray-700 truncate">
+                {business.phone}
+              </span>
+            </div>
+            {business.service_time && (
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                <span className="text-xs sm:text-sm text-gray-700 truncate">
+                  {business.service_time}
+                </span>
               </div>
-            </div>
+            )}
+          </div>
+        </div>
 
-            {/* Right: Workplace Location Settings */}
-            <div className="bg-gray-50 rounded-xl border border-gray-200 p-6">
-              <WorkplaceLocationSettings
-                business={business}
-                onUpdate={async (data) => {
-                  await editBusiness(business.id, data);
-                  loadBusinesses();
-                }}
-              />
+        {/* Stats Row */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <StatCard
+            title="Total Staff"
+            value={business.staff_count || 0}
+            icon={Users}
+            color="blue"
+          />
+          <StatCard
+            title="Active Jobs"
+            value={business.active_jobs || 0}
+            icon={Briefcase}
+            color="green"
+          />
+          <StatCard
+            title="Applications"
+            value={business.total_applications || 0}
+            icon={BarChart3}
+            color="purple"
+          />
+          <StatCard
+            title="Category"
+            value={getCategoryLabel(business.category)}
+            icon={Building2}
+            color="gray"
+          />
+        </div>
+
+        {/* Two-Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          {/* Quick Actions */}
+          <div className="bg-gray-50 rounded-lg border border-gray-200 p-4 sm:p-6">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
+              Quick Actions
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+              <Link
+                href="/staff"
+                className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white hover:bg-blue-50 rounded-lg transition-all group border border-gray-200 hover:border-blue-300"
+              >
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0">
+                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-medium text-gray-900 text-sm sm:text-base truncate">
+                    Manage Staff
+                  </p>
+                  <p className="text-xs text-gray-600 truncate">View and edit team</p>
+                </div>
+              </Link>
+
+              <Link
+                href="/shifts"
+                className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white hover:bg-green-50 rounded-lg transition-all group border border-gray-200 hover:border-green-300"
+              >
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0">
+                  <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-medium text-gray-900 text-sm sm:text-base truncate">
+                    Schedule Shifts
+                  </p>
+                  <p className="text-xs text-gray-600 truncate">Manage schedules</p>
+                </div>
+              </Link>
+
+              <Link
+                href="/jobs/create"
+                className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white hover:bg-purple-50 rounded-lg transition-all group border border-gray-200 hover:border-purple-300"
+              >
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0">
+                  <Briefcase className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-medium text-gray-900 text-sm sm:text-base truncate">
+                    Post New Job
+                  </p>
+                  <p className="text-xs text-gray-600 truncate">Create listing</p>
+                </div>
+              </Link>
+
+              <Link
+                href="/manage-applications"
+                className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white hover:bg-orange-50 rounded-lg transition-all group border border-gray-200 hover:border-orange-300"
+              >
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0">
+                  <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-medium text-gray-900 text-sm sm:text-base truncate">
+                    Applications
+                  </p>
+                  <p className="text-xs text-gray-600 truncate">Review applicants</p>
+                </div>
+              </Link>
             </div>
+          </div>
+
+          {/* Workplace Location Settings */}
+          <div className="bg-gray-50 rounded-lg border border-gray-200 p-4 sm:p-6">
+            <WorkplaceLocationSettings
+              business={business}
+              onUpdate={async (data) => {
+                await editBusiness(business.id, data);
+                loadBusinesses();
+              }}
+            />
           </div>
         </div>
 
@@ -1122,9 +1132,7 @@ const MyBusinessPage: React.FC = () => {
         {showCreateModal && (
           <BusinessModal
             business={business}
-            onClose={() => {
-              setShowCreateModal(false);
-            }}
+            onClose={() => setShowCreateModal(false)}
           />
         )}
       </div>
@@ -1133,3 +1141,4 @@ const MyBusinessPage: React.FC = () => {
 };
 
 export default MyBusinessPage;
+
