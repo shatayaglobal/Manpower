@@ -1,7 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import { Mail, Phone, MapPin, Send, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Send,
+  CheckCircle,
+  AlertCircle,
+  Loader2,
+} from "lucide-react";
+import { TermsCheckbox } from "@/components/terms-checkbox";
 
 interface ContactFormData {
   email_address: string;
@@ -22,6 +31,8 @@ const ContactPage: React.FC = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsError, setTermsError] = useState("");
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -40,12 +51,23 @@ const ContactPage: React.FC = () => {
   };
 
   const handleSubmit = async () => {
+    // Clear previous terms error
+    setTermsError("");
+
+    // Validate terms acceptance first
+    if (!termsAccepted) {
+      setTermsError(
+        "You must accept the Terms and Conditions to send a message"
+      );
+      return;
+    }
+
     if (!validateForm()) return;
 
     setSubmitting(true);
     try {
       // Replace with actual API call: await contactAPI.submitContact(formData);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setSubmitted(true);
       setFormData({
         email_address: "",
@@ -54,6 +76,7 @@ const ContactPage: React.FC = () => {
         title: "",
         subject: "",
       });
+      setTermsAccepted(false); // Reset terms checkbox
     } catch {
       setErrors({ submit: "Failed to send message. Please try again." });
     } finally {
@@ -66,8 +89,12 @@ const ContactPage: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="max-w-md w-full bg-white rounded-lg p-8 text-center">
           <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Message Sent!</h2>
-          <p className="text-gray-600 mb-6">We&apos;ll get back to you within 24 hours.</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            Message Sent!
+          </h2>
+          <p className="text-gray-600 mb-6">
+            We&apos;ll get back to you within 24 hours.
+          </p>
           <button
             onClick={() => setSubmitted(false)}
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
@@ -91,7 +118,9 @@ const ContactPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Contact Info */}
           <div className="bg-white rounded-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Get in Touch</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              Get in Touch
+            </h2>
 
             <div className="space-y-4">
               <div className="flex items-center">
@@ -114,7 +143,9 @@ const ContactPage: React.FC = () => {
                 <MapPin className="w-5 h-5 text-purple-600 mr-3" />
                 <div>
                   <p className="font-medium">Address</p>
-                  <p className="text-gray-600">Hapalekh Street 7, Tel Aviv, Israel</p>
+                  <p className="text-gray-600">
+                    Hapalekh Street 7, Tel Aviv, Israel
+                  </p>
                 </div>
               </div>
             </div>
@@ -122,7 +153,9 @@ const ContactPage: React.FC = () => {
 
           {/* Contact Form */}
           <div className="bg-white rounded-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Send Message</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              Send Message
+            </h2>
 
             {errors.submit && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
@@ -136,40 +169,64 @@ const ContactPage: React.FC = () => {
             <div className="space-y-4">
               {/* Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Name *
+                </label>
                 <input
                   type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, name: e.target.value }))
+                  }
                   className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.name ? 'border-red-300' : 'border-gray-300'
+                    errors.name ? "border-red-300" : "border-gray-300"
                   }`}
                   placeholder="Your name"
                 />
-                {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+                {errors.name && (
+                  <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+                )}
               </div>
 
               {/* Email */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email *
+                </label>
                 <input
                   type="email"
                   value={formData.email_address}
-                  onChange={(e) => setFormData(prev => ({ ...prev, email_address: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      email_address: e.target.value,
+                    }))
+                  }
                   className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.email_address ? 'border-red-300' : 'border-gray-300'
+                    errors.email_address ? "border-red-300" : "border-gray-300"
                   }`}
                   placeholder="your@email.com"
                 />
-                {errors.email_address && <p className="text-red-500 text-sm mt-1">{errors.email_address}</p>}
+                {errors.email_address && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.email_address}
+                  </p>
+                )}
               </div>
 
               {/* Inquiry Type */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Inquiry Type</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Inquiry Type
+                </label>
                 <select
                   value={formData.inquiry_type}
-                  onChange={(e) => setFormData(prev => ({ ...prev, inquiry_type: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      inquiry_type: e.target.value,
+                    }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="GENERAL">General Inquiry</option>
@@ -182,33 +239,60 @@ const ContactPage: React.FC = () => {
 
               {/* Subject */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Subject *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Subject *
+                </label>
                 <input
                   type="text"
                   value={formData.title}
-                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, title: e.target.value }))
+                  }
                   className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.title ? 'border-red-300' : 'border-gray-300'
+                    errors.title ? "border-red-300" : "border-gray-300"
                   }`}
                   placeholder="Brief subject"
                 />
-                {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
+                {errors.title && (
+                  <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+                )}
               </div>
 
               {/* Message */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Message *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Message *
+                </label>
                 <textarea
                   value={formData.subject}
-                  onChange={(e) => setFormData(prev => ({ ...prev, subject: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      subject: e.target.value,
+                    }))
+                  }
                   rows={4}
                   className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${
-                    errors.subject ? 'border-red-300' : 'border-gray-300'
+                    errors.subject ? "border-red-300" : "border-gray-300"
                   }`}
                   placeholder="Your message..."
                 />
-                {errors.subject && <p className="text-red-500 text-sm mt-1">{errors.subject}</p>}
+                {errors.subject && (
+                  <p className="text-red-500 text-sm mt-1">{errors.subject}</p>
+                )}
               </div>
+
+              {/* Terms and Conditions Checkbox */}
+              <TermsCheckbox
+                checked={termsAccepted}
+                onCheckedChange={(checked) => {
+                  setTermsAccepted(checked);
+                  if (checked && termsError) {
+                    setTermsError("");
+                  }
+                }}
+                error={termsError}
+              />
 
               {/* Submit Button */}
               <button
