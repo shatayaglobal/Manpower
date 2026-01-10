@@ -37,6 +37,7 @@ import { useAuthState } from "@/lib/redux/redux";
 import { toast } from "sonner";
 import { AuthError, GoogleCredentialResponse } from "@/lib/types";
 import AccountTypeModal from "@/components/account-type-modal";
+import { TermsCheckbox } from "./terms-checkbox";
 
 type GoogleGIS = {
   accounts: {
@@ -508,6 +509,16 @@ export default function SignUpPage() {
                       </div>
                     )}
                   </div>
+                  <TermsCheckbox
+                    checked={termsAccepted}
+                    onCheckedChange={(checked) => {
+                      setTermsAccepted(checked);
+                      if (checked && termsError) {
+                        setTermsError("");
+                      }
+                    }}
+                    error={termsError}
+                  />
 
                   <Button
                     type="submit"
