@@ -149,6 +149,24 @@ const ContactPage: React.FC = () => {
                 </div>
               </div>
             </div>
+            <div className="mt-8 pt-8 border-t border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                Account Deletion Requests
+              </h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                To request deletion of your Shataya account and associated data,
+                please contact us at{" "}
+                <a
+                  href="mailto:shatayabuilding@gmail.com"
+                  className="text-blue-600 hover:underline"
+                >
+                  shatayabuilding@gmail.com
+                </a>{" "}
+                with your account email address. We will process your request
+                within 30 days. All personal data including your profile,
+                messages, and application history will be permanently deleted.
+              </p>
+            </div>
           </div>
 
           {/* Contact Form */}
