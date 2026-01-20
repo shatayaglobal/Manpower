@@ -258,15 +258,23 @@ SPECTACULAR_SETTINGS = {
 
 FRONTEND_URL = env('FRONTEND_URL', default='http://localhost:3000')
 
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "http://localhost:8081",
+    "http://10.128.24.33:8081",
+    "http://10.128.24.33:19000",
+    "http://10.128.24.33:19006",
 ]
 
 if not DEBUG:
     CORS_ALLOWED_ORIGINS.extend([
         "https://www.shatayaglobal.com",
         "https://shatayaglobal.com",
+        "https://api.shatayaglobal.com",
+        "capacitor://localhost",
+        "http://localhost",
     ])
 
 if FRONTEND_URL and FRONTEND_URL not in CORS_ALLOWED_ORIGINS:

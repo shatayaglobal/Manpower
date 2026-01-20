@@ -19,13 +19,29 @@ from rest_framework.views import APIView
 from rest_framework.generics import UpdateAPIView
 
 class PostListCreateView(ListCreateAPIView):
-    queryset = Post.objects.filter(is_active=True)
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['post_type', 'priority', 'location', 'user__account_type', 'user']
     search_fields = ['title', 'description', 'location']
     ordering_fields = ['created_at', 'priority', 'view_count']
     ordering = ['-created_at']
+
+    def get_queryset(self):
+        """
+        Filter posts based on user account type:
+        - BUSINESS users: Only see their own posts
+        - WORKER users: See all active job posts (to browse/apply)
+        """
+        user = self.request.user
+        queryset = Post.objects.filter(is_active=True)
+
+        if user.account_type == 'BUSINESS':
+            queryset = queryset.filter(user=user)
+
+        elif user.account_type == 'WORKER':
+            queryset = queryset.filter(post_type='JOB')
+
+        return queryset
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
