@@ -150,6 +150,11 @@ class UserRegistrationView(APIView):
         responses={201: {"type": "object"}},
     )
     def post(self, request):
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"📝 Registration request data: {request.data}")
+        logger.info(f"📝 Request headers: {request.headers}")
+
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
