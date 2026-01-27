@@ -184,13 +184,16 @@ class JobApplicationSerializer(serializers.ModelSerializer):
 
 class JobApplicationListSerializer(serializers.ModelSerializer):
     applicant_name = serializers.SerializerMethodField()
+    applicant_email = serializers.CharField(source='applicant.email', read_only=True)
+    applicant_phone = serializers.SerializerMethodField() 
     resume_url = serializers.SerializerMethodField()
     job = PostListSerializer(read_only=True)
 
     class Meta:
         model = JobApplication
         fields = [
-            'id', 'applicant', 'applicant_name', 'cover_letter', 'job',
+            'id', 'applicant', 'applicant_name', 'applicant_email',
+            'applicant_phone', 'cover_letter', 'job',
             'resume', 'resume_url', 'additional_info', 'status',
             'created_at', 'updated_at', 'reviewed_at'
         ]
@@ -201,14 +204,20 @@ class JobApplicationListSerializer(serializers.ModelSerializer):
             return f"{user.first_name} {user.last_name}"
         return user.email
 
+    def get_applicant_phone(self, obj):
+        """Get phone from user profile if available"""
+        try:
+            return obj.applicant.profile.phone or ''
+        except:
+            return ''
+
     def get_resume_url(self, obj):
         if obj.resume:
             request = self.context.get('request')
             if request:
                 return request.build_absolute_uri(obj.resume.url)
-            return obj.resume.url  
+            return obj.resume.url
         return None
-
 
 class ApplicationStatusUpdateSerializer(serializers.ModelSerializer):
     class Meta:

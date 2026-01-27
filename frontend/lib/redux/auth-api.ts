@@ -176,10 +176,10 @@ class AuthService {
     const response = await axiosInstance.get("users/", {
       params: {
         search: query,
-        account_type: 'WORKER'
-      }
+        account_type: "WORKER",
+      },
     });
-    return response.data.results || response.data; 
+    return response.data.results || response.data;
   }
 }
 

@@ -370,16 +370,25 @@ export const ACCOUNT_TYPES = {
 
 export interface Job {
   id: string;
+  user: User;  
+  user_name: string;
   title: string;
-  description: string;
+  post_type: string;
   location: string;
-  salary_range?: string;
+  salary_range: string;
+  description: string;
+  total_likes: number;
+  total_comments: number;
+  created_at: string;
 }
+
 export interface JobApplication {
   id: string;
-  job: string | Job;
   applicant: string;
   applicant_name: string;
+  applicant_email: string;
+  applicant_phone: string;
+  job: Job;
   cover_letter: string;
   resume: string;
   resume_url: string | null;

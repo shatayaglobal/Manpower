@@ -159,8 +159,9 @@ class UserRegistrationView(APIView):
         if serializer.is_valid():
             user = serializer.save()
 
-            # Create user profile
-            UserProfile.objects.create(user=user)
+            # Only create UserProfile for WORKER accounts
+            if user.account_type == 'WORKER':
+                UserProfile.objects.create(user=user)
 
             # Send verification email BEFORE returning response
             logger.info(f"Attempting to send verification email to {user.email}")
@@ -283,7 +284,11 @@ class GoogleAuthView(APIView):
                         is_google_user=True,
                         is_verified=True,
                     )
-                    UserProfile.objects.create(user=user)
+
+                    # Only create UserProfile for workers
+                    if account_type == 'WORKER':
+                        UserProfile.objects.create(user=user)
+
                     created = True
 
                 # Generate JWT tokens

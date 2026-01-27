@@ -19,7 +19,6 @@ import {
   ChevronDown,
   Briefcase,
   Calendar,
-  Building,
   UserCheck,
   MessageCircle,
   Clock,
@@ -27,7 +26,6 @@ import {
   Bell,
   FileText,
   X,
-  Home,
   Search,
   LayoutDashboard,
   Users,
@@ -68,7 +66,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { logout } = useAuthSlice();
   const router = useRouter();
   const pathname = usePathname();
-  const dispatch = useDispatch<AppDispatch>();
   const { unreadCount } = useMessaging();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -518,7 +515,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link
-                    href="/profile"
+                    href={
+                      user?.account_type === "BUSINESS"
+                        ? "/business-profile"
+                        : "/profile"
+                    }
                     className="flex items-center gap-2 py-2 cursor-pointer"
                   >
                     <User className="h-4 w-4" />
