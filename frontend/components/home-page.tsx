@@ -169,7 +169,7 @@ export default function HomePage() {
             <p className="text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto mb-12 font-medium">
               The fastest way to hire skilled workers or find your next job.
               Trusted by thousands of businesses and professionals across
-              Uganda.
+              Israel.
             </p>
 
             {/* CTA Buttons */}
