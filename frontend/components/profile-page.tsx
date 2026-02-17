@@ -193,12 +193,6 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (profile?.id) {
-      if (completionStatus?.is_complete) {
-        toast.success("Your profile is already complete!");
-        router.push("/jobs");
-        return;
-      }
-
       setFormData({
         first_name: user?.first_name || "",
         last_name: user?.last_name || "",

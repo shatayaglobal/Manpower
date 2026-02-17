@@ -216,6 +216,7 @@ class LogoutView(APIView):
 class GoogleAuthView(APIView):
     """Google OAuth with JWT tokens"""
     permission_classes = [AllowAny]
+    authentication_classes = []
 
     @extend_schema(
         summary="Google OAuth login",

@@ -17,8 +17,7 @@ export function GoogleMapsProvider({
   return (
     <LoadScript
       googleMapsApiKey={apiKey}
-      libraries={["places"]}  
-      loadingElement={<div className="text-center py-8">Loading Google Maps...</div>}
+      libraries={["places"]}
     >
       {children}
     </LoadScript>
