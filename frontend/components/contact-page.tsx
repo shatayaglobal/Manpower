@@ -79,7 +79,7 @@ const ContactPage: React.FC = () => {
           </div>
           <h2 className="text-2xl font-extrabold text-gray-900 mb-3">Message Sent!</h2>
           <p className="text-lg text-gray-500 mb-8 leading-relaxed">
-            Thanks for reaching out. We'll get back to you within 24 hours.
+            Thanks for reaching out. We&apos;ll get back to you within 24 hours.
           </p>
           <Button
             onClick={() => setSubmitted(false)}
