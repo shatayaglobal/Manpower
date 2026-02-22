@@ -10,7 +10,6 @@ import {
   TrendingUp,
   CheckCircle2,
   Building2,
-  Sparkles,
   ChevronRight,
   Award,
 } from "lucide-react";
@@ -22,7 +21,8 @@ const features = [
   {
     icon: Users,
     title: "Talent Management",
-    description: "Connect with qualified professionals through smart matching.",
+    description:
+      "Find qualified professionals through skills-based matching. See who's available in real time and connect instantly — no back-and-forth.",
     accent: "bg-blue-50 text-blue-600 border-blue-100",
     iconBg: "bg-blue-600",
     benefits: [
@@ -35,7 +35,7 @@ const features = [
     icon: Briefcase,
     title: "Job Placement",
     description:
-      "Seamless recruitment that connects the right talent to every role.",
+      "Post a role, set your requirements, and let the platform handle the heavy lifting — from screening to shortlisting.",
     accent: "bg-amber-50 text-amber-700 border-amber-100",
     iconBg: "bg-amber-500",
     benefits: [
@@ -47,7 +47,8 @@ const features = [
   {
     icon: Calendar,
     title: "Shift Scheduling",
-    description: "Intelligent scheduling with automated conflict resolution.",
+    description:
+      "Drag, drop, and deploy. Build schedules in minutes with conflict resolution built in, then push notifications automatically.",
     accent: "bg-violet-50 text-violet-700 border-violet-100",
     iconBg: "bg-violet-600",
     benefits: [
@@ -59,7 +60,8 @@ const features = [
   {
     icon: TrendingUp,
     title: "Analytics & Reports",
-    description: "Comprehensive workforce insights with real-time dashboards.",
+    description:
+      "Understand your workforce at a glance. Track performance, costs, and placement success with live dashboards and custom exports.",
     accent: "bg-emerald-50 text-emerald-700 border-emerald-100",
     iconBg: "bg-emerald-600",
     benefits: ["Performance metrics", "Custom reports", "Predictive insights"],
@@ -100,10 +102,38 @@ const jobs = [
 ];
 
 const stats = [
-  { value: "15K+", label: "Active Workers", color: "text-blue-600" },
-  { value: "500+", label: "Partner Companies", color: "text-amber-500" },
-  { value: "75K+", label: "Placements Made", color: "text-blue-600" },
-  { value: "98%", label: "Satisfaction Rate", color: "text-emerald-600" },
+  { value: "15K+", label: "Active Workers" },
+  { value: "500+", label: "Partner Companies" },
+  { value: "75K+", label: "Placements Made" },
+  { value: "98%", label: "Satisfaction Rate" },
+];
+
+const industries = [
+  {
+    name: "Construction",
+    description:
+      "From site labourers to project managers, we connect construction firms with workers who are trained, safety-certified, and ready to deploy at short notice. Whether you need a crew of five or fifty, we move quickly.",
+  },
+  {
+    name: "Hospitality",
+    description:
+      "Hotels, resorts, and restaurants rely on us to staff housekeeping, front-of-house, kitchen, and event teams — consistently and on time. We understand the seasonal pressures and staff accordingly.",
+  },
+  {
+    name: "Logistics & Warehousing",
+    description:
+      "We supply forklift operators, pickers, packers, and delivery drivers to logistics companies that need flexible, shift-ready talent. Our workers are vetted and available on short-lead requests.",
+  },
+  {
+    name: "Security Services",
+    description:
+      "Licensed and vetted security personnel for commercial sites, events, and residential properties. Our guards are trained, uniformed, and available around the clock — day shifts, night shifts, and weekends.",
+  },
+  {
+    name: "Cleaning & Facilities",
+    description:
+      "Professional cleaners and facilities staff for offices, healthcare centres, and commercial spaces. We handle both permanent placements and short-term contract cover so your operations never skip a beat.",
+  },
 ];
 
 export default function HomePage() {
@@ -111,13 +141,13 @@ export default function HomePage() {
   const { isAuthenticated, user } = useAuthState();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 font-sans">
+      {/* ── HERO ──────────────────────────────────────────────────────────── */}
       <section className="bg-white border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            {/* Left — copy */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-28">
+          <div className="grid lg:grid-cols-2 gap-20 items-center">
+            {/* Left */}
             <div>
-              {/* Eyebrow */}
               <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 px-4 py-2 rounded-full mb-8">
                 <span className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
                 <span className="text-xs font-semibold text-blue-700 tracking-wide uppercase">
@@ -128,16 +158,17 @@ export default function HomePage() {
               <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 leading-[1.1] tracking-tight mb-6">
                 Connect Top Talent
                 <br />
-                with <span className="text-blue-600">Great Opportunities</span>
+                with{" "}
+                <span className="text-blue-600">Great Opportunities</span>
               </h1>
 
-              <p className="text-lg text-gray-500 leading-relaxed mb-10 max-w-lg">
+              <p className="text-base sm:text-lg text-gray-600 leading-relaxed mb-10 max-w-lg">
                 The fastest way to hire skilled workers or find your next job.
-                Trusted by thousands of businesses and professionals across
-                Israel.
+                We handle the matching, screening, and scheduling — so you can
+                focus on the work that matters. Trusted by thousands of
+                businesses and professionals across Uganda.
               </p>
 
-              {/* CTAs */}
               <div className="flex flex-wrap gap-3">
                 {isAuthenticated && user ? (
                   <>
@@ -187,7 +218,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right — trust stat cards (dashboard-style) */}
+            {/* Right — stat cards */}
             <div className="grid grid-cols-2 gap-4">
               {[
                 {
@@ -226,7 +257,7 @@ export default function HomePage() {
                 <div
                   key={label}
                   className={cn(
-                    "bg-white rounded-2xl border p-5 flex flex-col justify-between gap-4",
+                    "bg-white rounded-2xl border p-5 flex flex-col justify-between gap-6",
                     border
                   )}
                 >
@@ -239,8 +270,8 @@ export default function HomePage() {
                     {icon}
                   </div>
                   <div>
-                    <p className={cn("text-2xl font-bold", text)}>{value}</p>
-                    <p className="text-xs text-gray-400 font-medium mt-0.5">
+                    <p className={cn("text-3xl font-bold", text)}>{value}</p>
+                    <p className="text-sm text-gray-500 font-medium mt-1">
                       {label}
                     </p>
                   </div>
@@ -252,18 +283,19 @@ export default function HomePage() {
       </section>
 
       {/* ── FEATURES ──────────────────────────────────────────────────────── */}
-      <section className="py-20">
+      <section className="py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-12">
+          <div className="mb-14">
             <p className="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-3">
               Platform
             </p>
-            <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-3">
+            <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-4">
               Everything You Need to Manage Your Workforce
             </h2>
-            <p className="text-gray-500 max-w-xl">
-              Powerful tools designed to streamline hiring, scheduling, and
-              workforce management.
+            <p className="text-base text-gray-500 max-w-2xl leading-relaxed">
+              Built for hiring managers and HR teams who don&apos;t have time to
+              waste. From posting a role to scheduling shifts, the tools are
+              fast, intuitive, and designed around how real teams work.
             </p>
           </div>
 
@@ -271,7 +303,7 @@ export default function HomePage() {
             {features.map((f) => (
               <div
                 key={f.title}
-                className="bg-white rounded-2xl border border-gray-100 p-6 hover:border-blue-200 hover:shadow-md hover:shadow-blue-50 transition-all duration-200 group cursor-pointer"
+                className="bg-white rounded-2xl border border-gray-100 p-6 hover:border-blue-200 hover:shadow-md hover:shadow-blue-50 transition-all duration-200 group cursor-pointer flex flex-col"
               >
                 <div
                   className={cn(
@@ -281,24 +313,24 @@ export default function HomePage() {
                 >
                   <f.icon className="h-5 w-5 text-white" />
                 </div>
-                <h3 className="font-bold text-gray-900 text-sm mb-2">
+                <h3 className="font-bold text-gray-900 text-base mb-3">
                   {f.title}
                 </h3>
-                <p className="text-xs text-gray-500 leading-relaxed mb-5">
+                <p className="text-sm text-gray-500 leading-relaxed mb-5 flex-1">
                   {f.description}
                 </p>
-                <ul className="space-y-2">
+                <ul className="space-y-2 mb-5">
                   {f.benefits.map((b) => (
                     <li
                       key={b}
-                      className="flex items-center gap-2 text-xs text-gray-500"
+                      className="flex items-center gap-2 text-sm text-gray-500"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                       {b}
                     </li>
                   ))}
                 </ul>
-                <div className="mt-5 flex items-center text-xs font-semibold text-blue-600 group-hover:text-blue-700">
+                <div className="flex items-center text-sm font-semibold text-blue-600 group-hover:text-blue-700 mt-auto">
                   Learn more{" "}
                   <ChevronRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-0.5 transition-transform" />
                 </div>
@@ -308,12 +340,13 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── STATS BAND ────────────────────────────────────────────────────── */}
       <section className="bg-blue-600 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {stats.map(({ value, label }) => (
               <div key={label}>
-                <p className="text-4xl font-extrabold text-white mb-1">
+                <p className="text-4xl font-extrabold text-white mb-2">
                   {value}
                 </p>
                 <p className="text-blue-200 text-sm font-medium">{label}</p>
@@ -324,63 +357,37 @@ export default function HomePage() {
       </section>
 
       {/* ── INDUSTRIES ────────────────────────────────────────────────────── */}
-      {/* ── INDUSTRIES ────────────────────────────────────────────────────── */}
-      <section className="py-20 bg-white border-y border-gray-100">
+      <section className="py-24 bg-white border-y border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-12">
+          <div className="mb-14">
             <p className="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-3">
               Industries
             </p>
-            <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-3">
+            <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-4">
               Serving Multiple Sectors
             </h2>
-            <p className="text-gray-500 max-w-xl">
-              We place skilled workers across industries where reliable talent
-              makes the real difference — keeping operations running every day.
+            <p className="text-base text-gray-500 max-w-2xl leading-relaxed">
+              Every industry has its own pace, pressures, and people requirements.
+              We&apos;ve built deep expertise in the sectors where getting the right
+              person on site — fast — makes all the difference.
             </p>
           </div>
 
           <div className="divide-y divide-gray-100 border border-gray-100 rounded-2xl overflow-hidden">
-            {[
-              {
-                name: "Construction",
-                description:
-                  "From site labourers to project managers, we connect construction firms with workers who are trained, safety-certified, and ready to deploy at short notice.",
-              },
-              {
-                name: "Hospitality",
-                description:
-                  "Hotels, resorts, and restaurants rely on us to staff housekeeping, front-of-house, kitchen, and event teams — consistently and on time.",
-              },
-              {
-                name: "Logistics & Warehousing",
-                description:
-                  "We supply forklift operators, pickers, packers, and delivery drivers to logistics companies that need flexible, shift-ready talent.",
-              },
-              {
-                name: "Security Services",
-                description:
-                  "Licensed and vetted security personnel for commercial sites, events, and residential properties — available around the clock.",
-              },
-              {
-                name: "Cleaning & Facilities",
-                description:
-                  "Professional cleaners and facilities staff for offices, healthcare centres, and commercial spaces, placed on permanent or contract terms.",
-              },
-            ].map(({ name, description }) => (
+            {industries.map(({ name, description }) => (
               <div
                 key={name}
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white hover:bg-gray-50 px-6 py-5 transition-colors group cursor-default"
+                className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 bg-white hover:bg-gray-50 px-6 py-6 transition-colors group cursor-default"
               >
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm text-gray-900 mb-1 group-hover:text-blue-700 transition-colors">
+                <div className="sm:w-40 shrink-0">
+                  <p className="font-semibold text-base text-gray-900 group-hover:text-blue-700 transition-colors">
                     {name}
                   </p>
-                  <p className="text-xs text-gray-500 leading-relaxed max-w-2xl">
-                    {description}
-                  </p>
                 </div>
-                <ChevronRight className="w-4 h-4 text-gray-300 shrink-0 group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all hidden sm:block" />
+                <p className="text-sm text-gray-500 leading-relaxed flex-1 max-w-2xl">
+                  {description}
+                </p>
+                <ChevronRight className="w-4 h-4 text-gray-300 shrink-0 group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all hidden sm:block mt-1" />
               </div>
             ))}
           </div>
@@ -388,16 +395,19 @@ export default function HomePage() {
       </section>
 
       {/* ── FEATURED JOBS ─────────────────────────────────────────────────── */}
-      <section className="py-20">
+      <section className="py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-end justify-between mb-12">
+          <div className="flex items-end justify-between mb-14">
             <div>
               <p className="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-3">
                 Opportunities
               </p>
-              <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+              <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-3">
                 Featured Jobs
               </h2>
+              <p className="text-base text-gray-500">
+                A sample of what&apos;s currently open on the platform.
+              </p>
             </div>
             <Button
               variant="outline"
@@ -428,29 +438,29 @@ export default function HomePage() {
                   </span>
                 </div>
 
-                <h3 className="font-bold text-gray-900 text-sm mb-1 group-hover:text-blue-700 transition-colors">
+                <h3 className="font-bold text-gray-900 text-base mb-1 group-hover:text-blue-700 transition-colors">
                   {job.title}
                 </h3>
-                <p className="text-xs text-blue-600 font-medium mb-4">
+                <p className="text-sm text-blue-600 font-medium mb-4">
                   {job.company}
                 </p>
 
                 <div className="space-y-2 mb-5 mt-auto">
-                  <div className="flex items-center gap-2 text-xs text-gray-400">
+                  <div className="flex items-center gap-2 text-sm text-gray-400">
                     <MapPin className="w-3.5 h-3.5 shrink-0" />
                     {job.location}
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-gray-400">
+                  <div className="flex items-center gap-2 text-sm text-gray-400">
                     <Clock className="w-3.5 h-3.5 shrink-0" />
                     {job.type}
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-gray-50 flex items-center justify-between">
-                  <span className="text-sm font-bold text-emerald-700">
+                <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
+                  <span className="text-base font-bold text-emerald-700">
                     {job.salary}
                   </span>
-                  <span className="text-xs text-gray-400">{job.posted}</span>
+                  <span className="text-sm text-gray-400">{job.posted}</span>
                 </div>
               </div>
             ))}
@@ -468,7 +478,7 @@ export default function HomePage() {
             <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-3">
               Ready to Join the Platform?
             </h2>
-            <p className="text-gray-500">Choose your path and start today.</p>
+            <p className="text-base text-gray-500">Choose your path and start today.</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-5 max-w-3xl mx-auto">
@@ -477,7 +487,7 @@ export default function HomePage() {
               <div className="w-11 h-11 bg-blue-600 rounded-xl flex items-center justify-center mb-5">
                 <Users className="w-5 h-5 text-white" />
               </div>
-              <h3 className="font-bold text-gray-900 mb-2">For Employers</h3>
+              <h3 className="font-bold text-gray-900 text-base mb-2">For Employers</h3>
               <p className="text-sm text-gray-500 mb-6 leading-relaxed">
                 Find qualified workers and manage your team efficiently with
                 smart tools built for growth.
@@ -495,7 +505,7 @@ export default function HomePage() {
               <div className="w-11 h-11 bg-amber-500 rounded-xl flex items-center justify-center mb-5">
                 <Briefcase className="w-5 h-5 text-white" />
               </div>
-              <h3 className="font-bold text-gray-900 mb-2">For Job Seekers</h3>
+              <h3 className="font-bold text-gray-900 text-base mb-2">For Job Seekers</h3>
               <p className="text-sm text-gray-500 mb-6 leading-relaxed">
                 Browse opportunities that match your skills and start your
                 career journey today.
