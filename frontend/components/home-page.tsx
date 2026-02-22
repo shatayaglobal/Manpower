@@ -23,7 +23,6 @@ const features = [
     title: "Talent Management",
     description:
       "Find qualified professionals through skills-based matching. See who's available in real time and connect instantly — no back-and-forth.",
-    accent: "bg-blue-50 text-blue-600 border-blue-100",
     iconBg: "bg-blue-600",
     benefits: [
       "Skills-based filtering",
@@ -36,7 +35,6 @@ const features = [
     title: "Job Placement",
     description:
       "Post a role, set your requirements, and let the platform handle the heavy lifting — from screening to shortlisting.",
-    accent: "bg-amber-50 text-amber-700 border-amber-100",
     iconBg: "bg-amber-500",
     benefits: [
       "Instant job posting",
@@ -49,7 +47,6 @@ const features = [
     title: "Shift Scheduling",
     description:
       "Drag, drop, and deploy. Build schedules in minutes with conflict resolution built in, then push notifications automatically.",
-    accent: "bg-violet-50 text-violet-700 border-violet-100",
     iconBg: "bg-violet-600",
     benefits: [
       "Drag-and-drop scheduling",
@@ -62,7 +59,6 @@ const features = [
     title: "Analytics & Reports",
     description:
       "Understand your workforce at a glance. Track performance, costs, and placement success with live dashboards and custom exports.",
-    accent: "bg-emerald-50 text-emerald-700 border-emerald-100",
     iconBg: "bg-emerald-600",
     benefits: ["Performance metrics", "Custom reports", "Predictive insights"],
   },
@@ -141,16 +137,15 @@ export default function HomePage() {
   const { isAuthenticated, user } = useAuthState();
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans">
+    <div className="min-h-screen bg-gray-50">
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
       <section className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-28">
           <div className="grid lg:grid-cols-2 gap-20 items-center">
-            {/* Left */}
             <div>
               <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 px-4 py-2 rounded-full mb-8">
                 <span className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
-                <span className="text-xs font-semibold text-blue-700 tracking-wide uppercase">
+                <span className="text-sm font-semibold text-blue-700 tracking-wide uppercase">
                   Trusted Manpower Platform
                 </span>
               </div>
@@ -158,11 +153,10 @@ export default function HomePage() {
               <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 leading-[1.1] tracking-tight mb-6">
                 Connect Top Talent
                 <br />
-                with{" "}
-                <span className="text-blue-600">Great Opportunities</span>
+                with <span className="text-blue-600">Great Opportunities</span>
               </h1>
 
-              <p className="text-base sm:text-lg text-gray-600 leading-relaxed mb-10 max-w-lg">
+              <p className="text-xl text-gray-600 leading-relaxed mb-10 max-w-lg">
                 The fastest way to hire skilled workers or find your next job.
                 We handle the matching, screening, and scheduling — so you can
                 focus on the work that matters. Trusted by thousands of
@@ -175,24 +169,24 @@ export default function HomePage() {
                     {user.account_type === "WORKER" ? (
                       <Button
                         onClick={() => router.push("/jobs")}
-                        className="bg-blue-600 hover:bg-blue-700 text-white h-11 px-6 rounded-xl font-semibold text-sm shadow-sm"
+                        className="bg-blue-600 hover:bg-blue-700 text-white h-12 px-7 rounded-xl font-semibold text-base shadow-sm"
                       >
                         Browse Available Jobs
-                        <ArrowRight className="ml-2 h-4 w-4" />
+                        <ArrowRight className="ml-2 h-5 w-5" />
                       </Button>
                     ) : (
                       <Button
                         onClick={() => router.push("/jobs/create")}
-                        className="bg-blue-600 hover:bg-blue-700 text-white h-11 px-6 rounded-xl font-semibold text-sm shadow-sm"
+                        className="bg-blue-600 hover:bg-blue-700 text-white h-12 px-7 rounded-xl font-semibold text-base shadow-sm"
                       >
                         Post a Job Opening
-                        <ArrowRight className="ml-2 h-4 w-4" />
+                        <ArrowRight className="ml-2 h-5 w-5" />
                       </Button>
                     )}
                     <Button
                       variant="outline"
                       onClick={() => router.push("/profile")}
-                      className="border-gray-200 text-gray-700 hover:border-blue-200 hover:text-blue-700 h-11 px-6 rounded-xl font-semibold text-sm"
+                      className="border-gray-200 text-gray-700 hover:border-blue-200 hover:text-blue-700 h-12 px-7 rounded-xl font-semibold text-base"
                     >
                       View My Profile
                     </Button>
@@ -201,15 +195,15 @@ export default function HomePage() {
                   <>
                     <Button
                       onClick={() => router.push("/signup")}
-                      className="bg-blue-600 hover:bg-blue-700 text-white h-11 px-6 rounded-xl font-semibold text-sm shadow-sm"
+                      className="bg-blue-600 hover:bg-blue-700 text-white h-12 px-7 rounded-xl font-semibold text-base shadow-sm"
                     >
                       Get Started Free
-                      <ArrowRight className="ml-2 h-4 w-4" />
+                      <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
                     <Button
                       variant="outline"
                       onClick={() => router.push("/login")}
-                      className="border-gray-200 text-gray-700 hover:border-blue-200 hover:text-blue-700 h-11 px-6 rounded-xl font-semibold text-sm"
+                      className="border-gray-200 text-gray-700 hover:border-blue-200 hover:text-blue-700 h-12 px-7 rounded-xl font-semibold text-base"
                     >
                       Sign In
                     </Button>
@@ -218,7 +212,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right — stat cards */}
+            {/* Stat cards */}
             <div className="grid grid-cols-2 gap-4">
               {[
                 {
@@ -226,7 +220,7 @@ export default function HomePage() {
                   value: "15,000+",
                   border: "border-blue-100",
                   text: "text-blue-600",
-                  icon: <Users className="w-4 h-4 text-blue-600" />,
+                  icon: <Users className="w-5 h-5 text-blue-600" />,
                   bg: "bg-blue-50",
                 },
                 {
@@ -234,7 +228,7 @@ export default function HomePage() {
                   value: "500+",
                   border: "border-amber-100",
                   text: "text-amber-600",
-                  icon: <Building2 className="w-4 h-4 text-amber-600" />,
+                  icon: <Building2 className="w-5 h-5 text-amber-600" />,
                   bg: "bg-amber-50",
                 },
                 {
@@ -242,7 +236,7 @@ export default function HomePage() {
                   value: "75,000+",
                   border: "border-emerald-100",
                   text: "text-emerald-700",
-                  icon: <CheckCircle2 className="w-4 h-4 text-emerald-600" />,
+                  icon: <CheckCircle2 className="w-5 h-5 text-emerald-600" />,
                   bg: "bg-emerald-50",
                 },
                 {
@@ -250,20 +244,20 @@ export default function HomePage() {
                   value: "98%",
                   border: "border-violet-100",
                   text: "text-violet-700",
-                  icon: <Award className="w-4 h-4 text-violet-600" />,
+                  icon: <Award className="w-5 h-5 text-violet-600" />,
                   bg: "bg-violet-50",
                 },
               ].map(({ label, value, border, text, icon, bg }) => (
                 <div
                   key={label}
                   className={cn(
-                    "bg-white rounded-2xl border p-5 flex flex-col justify-between gap-6",
+                    "bg-white rounded-2xl border p-6 flex flex-col justify-between gap-6",
                     border
                   )}
                 >
                   <div
                     className={cn(
-                      "w-9 h-9 rounded-xl flex items-center justify-center",
+                      "w-11 h-11 rounded-xl flex items-center justify-center",
                       bg
                     )}
                   >
@@ -271,7 +265,7 @@ export default function HomePage() {
                   </div>
                   <div>
                     <p className={cn("text-3xl font-bold", text)}>{value}</p>
-                    <p className="text-sm text-gray-500 font-medium mt-1">
+                    <p className="text-base text-gray-500 font-medium mt-1">
                       {label}
                     </p>
                   </div>
@@ -286,13 +280,13 @@ export default function HomePage() {
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-14">
-            <p className="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-3">
+            <p className="text-sm font-semibold text-blue-600 uppercase tracking-widest mb-3">
               Platform
             </p>
             <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-4">
               Everything You Need to Manage Your Workforce
             </h2>
-            <p className="text-base text-gray-500 max-w-2xl leading-relaxed">
+            <p className="text-lg text-gray-500 max-w-2xl leading-relaxed">
               Built for hiring managers and HR teams who don&apos;t have time to
               waste. From posting a role to scheduling shifts, the tools are
               fast, intuitive, and designed around how real teams work.
@@ -307,32 +301,32 @@ export default function HomePage() {
               >
                 <div
                   className={cn(
-                    "w-10 h-10 rounded-xl flex items-center justify-center mb-5 group-hover:scale-105 transition-transform",
+                    "w-12 h-12 rounded-xl flex items-center justify-center mb-5 group-hover:scale-105 transition-transform",
                     f.iconBg
                   )}
                 >
-                  <f.icon className="h-5 w-5 text-white" />
+                  <f.icon className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="font-bold text-gray-900 text-base mb-3">
+                <h3 className="font-bold text-gray-900 text-lg mb-3">
                   {f.title}
                 </h3>
-                <p className="text-sm text-gray-500 leading-relaxed mb-5 flex-1">
+                <p className="text-base text-gray-500 leading-relaxed mb-5 flex-1">
                   {f.description}
                 </p>
-                <ul className="space-y-2 mb-5">
+                <ul className="space-y-2.5 mb-5">
                   {f.benefits.map((b) => (
                     <li
                       key={b}
                       className="flex items-center gap-2 text-sm text-gray-500"
                     >
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                       {b}
                     </li>
                   ))}
                 </ul>
                 <div className="flex items-center text-sm font-semibold text-blue-600 group-hover:text-blue-700 mt-auto">
                   Learn more{" "}
-                  <ChevronRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-0.5 transition-transform" />
+                  <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-0.5 transition-transform" />
                 </div>
               </div>
             ))}
@@ -346,10 +340,10 @@ export default function HomePage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {stats.map(({ value, label }) => (
               <div key={label}>
-                <p className="text-4xl font-extrabold text-white mb-2">
+                <p className="text-5xl font-extrabold text-white mb-2">
                   {value}
                 </p>
-                <p className="text-blue-200 text-sm font-medium">{label}</p>
+                <p className="text-blue-200 text-base font-medium">{label}</p>
               </div>
             ))}
           </div>
@@ -360,13 +354,13 @@ export default function HomePage() {
       <section className="py-24 bg-white border-y border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-14">
-            <p className="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-3">
+            <p className="text-sm font-semibold text-blue-600 uppercase tracking-widest mb-3">
               Industries
             </p>
             <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-4">
               Serving Multiple Sectors
             </h2>
-            <p className="text-base text-gray-500 max-w-2xl leading-relaxed">
+            <p className="text-lg text-gray-500 max-w-2xl leading-relaxed">
               Every industry has its own pace, pressures, and people requirements.
               We&apos;ve built deep expertise in the sectors where getting the right
               person on site — fast — makes all the difference.
@@ -377,17 +371,17 @@ export default function HomePage() {
             {industries.map(({ name, description }) => (
               <div
                 key={name}
-                className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 bg-white hover:bg-gray-50 px-6 py-6 transition-colors group cursor-default"
+                className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 bg-white hover:bg-gray-50 px-6 py-7 transition-colors group cursor-default"
               >
-                <div className="sm:w-40 shrink-0">
-                  <p className="font-semibold text-base text-gray-900 group-hover:text-blue-700 transition-colors">
+                <div className="sm:w-52 shrink-0">
+                  <p className="font-semibold text-lg text-gray-900 group-hover:text-blue-700 transition-colors">
                     {name}
                   </p>
                 </div>
-                <p className="text-sm text-gray-500 leading-relaxed flex-1 max-w-2xl">
+                <p className="text-base text-gray-500 leading-relaxed flex-1 max-w-2xl">
                   {description}
                 </p>
-                <ChevronRight className="w-4 h-4 text-gray-300 shrink-0 group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all hidden sm:block mt-1" />
+                <ChevronRight className="w-5 h-5 text-gray-300 shrink-0 group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all hidden sm:block mt-1" />
               </div>
             ))}
           </div>
@@ -399,22 +393,22 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-end justify-between mb-14">
             <div>
-              <p className="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-3">
+              <p className="text-sm font-semibold text-blue-600 uppercase tracking-widest mb-3">
                 Opportunities
               </p>
               <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-3">
                 Featured Jobs
               </h2>
-              <p className="text-base text-gray-500">
+              <p className="text-lg text-gray-500">
                 A sample of what&apos;s currently open on the platform.
               </p>
             </div>
             <Button
               variant="outline"
               onClick={() => router.push("/jobs")}
-              className="border-gray-200 text-gray-600 hover:border-blue-200 hover:text-blue-600 h-9 px-4 rounded-xl text-sm font-semibold"
+              className="border-gray-200 text-gray-600 hover:border-blue-200 hover:text-blue-600 h-10 px-5 rounded-xl text-base font-semibold"
             >
-              View All <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+              View All <ArrowRight className="ml-1.5 h-4 w-4" />
             </Button>
           </div>
 
@@ -422,15 +416,15 @@ export default function HomePage() {
             {jobs.map((job) => (
               <div
                 key={job.title}
-                className="bg-white rounded-2xl border border-gray-100 p-5 hover:border-blue-200 hover:shadow-md hover:shadow-blue-50 transition-all duration-200 cursor-pointer group flex flex-col"
+                className="bg-white rounded-2xl border border-gray-100 p-6 hover:border-blue-200 hover:shadow-md hover:shadow-blue-50 transition-all duration-200 cursor-pointer group flex flex-col"
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-                    <Building2 className="w-5 h-5 text-blue-600" />
+                <div className="flex items-start justify-between mb-5">
+                  <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+                    <Building2 className="w-6 h-6 text-blue-600" />
                   </div>
                   <span
                     className={cn(
-                      "text-xs font-semibold px-2.5 py-1 rounded-full border",
+                      "text-sm font-semibold px-3 py-1.5 rounded-full border",
                       job.tagColor
                     )}
                   >
@@ -438,29 +432,29 @@ export default function HomePage() {
                   </span>
                 </div>
 
-                <h3 className="font-bold text-gray-900 text-base mb-1 group-hover:text-blue-700 transition-colors">
+                <h3 className="font-bold text-gray-900 text-xl mb-1.5 group-hover:text-blue-700 transition-colors">
                   {job.title}
                 </h3>
-                <p className="text-sm text-blue-600 font-medium mb-4">
+                <p className="text-base text-blue-600 font-medium mb-5">
                   {job.company}
                 </p>
 
-                <div className="space-y-2 mb-5 mt-auto">
-                  <div className="flex items-center gap-2 text-sm text-gray-400">
-                    <MapPin className="w-3.5 h-3.5 shrink-0" />
+                <div className="space-y-2.5 mb-5 mt-auto">
+                  <div className="flex items-center gap-2 text-base text-gray-400">
+                    <MapPin className="w-4 h-4 shrink-0" />
                     {job.location}
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-400">
-                    <Clock className="w-3.5 h-3.5 shrink-0" />
+                  <div className="flex items-center gap-2 text-base text-gray-400">
+                    <Clock className="w-4 h-4 shrink-0" />
                     {job.type}
                   </div>
                 </div>
 
                 <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
-                  <span className="text-base font-bold text-emerald-700">
+                  <span className="text-lg font-bold text-emerald-700">
                     {job.salary}
                   </span>
-                  <span className="text-sm text-gray-400">{job.posted}</span>
+                  <span className="text-base text-gray-400">{job.posted}</span>
                 </div>
               </div>
             ))}
@@ -472,29 +466,29 @@ export default function HomePage() {
       <section className="pb-20 bg-white border-t border-gray-100">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
           <div className="text-center mb-12">
-            <p className="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-3">
+            <p className="text-sm font-semibold text-blue-600 uppercase tracking-widest mb-3">
               Get Started
             </p>
             <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-3">
               Ready to Join the Platform?
             </h2>
-            <p className="text-base text-gray-500">Choose your path and start today.</p>
+            <p className="text-lg text-gray-500">Choose your path and start today.</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-5 max-w-3xl mx-auto">
             {/* Employers */}
             <div className="bg-gray-50 border border-gray-100 rounded-2xl p-8 hover:border-blue-200 transition-all group">
-              <div className="w-11 h-11 bg-blue-600 rounded-xl flex items-center justify-center mb-5">
-                <Users className="w-5 h-5 text-white" />
+              <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mb-5">
+                <Users className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-bold text-gray-900 text-base mb-2">For Employers</h3>
-              <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+              <h3 className="font-bold text-gray-900 text-xl mb-3">For Employers</h3>
+              <p className="text-base text-gray-500 mb-6 leading-relaxed">
                 Find qualified workers and manage your team efficiently with
                 smart tools built for growth.
               </p>
               <Button
                 onClick={() => router.push("/signup")}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white h-10 rounded-xl font-semibold text-sm"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white h-11 rounded-xl font-semibold text-base"
               >
                 Post a Job
               </Button>
@@ -502,17 +496,17 @@ export default function HomePage() {
 
             {/* Job Seekers */}
             <div className="bg-gray-50 border border-gray-100 rounded-2xl p-8 hover:border-amber-200 transition-all group">
-              <div className="w-11 h-11 bg-amber-500 rounded-xl flex items-center justify-center mb-5">
-                <Briefcase className="w-5 h-5 text-white" />
+              <div className="w-12 h-12 bg-amber-500 rounded-xl flex items-center justify-center mb-5">
+                <Briefcase className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-bold text-gray-900 text-base mb-2">For Job Seekers</h3>
-              <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+              <h3 className="font-bold text-gray-900 text-xl mb-3">For Job Seekers</h3>
+              <p className="text-base text-gray-500 mb-6 leading-relaxed">
                 Browse opportunities that match your skills and start your
                 career journey today.
               </p>
               <Button
                 onClick={() => router.push("/signup")}
-                className="w-full bg-amber-500 hover:bg-amber-600 text-white h-10 rounded-xl font-semibold text-sm"
+                className="w-full bg-amber-500 hover:bg-amber-600 text-white h-11 rounded-xl font-semibold text-base"
               >
                 Find Jobs
               </Button>
