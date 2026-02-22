@@ -154,11 +154,17 @@ export default function StaffManagementPage() {
   };
 
   useEffect(() => {
-    loadBusinesses();
-  }, [loadBusinesses]);
-  useEffect(() => {
-    if (businessId) loadStaff(reloadParams);
-  }, [businessId, page, search, statusFilter, typeFilter, sortField, sortDir]);
+    if (!businessId) return;
+    const params = {
+      page,
+      search,
+      status: (statusFilter === "all" ? "" : statusFilter) as "" | undefined,
+      employment_type: (typeFilter === "all" ? "" : typeFilter) as "" | undefined,
+      ordering: sortDir === "desc" ? `-${sortField}` : sortField,
+    };
+    loadStaff(params);
+  }, [businessId, page, search, statusFilter, typeFilter, sortField, sortDir, loadStaff]);
+
   useEffect(() => {
     setPage(1);
   }, [search, statusFilter, typeFilter]);

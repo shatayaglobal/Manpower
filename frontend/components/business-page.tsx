@@ -34,7 +34,6 @@ import { cn } from "@/lib/utils";
 const getCategoryLabel = (v: string) =>
   BUSINESS_CATEGORIES.find((c) => c.value === v)?.label ?? "Other";
 
-// ── Stat card ─────────────────────────────────────────────────────────────────
 function StatCard({
   title,
   value,
@@ -61,7 +60,6 @@ function StatCard({
   );
 }
 
-// ── Quick action link ─────────────────────────────────────────────────────────
 function QuickAction({
   href,
   icon: Icon,
@@ -97,7 +95,6 @@ function QuickAction({
   );
 }
 
-// ── Business form modal ───────────────────────────────────────────────────────
 interface ModalProps {
   business: Business | null;
   onClose: () => void;
@@ -615,7 +612,6 @@ function BusinessModal({ business, onClose }: ModalProps) {
   );
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────────
 export default function MyBusinessPage() {
   const [showModal, setShowModal] = useState(false);
   const {
@@ -625,7 +621,6 @@ export default function MyBusinessPage() {
     loadBusinesses,
     editBusiness,
     clearBusinessError,
-    selectBusiness,
   } = useBusiness();
   const business = businesses[0] ?? null;
 
@@ -641,7 +636,6 @@ export default function MyBusinessPage() {
     );
   }
 
-  // ── No business yet ──
   if (!business) {
     return (
       <div className="bg-gray-50 -ml-4 -mt-5 min-h-screen -mr-4">

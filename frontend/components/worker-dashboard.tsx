@@ -12,7 +12,6 @@ import {
   CheckCircle2,
   Briefcase,
   ArrowRight,
-  Search,
   UserCircle,
   ChevronRight,
   Building2,
@@ -39,7 +38,8 @@ import { useApplications } from "@/lib/redux/use-applications";
 import { toast } from "sonner";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { PostListItem, JobApplication } from "@/lib/types";
+import { PostListItem } from "@/lib/types";
+import { LucideIcon } from "lucide-react";
 
 interface Location {
   latitude: number;
@@ -69,7 +69,7 @@ const PRIORITY_MAP: Record<string, { label: string; color: string }> = {
 
 const APPLICATION_STATUS: Record<
   string,
-  { label: string; color: string; icon: any }
+  { label: string; color: string; icon: LucideIcon }
 > = {
   PENDING: {
     label: "Pending",

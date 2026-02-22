@@ -66,14 +66,6 @@ const features = [
   },
 ];
 
-const industries = [
-  { name: "Construction", icon: Building2 },
-  { name: "Hospitality", icon: Users },
-  { name: "Logistics", icon: TrendingUp },
-  { name: "Security", icon: CheckCircle2 },
-  { name: "Cleaning", icon: Sparkles },
-];
-
 const jobs = [
   {
     title: "Construction Workers",
@@ -120,7 +112,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* ── HERO ─────────────────────────────────────────────────────────── */}
       <section className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -317,7 +308,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── STATS BAND ────────────────────────────────────────────────────── */}
       <section className="bg-blue-600 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">

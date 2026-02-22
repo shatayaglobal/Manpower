@@ -335,7 +335,7 @@ export default function JobApplicationsPage() {
                                     );
                                     toast.success("Application accepted!");
                                     loadJobApplications(jobId);
-                                  } catch (err) {
+                                  } catch {
                                     toast.error("Failed to accept application");
                                   }
                                 }}
@@ -356,7 +356,7 @@ export default function JobApplicationsPage() {
                                     );
                                     toast.success("Application rejected.");
                                     loadJobApplications(jobId);
-                                  } catch (err) {
+                                  } catch {
                                     toast.error("Failed to reject application");
                                   }
                                 }}

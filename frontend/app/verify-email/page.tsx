@@ -37,29 +37,27 @@ export default function VerifyEmailPage() {
     if (hasVerified.current) return;
     hasVerified.current = true;
 
-    handleVerifyEmail();
-  }, [token]);
+    const handleVerifyEmail = async () => {
+      const result = await verifyEmail(token);
 
-  const handleVerifyEmail = async () => {
-    if (!token) return;
-
-    const result = await verifyEmail(token);
-
-    if (result.success) {
-      setVerificationState("success");
-      const data = result.data as { user?: { first_name?: string } };
-      setUserName(data?.user?.first_name || "");
-      if (typeof window !== "undefined") {
-        sessionStorage.removeItem("verification_email");
+      if (result.success) {
+        setVerificationState("success");
+        const data = result.data as { user?: { first_name?: string } };
+        setUserName(data?.user?.first_name || "");
+        if (typeof window !== "undefined") {
+          sessionStorage.removeItem("verification_email");
+        }
+      } else {
+        setVerificationState("error");
+        setErrorMessage(
+          (result.error as AuthError)?.message ||
+            "Failed to verify email. Please try again."
+        );
       }
-    } else {
-      setVerificationState("error");
-      setErrorMessage(
-        (result.error as AuthError)?.message ||
-          "Failed to verify email. Please try again."
-      );
-    }
-  }
+    };
+
+    handleVerifyEmail();
+  }, [token, verifyEmail]);
 
     const renderContent = () => {
       switch (verificationState) {
