@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, Loader2 } from "lucide-react";
+import { X, Loader2, UserPlus, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useWorkforce } from "@/lib/redux/use-workforce";
 import {
@@ -13,6 +13,7 @@ import {
 import { toast } from "sonner";
 import { UserSearchSelect } from "@/components/staff/UserSearchSelect";
 import type { User } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 interface StaffModalProps {
   staff: BusinessStaff | null;
@@ -21,12 +22,25 @@ interface StaffModalProps {
   onSuccess: () => void;
 }
 
+const labelCls =
+  "block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5";
+const inputCls = (err?: string, disabled?: boolean) =>
+  cn(
+    "w-full px-3 py-2.5 border rounded-xl text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+    err ? "border-red-300 bg-red-50/30" : "border-gray-200",
+    disabled ? "bg-gray-50 cursor-not-allowed text-gray-500" : "bg-white"
+  );
+const selectCls =
+  "w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent";
+
 export const StaffModal: React.FC<StaffModalProps> = ({
   staff,
   onClose,
   businessId,
   onSuccess,
 }) => {
+  const { addStaff, editStaff } = useWorkforce();
+
   const [formData, setFormData] = useState<StaffFormData>({
     name: staff?.name || "",
     job_title: staff?.job_title || "",
@@ -39,13 +53,15 @@ export const StaffModal: React.FC<StaffModalProps> = ({
     hire_date: staff?.hire_date || new Date().toISOString().split("T")[0],
     user: staff?.user || undefined,
   });
-
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [submitting, setSubmitting] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [showUserSearch, setShowUserSearch] = useState<boolean>(!staff);
+  const [showUserSearch, setShowUserSearch] = useState(!staff);
 
-  const { addStaff, editStaff } = useWorkforce();
+  const set = (k: keyof StaffFormData, v: string) => {
+    setFormData((p) => ({ ...p, [k]: v }));
+    if (errors[k]) setErrors((p) => ({ ...p, [k]: "" }));
+  };
 
   useEffect(() => {
     if (staff) {
@@ -67,11 +83,10 @@ export const StaffModal: React.FC<StaffModalProps> = ({
 
   useEffect(() => {
     if (selectedUser) {
-      setFormData((prev) => ({
-        ...prev,
+      setFormData((p) => ({
+        ...p,
         name: `${selectedUser.first_name} ${selectedUser.last_name}`,
         email: selectedUser.email,
-        phone: prev.phone,
         user: selectedUser.id as string,
       }));
     }
@@ -79,113 +94,90 @@ export const StaffModal: React.FC<StaffModalProps> = ({
 
   const handleUserSelect = (user: User | null) => {
     setSelectedUser(user);
-    if (!user) {
-      setFormData((prev) => ({
-        ...prev,
-        user: undefined,
-        name: "",
-        email: "",
-        phone: "",
-      }));
-    }
+    if (!user)
+      setFormData((p) => ({ ...p, user: undefined, name: "", email: "" }));
   };
 
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.name.trim()) newErrors.name = "Name is required";
-    if (!formData.job_title.trim())
-      newErrors.job_title = "Job title is required";
-    if (!formData.email.trim()) newErrors.email = "Email is required";
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email";
-    }
-    if (!formData.phone.trim()) newErrors.phone = "Phone is required";
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const validate = (): boolean => {
+    const e: Record<string, string> = {};
+    if (!formData.name.trim()) e.name = "Name is required";
+    if (!formData.job_title.trim()) e.job_title = "Job title is required";
+    if (!formData.email.trim()) e.email = "Email is required";
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
+      e.email = "Invalid email address";
+    if (!formData.phone.trim()) e.phone = "Phone is required";
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = async (): Promise<void> => {
-    if (!validateForm()) return;
-
+  const handleSubmit = async () => {
+    if (!validate()) return;
     setSubmitting(true);
     try {
-      const submitData = {
-        ...formData,
-        business: businessId,
-      };
-
+      const payload = { ...formData, business: businessId };
       if (staff) {
-        await editStaff(staff.id, submitData);
-        toast.success("Staff member updated successfully!");
+        await editStaff(staff.id, payload);
+        toast.success("Staff member updated!");
       } else {
-        await addStaff(submitData);
-        toast.success("Staff member added successfully!");
+        await addStaff(payload);
+        toast.success("Staff member added!");
       }
-      onSuccess(); // Reload staff list
+      onSuccess();
       onClose();
     } catch (error: unknown) {
-      let errorMessage = "Failed to save staff member. Please try again.";
-
+      let msg = "Failed to save staff member.";
       if (error && typeof error === "object" && "response" in error) {
-        const response = (
+        const r = (
           error as {
             response?: { data?: { business?: string[]; detail?: string } };
           }
         ).response;
-        errorMessage =
-          response?.data?.business?.[0] ||
-          response?.data?.detail ||
-          errorMessage;
+        msg = r?.data?.business?.[0] || r?.data?.detail || msg;
       }
-
-      toast.error(errorMessage);
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }
   };
 
-  const isUserLinked = !!selectedUser || !!staff?.user;
+  const isLinked = !!selectedUser || !!staff?.user;
 
   return (
-    <div className="fixed inset-0 bg-black/20 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-full w-full sm:max-w-lg md:max-w-2xl max-h-[85vh] overflow-y-auto">
-        <div className="p-4 sm:p-6 border-b border-gray-200">
-          <div className="flex justify-between items-center">
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
-              {staff ? "Edit Staff Member" : "Add New Staff Member"}
-            </h2>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-xl">
+        {/* Header */}
+        <div className="px-6 py-5 border-b border-gray-100 shrink-0 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-gray-900">
+            {staff ? "Edit Staff Member" : "Add New Staff Member"}
+          </h2>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
-        <div className="p-4 sm:p-6">
-          <div className="space-y-4">
-            {/* User Search Section - Only show for new staff */}
-            {!staff && showUserSearch && (
-              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+          {/* Link user banner — new staff only */}
+          {!staff &&
+            (showUserSearch ? (
+              <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4">
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <h3 className="text-sm font-semibold text-gray-900 mb-1">
-                      Link to Registered User (Optional)
-                    </h3>
-                    <p className="text-xs text-gray-600">
-                      Search and select an existing user to auto-fill their
-                      details
+                    <p className="text-sm font-semibold text-gray-900">
+                      Link to registered user
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Auto-fill name and email from an existing account
                     </p>
                   </div>
                   <button
-                    type="button"
                     onClick={() => setShowUserSearch(false)}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-blue-100 transition-colors"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
                 <UserSearchSelect
@@ -194,98 +186,147 @@ export const StaffModal: React.FC<StaffModalProps> = ({
                   disabled={false}
                 />
               </div>
-            )}
-
-            {/* Show button to enable user search if hidden */}
-            {!staff && !showUserSearch && !selectedUser && (
+            ) : !selectedUser ? (
               <button
-                type="button"
                 onClick={() => setShowUserSearch(true)}
-                className="w-full px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-200 rounded-2xl text-sm text-gray-400 hover:border-blue-300 hover:text-blue-600 transition-colors"
               >
-                + Link to existing user account
+                <UserPlus className="w-4 h-4" />
+                Link to existing user account (optional)
               </button>
-            )}
+            ) : (
+              <div className="flex items-center gap-3 p-3.5 bg-emerald-50 border border-emerald-100 rounded-2xl">
+                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-emerald-700">
+                    User linked — name and email auto-filled
+                  </p>
+                  <p className="text-xs text-emerald-600 truncate">
+                    {selectedUser.email}
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleUserSelect(null)}
+                  className="text-xs text-emerald-600 hover:text-emerald-800 font-semibold shrink-0"
+                >
+                  Unlink
+                </button>
+              </div>
+            ))}
+
+          {/* Personal details card */}
+          <div className="bg-gray-50 rounded-2xl p-4 space-y-4">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+              Personal Details
+            </p>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name *
+              <label className={labelCls}>
+                Full Name{" "}
+                <span className="text-red-500 normal-case font-normal">*</span>
               </label>
               <input
                 type="text"
                 value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                disabled={isUserLinked}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.name ? "border-red-300" : "border-gray-300"
-                } ${isUserLinked ? "bg-gray-100 cursor-not-allowed" : ""}`}
+                onChange={(e) => set("name", e.target.value)}
+                disabled={isLinked}
                 placeholder="John Doe"
+                className={inputCls(errors.name, isLinked)}
               />
               {errors.name && (
-                <p className="text-red-600 text-sm mt-1">{errors.name}</p>
-              )}
-              {isUserLinked && (
-                <p className="text-xs text-gray-500 mt-1">
-                  Name is auto-filled from linked user account
-                </p>
+                <p className="text-red-500 text-xs mt-1">{errors.name}</p>
               )}
             </div>
 
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Job Title *
+                <label className={labelCls}>
+                  Email{" "}
+                  <span className="text-red-500 normal-case font-normal">
+                    *
+                  </span>
+                </label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => set("email", e.target.value)}
+                  disabled={isLinked}
+                  placeholder="john@example.com"
+                  className={inputCls(errors.email, isLinked)}
+                />
+                {errors.email && (
+                  <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                )}
+              </div>
+              <div>
+                <label className={labelCls}>
+                  Phone{" "}
+                  <span className="text-red-500 normal-case font-normal">
+                    *
+                  </span>
+                </label>
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => set("phone", e.target.value)}
+                  placeholder="+256-700-000000"
+                  className={inputCls(errors.phone)}
+                />
+                {errors.phone && (
+                  <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Job details card */}
+          <div className="bg-gray-50 rounded-2xl p-4 space-y-4">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+              Job Details
+            </p>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className={labelCls}>
+                  Job Title{" "}
+                  <span className="text-red-500 normal-case font-normal">
+                    *
+                  </span>
                 </label>
                 <input
                   type="text"
                   value={formData.job_title}
-                  onChange={(e) =>
-                    setFormData({ ...formData, job_title: e.target.value })
-                  }
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.job_title ? "border-red-300" : "border-gray-300"
-                  }`}
-                  placeholder="Manager"
+                  onChange={(e) => set("job_title", e.target.value)}
+                  placeholder="e.g. Manager"
+                  className={inputCls(errors.job_title)}
                 />
                 {errors.job_title && (
-                  <p className="text-red-600 text-sm mt-1">
+                  <p className="text-red-500 text-xs mt-1">
                     {errors.job_title}
                   </p>
                 )}
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Department
-                </label>
+                <label className={labelCls}>Department</label>
                 <input
                   type="text"
                   value={formData.department}
-                  onChange={(e) =>
-                    setFormData({ ...formData, department: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Sales"
+                  onChange={(e) => set("department", e.target.value)}
+                  placeholder="e.g. Sales"
+                  className={inputCls()}
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Employment Type *
-                </label>
+                <label className={labelCls}>Employment Type</label>
                 <select
                   value={formData.employment_type}
                   onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      employment_type: e.target.value as EmploymentType,
-                    })
+                    set("employment_type", e.target.value as EmploymentType)
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={selectCls}
                 >
                   <option value="FULL_TIME">Full Time</option>
                   <option value="PART_TIME">Part Time</option>
@@ -293,20 +334,12 @@ export const StaffModal: React.FC<StaffModalProps> = ({
                   <option value="INTERN">Intern</option>
                 </select>
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Status *
-                </label>
+                <label className={labelCls}>Status</label>
                 <select
                   value={formData.status}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      status: e.target.value as StaffStatus,
-                    })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => set("status", e.target.value as StaffStatus)}
+                  className={selectCls}
                 >
                   <option value="ACTIVE">Active</option>
                   <option value="INACTIVE">Inactive</option>
@@ -316,111 +349,60 @@ export const StaffModal: React.FC<StaffModalProps> = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email *
-                </label>
+                <label className={labelCls}>Hire Date</label>
                 <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  disabled={isUserLinked}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.email ? "border-red-300" : "border-gray-300"
-                  } ${isUserLinked ? "bg-gray-100 cursor-not-allowed" : ""}`}
-                  placeholder="john@example.com"
+                  type="date"
+                  value={formData.hire_date}
+                  onChange={(e) => set("hire_date", e.target.value)}
+                  className={inputCls()}
                 />
-                {errors.email && (
-                  <p className="text-red-600 text-sm mt-1">{errors.email}</p>
-                )}
-                {isUserLinked && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    Email is auto-filled from linked user account
-                  </p>
-                )}
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone *
-                </label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) =>
-                    setFormData({ ...formData, phone: e.target.value })
-                  }
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.phone ? "border-red-300" : "border-gray-300"
-                  }`}
-                  placeholder="+256-700-000000"
-                />
-                {errors.phone && (
-                  <p className="text-red-600 text-sm mt-1">{errors.phone}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Hourly Rate (Optional)
+                <label className={labelCls}>
+                  Hourly Rate{" "}
+                  <span className="text-gray-300 normal-case font-normal">
+                    (optional)
+                  </span>
                 </label>
                 <input
                   type="number"
                   step="0.01"
                   value={formData.hourly_rate}
-                  onChange={(e) =>
-                    setFormData({ ...formData, hourly_rate: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => set("hourly_rate", e.target.value)}
                   placeholder="25.00"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Hire Date *
-                </label>
-                <input
-                  type="date"
-                  value={formData.hire_date}
-                  onChange={(e) =>
-                    setFormData({ ...formData, hire_date: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={inputCls()}
                 />
               </div>
             </div>
           </div>
         </div>
 
-        <div className="px-4 sm:px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-end space-x-0 sm:space-x-3 gap-4 sm:gap-0">
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/60 rounded-b-2xl flex gap-3 shrink-0">
           <Button
             variant="outline"
             onClick={onClose}
             disabled={submitting}
-            className="w-full sm:w-auto border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600 min-w-[120px]"
+            className="flex-1 border-gray-200 h-10 rounded-xl font-semibold text-sm"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={submitting}
-            className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white min-w-[120px]"
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-10 rounded-xl font-semibold text-sm shadow-sm"
           >
             {submitting ? (
               <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin text-blue-500" />
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 {staff ? "Updating..." : "Adding..."}
               </>
             ) : staff ? (
               "Update Staff"
             ) : (
-              "Add Staff"
+              "Add Staff Member"
             )}
           </Button>
         </div>

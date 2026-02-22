@@ -4,9 +4,16 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Loader2, ArrowLeft, MapPin, DollarSign, Save } from "lucide-react";
+import {
+  Loader2,
+  ArrowLeft,
+  MapPin,
+  DollarSign,
+  Save,
+  Calendar,
+  Briefcase,
+} from "lucide-react";
 import { toast } from "sonner";
 import { usePosts } from "@/lib/redux/usePosts";
 import { useAuthState } from "@/lib/redux/redux";
@@ -18,6 +25,64 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AddressAutocomplete } from "@/components/address-auto-complete";
+import { cn } from "@/lib/utils";
+
+const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
+  LOW: { label: "Low", color: "bg-sky-50 text-sky-700 border-sky-200" },
+  MEDIUM: {
+    label: "Medium",
+    color: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  },
+  HIGH: {
+    label: "High",
+    color: "bg-violet-50 text-violet-700 border-violet-200",
+  },
+  URGENT: { label: "Urgent", color: "bg-red-50 text-red-700 border-red-200" },
+};
+
+function FieldWrapper({
+  label,
+  required,
+  hint,
+  error,
+  icon,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  hint?: string;
+  error?: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">
+        {label}{" "}
+        {required && (
+          <span className="text-red-500 normal-case font-normal">*</span>
+        )}
+      </Label>
+      <div className={cn("relative", icon && "[&>input]:pl-9 [&>*]:pl-9")}>
+        {icon && (
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 z-10">
+            {icon}
+          </div>
+        )}
+        {children}
+      </div>
+      {error && <p className="text-red-500 text-xs mt-1.5">{error}</p>}
+      {hint && !error && <p className="text-xs text-gray-400 mt-1.5">{hint}</p>}
+    </div>
+  );
+}
+
+const inputCls = (err?: string, disabled?: boolean) =>
+  cn(
+    "w-full px-3 py-2.5 border rounded-xl text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:cursor-not-allowed",
+    err ? "border-red-300 bg-red-50/30" : "border-gray-200",
+    disabled ? "bg-gray-50" : "bg-white"
+  );
 
 export default function EditJobPage() {
   const router = useRouter();
@@ -37,7 +102,6 @@ export default function EditJobPage() {
     requirements: "",
     expires_at: "",
   });
-
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -46,30 +110,27 @@ export default function EditJobPage() {
       router.push("/login");
       return;
     }
-
-    if (jobId) {
-      loadPost(jobId);
-    }
+    if (jobId) loadPost(jobId);
   }, [isAuthenticated, jobId, loadPost, router]);
 
   useEffect(() => {
     if (selectedPost) {
-      const postOwnerId =
+      const ownerId =
         typeof selectedPost.user === "object"
           ? selectedPost.user.id
           : selectedPost.user;
-
-      if (user?.id !== postOwnerId) {
+      if (user?.id !== ownerId) {
         toast.error("You don't have permission to edit this job");
         router.push("/jobs");
         return;
       }
-
       setFormData({
         title: selectedPost.title || "",
         description: selectedPost.description || "",
-        post_type: (selectedPost.post_type || "JOB"),
-        priority: (selectedPost.priority || "MEDIUM"),
+        post_type: (selectedPost.post_type ||
+          "JOB") as (typeof formData)["post_type"],
+        priority: (selectedPost.priority ||
+          "MEDIUM") as (typeof formData)["priority"],
         location: selectedPost.location || "",
         salary_range: selectedPost.salary_range || "",
         requirements: selectedPost.requirements || "",
@@ -80,37 +141,28 @@ export default function EditJobPage() {
     }
   }, [selectedPost, user, router]);
 
-  const handleInputChange = (field: keyof typeof formData, value: string) => {
+  const set = (field: keyof typeof formData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: "" }));
-    }
+    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.title.trim()) newErrors.title = "Job title is required";
+  const validate = (): boolean => {
+    const e: Record<string, string> = {};
+    if (!formData.title.trim()) e.title = "Job title is required";
     if (!formData.description.trim())
-      newErrors.description = "Job description is required";
-    if (!formData.location.trim()) newErrors.location = "Location is required";
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+      e.description = "Job description is required";
+    if (!formData.location.trim()) e.location = "Location is required";
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!validateForm()) {
+    if (!validate()) {
       toast.error("Please fix the errors in the form");
       return;
     }
-
     setIsSubmitting(true);
-
     try {
       await editPost(jobId, formData);
       toast.success("Job updated successfully!");
@@ -126,362 +178,278 @@ export default function EditJobPage() {
 
   if (!isAuthenticated || !user || loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-700" />
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <Loader2 className="h-7 w-7 animate-spin text-blue-600" />
       </div>
     );
   }
 
+  const currentPriority = PRIORITY_CONFIG[formData.priority];
+
   return (
-    <div className="bg-white rounded-lg p-2 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
-      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-10">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => router.push("/jobs")}
-              className="shrink-0 -mt-4"
-            >
-              <ArrowLeft className="h-6 w-6" />
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                Edit Job Posting
-              </h1>
-              <p className="text-gray-600 text-base">
-                Update the details below
-              </p>
-            </div>
-          </div>
+    <div className="bg-gray-50 -ml-4 -mt-5 min-h-screen -mr-4">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8 max-w-8xl">
+        {/* ── Back nav ── */}
+        <button
+          onClick={() => router.push("/jobs")}
+          className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-900 transition-colors group mb-5"
+        >
+          <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+          Back to Jobs
+        </button>
+
+        {/* ── Header ── */}
+        <div className="bg-white rounded-2xl border border-gray-100 px-6 py-5 mb-5">
+          <h1 className="text-2xl font-bold text-gray-900">Edit Job Posting</h1>
+          <p className="text-gray-500 text-sm mt-0.5">
+            Update the details below to save your changes
+          </p>
         </div>
 
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Row 1: Title + Location */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Job Title */}
-                <div>
-                  <Label htmlFor="title">
-                    Job Title <span className="text-red-600">*</span>
-                  </Label>
-                  <div className="relative">
-                    <input
-                      id="title"
-                      type="text"
-                      value={formData.title}
-                      onChange={(e) =>
-                        handleInputChange("title", e.target.value)
-                      }
-                      disabled={isSubmitting}
-                      placeholder="e.g. Senior Frontend Developer"
-                      className={`
-                        w-full px-4 py-2.5 pl-11 pr-11 border rounded-lg
-                        transition-all duration-200 placeholder:text-gray-400
-                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                        disabled:bg-gray-100 disabled:cursor-not-allowed
-                        ${
-                          errors.title
-                            ? "border-red-300 focus:ring-red-300"
-                            : "border-gray-300"
-                        }
-                        ${isSubmitting ? "bg-gray-100" : "bg-white"}
-                      `}
-                    />
-                  </div>
-                  {errors.title && (
-                    <p className="mt-1 text-sm text-red-600">{errors.title}</p>
-                  )}
-                </div>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* ── Core details card ── */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+              Job Details
+            </p>
 
-                {/* Job Location */}
-                <div>
-                  <Label htmlFor="location">
-                    Job Location <span className="text-red-600">*</span>
-                  </Label>
-                  <div className="relative">
-                    <AddressAutocomplete
-                      value={formData.location}
-                      onChange={(address) =>
-                        handleInputChange("location", address)
-                      }
-                      onPlaceSelected={(place) =>
-                        handleInputChange("location", place.address)
-                      }
-                      placeholder="Search for job location..."
-                      className={`
-                        w-full px-4 py-2.5 pl-11 pr-11 border rounded-lg
-                        transition-all duration-200 placeholder:text-gray-400
-                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                        disabled:bg-gray-100 disabled:cursor-not-allowed
-                        ${
-                          errors.location
-                            ? "border-red-300 focus:ring-red-300"
-                            : "border-gray-300"
-                        }
-                        ${isSubmitting ? "bg-gray-100" : "bg-white"}
-                      `}
-                    />
-                  </div>
-                  {errors.location && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errors.location}
-                    </p>
-                  )}
-                  <p className="mt-1 text-xs text-gray-500">
-                    Start typing to search for the workplace location
-                  </p>
-                </div>
-              </div>
+            <div className="grid sm:grid-cols-2 gap-5">
+              <FieldWrapper
+                label="Job Title"
+                required
+                error={errors.title}
+                icon={<Briefcase className="w-4 h-4" />}
+              >
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => set("title", e.target.value)}
+                  disabled={isSubmitting}
+                  placeholder="e.g. Senior Frontend Developer"
+                  className={inputCls(errors.title, isSubmitting) + " pl-9"}
+                />
+              </FieldWrapper>
 
-              {/* Row 2: Post Type + Priority */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label>Post Type</Label>
-                  <div className="relative">
-                    <Select
-                      value={formData.post_type}
-                      onValueChange={(v) => handleInputChange("post_type", v)}
-                      disabled={isSubmitting}
-                    >
-                      <SelectTrigger
-                        className={`
-                          w-full px-4 py-5 pl-11 pr-11 border rounded-lg
-                          transition-all duration-200
-                          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                          disabled:cursor-not-allowed
-                          ${
-                            isSubmitting ? "bg-gray-100 opacity-70" : "bg-white"
-                          }
-                          [&>span:last-child]:hidden
-                        `}
-                      >
-                        <SelectValue placeholder="Select post type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="JOB">Job Posting</SelectItem>
-                        <SelectItem value="GENERAL">
-                          General Post/Announcement
-                        </SelectItem>
-                        <SelectItem value="ANNOUNCEMENT">
-                          Announcement
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+              <FieldWrapper
+                label="Location"
+                required
+                error={errors.location}
+                hint="Start typing to search"
+                icon={<MapPin className="w-4 h-4" />}
+              >
+                <AddressAutocomplete
+                  value={formData.location}
+                  onChange={(address) => set("location", address)}
+                  onPlaceSelected={(place) => set("location", place.address)}
+                  placeholder="Search for job location..."
+                  className={inputCls(errors.location, isSubmitting) + " pl-9"}
+                />
+              </FieldWrapper>
+            </div>
 
-                <div>
-                  <Label>Priority Level</Label>
-                  <div className="relative">
-                    <Select
-                      value={formData.priority}
-                      onValueChange={(v) => handleInputChange("priority", v)}
-                      disabled={isSubmitting}
-                    >
-                      <SelectTrigger
-                        className={`
-                          w-full px-4 py-5 pl-11 pr-11 border rounded-lg
-                          transition-all duration-200
-                          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                          disabled:cursor-not-allowed
-                          ${
-                            isSubmitting ? "bg-gray-100 opacity-70" : "bg-white"
-                          }
-                          [&>span:last-child]:hidden
-                        `}
-                      >
-                        <SelectValue placeholder="Select priority" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="LOW">Low Priority</SelectItem>
-                        <SelectItem value="MEDIUM">Medium Priority</SelectItem>
-                        <SelectItem value="HIGH">High Priority</SelectItem>
-                        <SelectItem value="URGENT">Urgent</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-
-              {/* Row 3: Salary + Expiry Date */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label htmlFor="salary_range">Salary Range</Label>
-                  <div className="relative">
-                    <input
-                      id="salary_range"
-                      type="text"
-                      value={formData.salary_range}
-                      onChange={(e) =>
-                        handleInputChange("salary_range", e.target.value)
-                      }
-                      disabled={isSubmitting}
-                      placeholder="e.g. USh 1,000,000 - 2,000,000"
-                      className={`
-                        w-full px-4 py-2.5 pl-11 pr-11 border rounded-lg
-                        transition-all duration-200 placeholder:text-gray-400
-                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                        disabled:bg-gray-100 disabled:cursor-not-allowed
-                        ${
-                          errors.salary_range
-                            ? "border-red-300 focus:ring-red-300"
-                            : "border-gray-300"
-                        }
-                        ${isSubmitting ? "bg-gray-100" : "bg-white"}
-                      `}
-                    />
-                    <DollarSign className="absolute left-3 top-3 h-5 w-5 text-gray-400 pointer-events-none" />
-                  </div>
-                  {errors.salary_range && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errors.salary_range}
-                    </p>
-                  )}
-                  <p className="mt-1 text-xs text-gray-500">Optional</p>
-                </div>
-
-                <div>
-                  <Label htmlFor="expires_at">Expiry Date</Label>
-                  <div className="relative">
-                    <input
-                      id="expires_at"
-                      type="date"
-                      value={formData.expires_at}
-                      onChange={(e) =>
-                        handleInputChange("expires_at", e.target.value)
-                      }
-                      min={new Date().toISOString().split("T")[0]}
-                      disabled={isSubmitting}
-                      className={`
-                        w-full px-4 py-2.5 pl-11 pr-4 border rounded-lg
-                        transition-all duration-200
-                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                        disabled:bg-gray-100 disabled:cursor-not-allowed
-                        ${
-                          errors.expires_at
-                            ? "border-red-300 focus:ring-red-300"
-                            : "border-gray-300"
-                        }
-                        ${isSubmitting ? "bg-gray-100" : "bg-white"}
-                      `}
-                    />
-                  </div>
-                  {errors.expires_at && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errors.expires_at}
-                    </p>
-                  )}
-                  <p className="mt-1 text-xs text-gray-500">Optional</p>
-                </div>
-              </div>
-
-              {/* Description */}
+            <div className="grid sm:grid-cols-2 gap-5">
               <div>
-                <Label htmlFor="description">
-                  Job Description <span className="text-red-600">*</span>
+                <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">
+                  Post Type
                 </Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) =>
-                    handleInputChange("description", e.target.value)
-                  }
-                  rows={12}
-                  placeholder="Describe the role, responsibilities, and what you're looking for..."
-                  className={`
-                    w-full px-4 py-3 border rounded-lg resize-none
-                    transition-all duration-200 min-h-30   h-30
-                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                    disabled:bg-gray-100 disabled:cursor-not-allowed
-                    ${
-                      errors.description
-                        ? "border-red-300 focus:ring-red-300"
-                        : "border-gray-300"
-                    }
-                    ${isSubmitting ? "bg-gray-100" : "bg-white"}
-                  `}
+                <Select
+                  value={formData.post_type}
+                  onValueChange={(v) => set("post_type", v)}
                   disabled={isSubmitting}
-                />
-                <div className="flex justify-end mt-1">
-                  <p className="text-xs text-gray-500">
-                    {formData.description.length}/1000
-                  </p>
-                </div>
-                {errors.description && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.description}
-                  </p>
-                )}
+                >
+                  <SelectTrigger className="w-full h-10 border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="JOB">Job Posting</SelectItem>
+                    <SelectItem value="GENERAL">
+                      General / Announcement
+                    </SelectItem>
+                    <SelectItem value="ANNOUNCEMENT">Announcement</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
-              {/* Requirements */}
               <div>
-                <Label htmlFor="requirements">Requirements</Label>
-                <Textarea
-                  id="requirements"
-                  value={formData.requirements}
-                  onChange={(e) =>
-                    handleInputChange("requirements", e.target.value)
-                  }
-                  rows={8}
-                  placeholder="List key skills, qualifications, and experience needed..."
-                  className={`
-                    w-full px-4 py-3 border rounded-lg resize-none
-                    transition-all duration-200 min-h-30 h-30
-                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                    disabled:bg-gray-100 disabled:cursor-not-allowed
-                    ${
-                      errors.requirements
-                        ? "border-red-300 focus:ring-red-300"
-                        : "border-gray-300"
-                    }
-                    ${isSubmitting ? "bg-gray-100" : "bg-white"}
-                  `}
+                <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">
+                  Priority Level
+                </Label>
+                <Select
+                  value={formData.priority}
+                  onValueChange={(v) => set("priority", v)}
                   disabled={isSubmitting}
-                />
-                <div className="flex justify-end mt-1">
-                  <p className="text-xs text-gray-500">
-                    {formData.requirements.length}/500
-                  </p>
-                </div>
-                {errors.requirements && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.requirements}
-                  </p>
-                )}
+                >
+                  <SelectTrigger className="w-full h-10 border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
+                    <SelectValue>
+                      {formData.priority && currentPriority && (
+                        <span
+                          className={cn(
+                            "text-xs font-semibold px-2 py-0.5 rounded-full border",
+                            currentPriority.color
+                          )}
+                        >
+                          {currentPriority.label}
+                        </span>
+                      )}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(PRIORITY_CONFIG).map(
+                      ([value, { label, color }]) => (
+                        <SelectItem key={value} value={value}>
+                          <span
+                            className={cn(
+                              "text-xs font-semibold px-2 py-0.5 rounded-full border",
+                              color
+                            )}
+                          >
+                            {label}
+                          </span>
+                        </SelectItem>
+                      )
+                    )}
+                  </SelectContent>
+                </Select>
               </div>
+            </div>
 
-              {/* Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 pt-8">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => router.push("/jobs")}
-                  className="flex-1 h-11 rounded-2xl"
+            <div className="grid sm:grid-cols-2 gap-5">
+              <FieldWrapper
+                label="Salary Range"
+                hint="Optional"
+                error={errors.salary_range}
+                icon={<DollarSign className="w-4 h-4" />}
+              >
+                <input
+                  type="text"
+                  value={formData.salary_range}
+                  onChange={(e) => set("salary_range", e.target.value)}
                   disabled={isSubmitting}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  className="flex-1 h-11 bg-blue-600 hover:bg-blue-700 rounded-2xl"
+                  placeholder="e.g. USh 1,000,000 – 2,000,000"
+                  className={
+                    inputCls(errors.salary_range, isSubmitting) + " pl-9"
+                  }
+                />
+              </FieldWrapper>
+
+              <FieldWrapper
+                label="Expiry Date"
+                hint="Optional"
+                icon={<Calendar className="w-4 h-4" />}
+              >
+                <input
+                  type="date"
+                  value={formData.expires_at}
+                  onChange={(e) => set("expires_at", e.target.value)}
                   disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Updating...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="h-4 w-4 mr-2" />
-                      Update Job
-                    </>
-                  )}
-                </Button>
-              </div>
-            </form>
+                  min={new Date().toISOString().split("T")[0]}
+                  className={inputCls(undefined, isSubmitting) + " pl-9"}
+                />
+              </FieldWrapper>
+            </div>
+          </div>
+
+          {/* ── Description card ── */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-2">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                Job Description{" "}
+                <span className="text-red-500 font-normal normal-case">*</span>
+              </Label>
+              <span
+                className={cn(
+                  "text-xs font-medium",
+                  formData.description.length > 900
+                    ? "text-red-500"
+                    : "text-gray-400"
+                )}
+              >
+                {formData.description.length}/1000
+              </span>
+            </div>
+            <Textarea
+              value={formData.description}
+              onChange={(e) => set("description", e.target.value)}
+              rows={8}
+              placeholder="Describe the role, responsibilities, and what you're looking for..."
+              className={cn(
+                "resize-none border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors",
+                errors.description
+                  ? "border-red-300 bg-red-50/30"
+                  : "border-gray-200"
+              )}
+              disabled={isSubmitting}
+            />
+            {errors.description && (
+              <p className="text-red-500 text-xs">{errors.description}</p>
+            )}
+          </div>
+
+          {/* ── Requirements card ── */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-2">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                Requirements
+              </Label>
+              <span
+                className={cn(
+                  "text-xs font-medium",
+                  formData.requirements.length > 450
+                    ? "text-red-500"
+                    : "text-gray-400"
+                )}
+              >
+                {formData.requirements.length}/500
+              </span>
+            </div>
+            <Textarea
+              value={formData.requirements}
+              onChange={(e) => set("requirements", e.target.value)}
+              rows={6}
+              placeholder="List key skills, qualifications, and experience needed..."
+              className={cn(
+                "resize-none border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors",
+                errors.requirements
+                  ? "border-red-300 bg-red-50/30"
+                  : "border-gray-200"
+              )}
+              disabled={isSubmitting}
+            />
+            {errors.requirements && (
+              <p className="text-red-500 text-xs">{errors.requirements}</p>
+            )}
+          </div>
+
+          {/* ── Actions ── */}
+          <div className="flex flex-col sm:flex-row gap-3 pb-8">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.push("/jobs")}
+              className="flex-1 h-11 border-gray-200 rounded-xl font-semibold"
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex-1 h-11 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-sm hover:shadow-md transition-all"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Changes
+                </>
+              )}
+            </Button>
+          </div>
+        </form>
       </div>
     </div>
   );

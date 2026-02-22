@@ -5,7 +5,6 @@ import "./globals.css";
 import Navbar from "@/components/navbar";
 import ReduxProvider from "@/lib/redux/redux-provider";
 import { Toaster } from "sonner";
-import GoogleMapsScript from "@/components/google-map-script";
 import { GoogleMapsProvider } from "@/components/google-maps.provider";
 
 const playfairDisplay = Playfair_Display({

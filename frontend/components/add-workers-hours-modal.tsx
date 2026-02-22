@@ -5,6 +5,7 @@ import { X, Loader2, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useWorkforce } from "@/lib/redux/use-workforce";
+import { cn } from "@/lib/utils";
 
 interface AddWorkerHoursModalProps {
   isOpen: boolean;
@@ -20,6 +21,16 @@ interface ClockInData {
   timezone_offset: number;
   clock_out_time?: string;
 }
+
+const labelCls =
+  "block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5";
+const inputCls = (err?: boolean) =>
+  cn(
+    "w-full px-3 py-2.5 border rounded-xl text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+    err ? "border-red-300 bg-red-50/30" : "border-gray-200 bg-white"
+  );
+const selectCls =
+  "w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent";
 
 export const AddWorkerHoursModal = ({
   isOpen,
@@ -44,12 +55,12 @@ export const AddWorkerHoursModal = ({
       const now = new Date();
       const hours = now.getHours();
       const minutes = now.getMinutes();
-
       let hour12 = hours % 12;
       if (hour12 === 0) hour12 = 12;
-
       setClockInTime(
-        `${hour12.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`
+        `${hour12.toString().padStart(2, "0")}:${minutes
+          .toString()
+          .padStart(2, "0")}`
       );
       setClockInAMPM(hours >= 12 ? "PM" : "AM");
     }
@@ -59,19 +70,9 @@ export const AddWorkerHoursModal = ({
     if (!time12) return "";
     const [hoursStr, minutes] = time12.split(":");
     let hours = parseInt(hoursStr);
-
-    if (ampm === "PM" && hours !== 12) {
-      hours += 12;
-    } else if (ampm === "AM" && hours === 12) {
-      hours = 0;
-    }
-
+    if (ampm === "PM" && hours !== 12) hours += 12;
+    else if (ampm === "AM" && hours === 12) hours = 0;
     return `${hours.toString().padStart(2, "0")}:${minutes}`;
-  };
-
-  const formatTimeDisplay = (time12: string, ampm: "AM" | "PM"): string => {
-    if (!time12) return "";
-    return `${time12} ${ampm}`;
   };
 
   const handleSubmit = async () => {
@@ -79,7 +80,6 @@ export const AddWorkerHoursModal = ({
       toast.error("Please select a worker");
       return;
     }
-
     if (!clockInTime) {
       toast.error("Please enter clock in time");
       return;
@@ -91,20 +91,14 @@ export const AddWorkerHoursModal = ({
       const clockOut24 = clockOutTime
         ? convertTo24Hour(clockOutTime, clockOutAMPM)
         : "";
-
-      const timezoneOffset = -new Date().getTimezoneOffset();
-
       const clockInData: ClockInData = {
         staff_id: selectedStaffId,
         notes: clockInNotes,
         clock_in_time: clockIn24,
         date: clockInDate,
-        timezone_offset: timezoneOffset,
+        timezone_offset: -new Date().getTimezoneOffset(),
       };
-
-      if (clockOut24) {
-        clockInData.clock_out_time = clockOut24;
-      }
+      if (clockOut24) clockInData.clock_out_time = clockOut24;
 
       await clockIn(clockInData);
       toast.success(
@@ -112,14 +106,12 @@ export const AddWorkerHoursModal = ({
           ? "Worker hours recorded successfully"
           : "Worker clocked in successfully"
       );
-
       handleClose();
       onSuccess();
     } catch (error) {
-      const errorMessage = error instanceof Error
-        ? error.message
-        : "Failed to clock in worker";
-      toast.error(errorMessage);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to clock in worker"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -138,199 +130,201 @@ export const AddWorkerHoursModal = ({
 
   if (!isOpen) return null;
 
+  const AMPMToggle = ({
+    value,
+    onChange,
+    disabled,
+  }: {
+    value: "AM" | "PM";
+    onChange: (v: "AM" | "PM") => void;
+    disabled?: boolean;
+  }) => (
+    <div className="flex rounded-xl border border-gray-200 overflow-hidden shrink-0">
+      {(["AM", "PM"] as const).map((period, i) => (
+        <button
+          key={period}
+          type="button"
+          onClick={() => onChange(period)}
+          disabled={disabled}
+          className={cn(
+            "px-3 py-2.5 text-xs font-semibold transition-colors",
+            i === 1 && "border-l border-gray-200",
+            value === period
+              ? "bg-blue-600 text-white"
+              : "bg-white text-gray-600 hover:bg-gray-50"
+          )}
+        >
+          {period}
+        </button>
+      ))}
+    </div>
+  );
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] flex flex-col shadow-xl">
         {/* Header */}
-        <div className="p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Add Worker Hours
-            </h2>
-            <button
-              onClick={handleClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-              disabled={isSubmitting}
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+        <div className="px-6 py-5 border-b border-gray-100 shrink-0 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-gray-900">Add Worker Hours</h2>
+          <button
+            onClick={handleClose}
+            disabled={isSubmitting}
+            className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
-        {/* Form */}
-        <div className="p-6 space-y-4">
-          {/* Worker Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select Worker *
-            </label>
-            <select
-              value={selectedStaffId}
-              onChange={(e) => setSelectedStaffId(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-              disabled={isSubmitting}
-            >
-              <option value="">Choose a worker...</option>
-              {staff
-                .filter((s) => s.status === "ACTIVE")
-                .map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name} - {s.job_title}
-                  </option>
-                ))}
-            </select>
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+          {/* Assignment section */}
+          <div className="bg-gray-50 rounded-2xl p-4 space-y-4">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+              Assignment
+            </p>
+
+            <div>
+              <label className={labelCls}>
+                Worker{" "}
+                <span className="text-red-500 normal-case font-normal">*</span>
+              </label>
+              <select
+                value={selectedStaffId}
+                onChange={(e) => setSelectedStaffId(e.target.value)}
+                className={selectCls}
+                disabled={isSubmitting}
+              >
+                <option value="">Choose a worker...</option>
+                {staff
+                  .filter((s) => s.status === "ACTIVE")
+                  .map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} — {s.job_title}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            <div>
+              <label className={labelCls}>
+                Date{" "}
+                <span className="text-red-500 normal-case font-normal">*</span>
+              </label>
+              <input
+                type="date"
+                value={clockInDate}
+                onChange={(e) => setClockInDate(e.target.value)}
+                className={inputCls()}
+                disabled={isSubmitting}
+              />
+            </div>
           </div>
 
-          {/* Date */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Date *
-            </label>
-            <input
-              type="date"
-              value={clockInDate}
-              onChange={(e) => setClockInDate(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-              disabled={isSubmitting}
-            />
-          </div>
+          {/* Schedule section */}
+          <div className="bg-gray-50 rounded-2xl p-4 space-y-4">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+              Schedule
+            </p>
 
-          {/* Clock In Time */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Clock In Time *
-            </label>
-            <div className="space-y-2">
+            {/* Clock In */}
+            <div>
+              <label className={labelCls}>
+                Clock In Time{" "}
+                <span className="text-red-500 normal-case font-normal">*</span>
+              </label>
               <div className="flex gap-2">
                 <input
                   type="time"
                   value={clockInTime}
                   onChange={(e) => setClockInTime(e.target.value)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                  className={cn(inputCls(), "flex-1")}
                   disabled={isSubmitting}
                 />
-                <div className="flex rounded-lg border border-gray-300 overflow-hidden">
-                  <button
-                    type="button"
-                    onClick={() => setClockInAMPM("AM")}
-                    disabled={isSubmitting}
-                    className={`px-4 py-2 text-sm font-medium transition-colors ${
-                      clockInAMPM === "AM"
-                        ? "bg-blue-500 text-white"
-                        : "bg-white text-gray-700 hover:bg-gray-50"
-                    }`}
-                  >
-                    AM
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setClockInAMPM("PM")}
-                    disabled={isSubmitting}
-                    className={`px-4 py-2 text-sm font-medium transition-colors border-l border-gray-300 ${
-                      clockInAMPM === "PM"
-                        ? "bg-blue-500 text-white"
-                        : "bg-white text-gray-700 hover:bg-gray-50"
-                    }`}
-                  >
-                    PM
-                  </button>
-                </div>
+                <AMPMToggle
+                  value={clockInAMPM}
+                  onChange={setClockInAMPM}
+                  disabled={isSubmitting}
+                />
               </div>
               {clockInTime && (
-                <p className="text-xs text-blue-600 font-medium">
-                  Selected: {formatTimeDisplay(clockInTime, clockInAMPM)}
+                <p className="text-xs text-blue-600 font-medium mt-1.5">
+                  Selected: {clockInTime} {clockInAMPM}
                 </p>
               )}
             </div>
-          </div>
 
-          {/* Clock Out Time */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Clock Out Time (Optional)
-            </label>
-            <div className="space-y-2">
+            {/* Clock Out */}
+            <div>
+              <label className={labelCls}>
+                Clock Out Time{" "}
+                <span className="text-gray-300 normal-case font-normal">
+                  (optional)
+                </span>
+              </label>
               <div className="flex gap-2">
                 <input
                   type="time"
                   value={clockOutTime}
                   onChange={(e) => setClockOutTime(e.target.value)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                  placeholder="Optional"
+                  className={cn(inputCls(), "flex-1")}
                   disabled={isSubmitting}
                 />
-                <div className="flex rounded-lg border border-gray-300 overflow-hidden">
-                  <button
-                    type="button"
-                    onClick={() => setClockOutAMPM("AM")}
-                    disabled={isSubmitting}
-                    className={`px-4 py-2 text-sm font-medium transition-colors ${
-                      clockOutAMPM === "AM"
-                        ? "bg-blue-500 text-white"
-                        : "bg-white text-gray-700 hover:bg-gray-50"
-                    }`}
-                  >
-                    AM
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setClockOutAMPM("PM")}
-                    disabled={isSubmitting}
-                    className={`px-4 py-2 text-sm font-medium transition-colors border-l border-gray-300 ${
-                      clockOutAMPM === "PM"
-                        ? "bg-blue-500 text-white"
-                        : "bg-white text-gray-700 hover:bg-gray-50"
-                    }`}
-                  >
-                    PM
-                  </button>
-                </div>
+                <AMPMToggle
+                  value={clockOutAMPM}
+                  onChange={setClockOutAMPM}
+                  disabled={isSubmitting}
+                />
               </div>
               {clockOutTime && (
-                <p className="text-xs text-blue-600 font-medium">
-                  Selected: {formatTimeDisplay(clockOutTime, clockOutAMPM)}
+                <p className="text-xs text-blue-600 font-medium mt-1.5">
+                  Selected: {clockOutTime} {clockOutAMPM}
                 </p>
               )}
             </div>
-          </div>
 
-          {/* Notes */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Notes (Optional)
-            </label>
-            <textarea
-              value={clockInNotes}
-              onChange={(e) => setClockInNotes(e.target.value)}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors resize-none"
-              placeholder="Add any notes..."
-              disabled={isSubmitting}
-            />
+            {/* Notes */}
+            <div>
+              <label className={labelCls}>
+                Notes{" "}
+                <span className="text-gray-300 normal-case font-normal">
+                  (optional)
+                </span>
+              </label>
+              <textarea
+                value={clockInNotes}
+                onChange={(e) => setClockInNotes(e.target.value)}
+                rows={3}
+                className={cn(inputCls(), "resize-none")}
+                placeholder="Add any notes..."
+                disabled={isSubmitting}
+              />
+            </div>
           </div>
 
           {/* Tip */}
-          <div className="bg-blue-50 border border-blue-100 p-3 rounded-lg">
-            <p className="text-xs text-blue-800">
-              💡 <strong>Tip:</strong> Leave clock out time empty if the worker
-              is starting their shift now. You can clock them out later.
+          <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3">
+            <p className="text-xs text-blue-700">
+              <span className="font-semibold">Tip:</span> Leave clock out time
+              empty if the worker is starting their shift now. You can clock
+              them out later.
             </p>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-end space-x-3 sticky bottom-0">
+        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/60 rounded-b-2xl flex gap-3 shrink-0">
           <Button
             variant="outline"
             onClick={handleClose}
             disabled={isSubmitting}
+            className="flex-1 border-gray-200 h-10 rounded-xl font-semibold text-sm"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={isSubmitting || !selectedStaffId || !clockInTime}
-            className="bg-blue-500 hover:bg-blue-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-10 rounded-xl font-semibold text-sm shadow-sm disabled:opacity-50"
           >
             {isSubmitting ? (
               <>

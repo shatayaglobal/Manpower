@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,7 +22,7 @@ import {
   DollarSign,
   MapPin,
   Loader2,
-  ChevronDown,
+  Briefcase,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { usePosts } from "@/lib/redux/usePosts";
@@ -34,6 +33,7 @@ import {
   ACCOUNT_TYPES,
 } from "@/lib/types";
 import { AddressAutocomplete } from "@/components/address-auto-complete";
+import { cn } from "@/lib/utils";
 
 interface AuthState {
   user: {
@@ -45,19 +45,82 @@ interface AuthState {
   } | null;
   isAuthenticated: boolean;
 }
-
 interface RootState {
   auth: AuthState;
 }
-
 interface JobFormData extends Omit<CreatePostRequest, "image"> {
   is_active?: boolean;
 }
-
 interface JobCreationFormProps {
   onCancel?: () => void;
   onSuccess?: () => void;
 }
+
+const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
+  [PRIORITY_LEVELS.LOW]: {
+    label: "Low",
+    color: "bg-sky-50 text-sky-700 border-sky-200",
+  },
+  [PRIORITY_LEVELS.MEDIUM]: {
+    label: "Medium",
+    color: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  },
+  [PRIORITY_LEVELS.HIGH]: {
+    label: "High",
+    color: "bg-violet-50 text-violet-700 border-violet-200",
+  },
+  [PRIORITY_LEVELS.URGENT]: {
+    label: "Urgent",
+    color: "bg-red-50 text-red-700 border-red-200",
+  },
+};
+
+function FieldWrapper({
+  label,
+  required,
+  hint,
+  error,
+  icon,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  hint?: string;
+  error?: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">
+        {label}{" "}
+        {required && (
+          <span className="text-red-500 normal-case font-normal">*</span>
+        )}
+      </Label>
+      <div className="relative">
+        {icon && (
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 z-10">
+            {icon}
+          </div>
+        )}
+        <div
+          className={icon ? "[&>*]:pl-9 [&>input]:pl-9 [&>textarea]:pl-9" : ""}
+        >
+          {children}
+        </div>
+      </div>
+      {error && <p className="text-red-500 text-xs mt-1.5">{error}</p>}
+      {hint && !error && <p className="text-xs text-gray-400 mt-1.5">{hint}</p>}
+    </div>
+  );
+}
+
+const inputCls = (err?: string) =>
+  cn(
+    "w-full px-3 py-2.5 border rounded-xl text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed",
+    err ? "border-red-300 bg-red-50/30" : "border-gray-200 bg-white"
+  );
 
 export default function JobCreationForm({
   onCancel,
@@ -67,7 +130,6 @@ export default function JobCreationForm({
   const { user, isAuthenticated } = useSelector(
     (state: RootState) => state.auth
   );
-
   const { addPost, loading, error, clearPostError } = usePosts();
 
   const [formData, setFormData] = useState<JobFormData>({
@@ -82,508 +144,357 @@ export default function JobCreationForm({
     is_featured: false,
     is_active: true,
   });
-
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const isAuthorized = user?.account_type === ACCOUNT_TYPES.BUSINESS;
 
   if (!isAuthenticated || !isAuthorized) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="max-w-md mx-auto">
-          <CardContent className="p-6 text-center">
-            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Access Denied
-            </h3>
-            <p className="text-gray-600 mb-4">
-              You need a business account to create job postings.
-            </p>
-            <Button
-              variant="outline"
-              onClick={() => router.push("/jobs")}
-              className="w-full"
-            >
-              Back to Jobs
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center max-w-sm mx-4">
+          <div className="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="h-7 w-7 text-red-500" />
+          </div>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">
+            Access Denied
+          </h3>
+          <p className="text-gray-500 text-sm mb-5">
+            You need a business account to create job postings.
+          </p>
+          <Button
+            variant="outline"
+            onClick={() => router.push("/jobs")}
+            className="w-full border-gray-200 rounded-xl"
+          >
+            Back to Jobs
+          </Button>
+        </div>
       </div>
     );
   }
 
-  const handleInputChange = (field: keyof JobFormData, value: unknown) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-
-    if (errors[field]) {
-      setErrors((prev) => ({
-        ...prev,
-        [field]: "",
-      }));
-    }
+  const set = (field: keyof JobFormData, value: unknown) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.title.trim()) {
-      newErrors.title = "Job title is required";
-    } else if (formData.title.length > 250) {
-      newErrors.title = "Title must be less than 250 characters";
-    }
-
-    if (!formData.description.trim()) {
-      newErrors.description = "Job description is required";
-    } else if (formData.description.length > 1000) {
-      newErrors.description = "Description must be less than 1000 characters";
-    }
-
-    if (!formData.location?.trim()) {
-      newErrors.location = "Location is required";
-    } else if (formData.location && formData.location.length > 550) {
-      newErrors.location = "Location must be less than 550 characters";
-    }
-
-    if (formData.requirements && formData.requirements.length > 500) {
-      newErrors.requirements = "Requirements must be less than 500 characters";
-    }
-
-    if (formData.salary_range && formData.salary_range.length > 100) {
-      newErrors.salary_range = "Salary range must be less than 100 characters";
-    }
-
+  const validate = (): boolean => {
+    const e: Record<string, string> = {};
+    if (!formData.title.trim()) e.title = "Job title is required";
+    else if (formData.title.length > 250)
+      e.title = "Title must be less than 250 characters";
+    if (!formData.description.trim())
+      e.description = "Job description is required";
+    else if (formData.description.length > 1000)
+      e.description = "Description must be less than 1000 characters";
+    if (!formData.location?.trim()) e.location = "Location is required";
+    if (formData.requirements && formData.requirements.length > 500)
+      e.requirements = "Requirements must be less than 500 characters";
+    if (formData.salary_range && formData.salary_range.length > 100)
+      e.salary_range = "Salary range must be less than 100 characters";
     if (formData.expires_at) {
-      const expiryDate = new Date(formData.expires_at);
+      const d = new Date(formData.expires_at);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-
-      if (expiryDate < today) {
-        newErrors.expires_at = "Expiry date cannot be in the past";
-      }
+      if (d < today) e.expires_at = "Expiry date cannot be in the past";
     }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
+    if (!validate()) return;
     clearPostError();
-
     try {
-      const formDataPayload = new FormData();
-      formDataPayload.append("title", formData.title);
-      formDataPayload.append("description", formData.description);
-      formDataPayload.append("post_type", formData.post_type);
-      formDataPayload.append(
-        "priority",
-        formData.priority || PRIORITY_LEVELS.MEDIUM
-      );
-
-      if (formData.location) {
-        formDataPayload.append("location", formData.location);
-      }
-
-      if (formData.salary_range) {
-        formDataPayload.append("salary_range", formData.salary_range);
-      }
-
-      if (formData.requirements) {
-        formDataPayload.append("requirements", formData.requirements);
-      }
-
-      if (formData.expires_at) {
-        formDataPayload.append("expires_at", formData.expires_at);
-      }
-
-      formDataPayload.append(
-        "is_featured",
-        String(formData.is_featured || false)
-      );
-      formDataPayload.append("is_active", "true");
-
-      const result = await addPost(formDataPayload as FormData);
-
+      const fd = new FormData();
+      fd.append("title", formData.title);
+      fd.append("description", formData.description);
+      fd.append("post_type", formData.post_type);
+      fd.append("priority", formData.priority || PRIORITY_LEVELS.MEDIUM);
+      if (formData.location) fd.append("location", formData.location);
+      if (formData.salary_range)
+        fd.append("salary_range", formData.salary_range);
+      if (formData.requirements)
+        fd.append("requirements", formData.requirements);
+      if (formData.expires_at) fd.append("expires_at", formData.expires_at);
+      fd.append("is_featured", String(formData.is_featured || false));
+      fd.append("is_active", "true");
+      const result = await addPost(fd as FormData);
       if (result.type === "posts/createPost/fulfilled") {
-        if (onSuccess) {
-          onSuccess();
-        } else {
-          router.push("/jobs?success=created");
-        }
+        onSuccess ? onSuccess() : router.push("/jobs?success=created");
       }
     } catch {
-      //console.error("Error creating job:", error);
+      /* handled by redux */
     }
   };
 
-  const priorityOptions = [
-    {
-      value: PRIORITY_LEVELS.LOW,
-      label: "Low Priority",
-    },
-    {
-      value: PRIORITY_LEVELS.MEDIUM,
-      label: "Medium Priority",
-    },
-    {
-      value: PRIORITY_LEVELS.HIGH,
-      label: "High Priority",
-    },
-    {
-      value: PRIORITY_LEVELS.URGENT,
-      label: "Urgent",
-    },
-  ];
-
-  const postTypeOptions = [
-    {
-      value: POST_TYPES.JOB,
-      label: "Job Posting",
-    },
-    {
-      value: POST_TYPES.GENERAL,
-      label: "General Post/Announcement",
-    },
-    {
-      value: POST_TYPES.ANNOUNCEMENT,
-      label: "Announcement",
-    },
-  ];
+  const currentPriority =
+    PRIORITY_CONFIG[formData.priority ?? PRIORITY_LEVELS.MEDIUM];
 
   return (
-    <div className="bg-white rounded-lg p-2 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
-      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-10">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => (onCancel ? onCancel() : router.push("/jobs"))}
-              className="shrink-0 -mt-4"
-            >
-              <ArrowLeft className="h-6 w-6" />
-            </Button>
+    <div className="bg-gray-50 -ml-4 -mt-5 min-h-screen -mr-4">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8 max-w-8xl">
+        {/* ── Back nav ── */}
+        <button
+          onClick={() => (onCancel ? onCancel() : router.push("/jobs"))}
+          className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-900 transition-colors group mb-5"
+        >
+          <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+          Back to Jobs
+        </button>
 
-            <div className="min-w-0 flex-1">
-              <h1 className="text-3xl font-bold text-gray-900 leading-tight">
-                Create Job Posting
-              </h1>
-              <p className="text-gray-600 text-base">
-                Fill in the details below
-              </p>
-            </div>
-          </div>
+        {/* ── Header ── */}
+        <div className="bg-white rounded-2xl border border-gray-100 px-6 py-5 mb-5">
+          <h1 className="text-2xl font-bold text-gray-900">
+            Create Job Posting
+          </h1>
+          <p className="text-gray-500 text-sm mt-0.5">
+            Fill in the details below to publish a new listing
+          </p>
         </div>
 
+        {/* ── Error banner ── */}
         {error && (
-          <div className="mb-8 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <AlertCircle className="h-5 w-5 text-red-600" />
-              <div>
-                <p className="font-medium text-red-800">Error</p>
-                <p className="text-sm text-red-700">{error}</p>
-              </div>
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-5 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2.5">
+              <AlertCircle className="h-4 w-4 text-red-600 shrink-0" />
+              <p className="text-sm text-red-700">{error}</p>
             </div>
-            <Button variant="ghost" size="sm" onClick={clearPostError}>
+            <button
+              onClick={clearPostError}
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-100 transition-colors shrink-0"
+            >
               <X className="h-4 w-4" />
-            </Button>
+            </button>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Row 1: Job Title + Location */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Job Title */}
-            <div>
-              <Label htmlFor="title">
-                Job Title <span className="text-red-600">*</span>
-              </Label>
-              <div className="relative">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* ── Core details card ── */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+              Job Details
+            </p>
+
+            {/* Title + Location */}
+            <div className="grid sm:grid-cols-2 gap-5">
+              <FieldWrapper
+                label="Job Title"
+                required
+                error={errors.title}
+                icon={<Briefcase className="w-4 h-4" />}
+              >
                 <input
-                  id="title"
                   type="text"
                   value={formData.title}
-                  onChange={(e) => handleInputChange("title", e.target.value)}
+                  onChange={(e) => set("title", e.target.value)}
                   disabled={loading}
                   placeholder="e.g. Senior Frontend Developer"
-                  className={`
-                    w-full px-4 py-2.5 pl-11 pr-11 border rounded-lg
-                    transition-all duration-200 placeholder:text-gray-400
-                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                    disabled:bg-gray-100 disabled:cursor-not-allowed
-                    ${
-                      errors.title
-                        ? "border-red-300 focus:ring-red-300"
-                        : "border-gray-300"
-                    }
-                    ${loading ? "bg-gray-100" : "bg-white"}
-                  `}
+                  className={inputCls(errors.title) + " pl-9"}
                 />
-              </div>
-              {errors.title && (
-                <p className="mt-1 text-sm text-red-600">{errors.title}</p>
-              )}
-            </div>
+              </FieldWrapper>
 
-            {/* Job Location */}
-            <div>
-              <Label htmlFor="location">
-                Job Location <span className="text-red-600">*</span>
-              </Label>
-              <div className="relative">
+              <FieldWrapper
+                label="Location"
+                required
+                error={errors.location}
+                hint="Start typing to search"
+                icon={<MapPin className="w-4 h-4" />}
+              >
                 <AddressAutocomplete
                   value={formData.location || ""}
-                  onChange={(address) => handleInputChange("location", address)}
-                  onPlaceSelected={(place) =>
-                    handleInputChange("location", place.address)
-                  }
+                  onChange={(address) => set("location", address)}
+                  onPlaceSelected={(place) => set("location", place.address)}
                   placeholder="Search for job location..."
-                  className={`
-                    w-full px-4 py-2.5 pl-11 pr-11 border rounded-lg
-                    transition-all duration-200 placeholder:text-gray-400
-                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                    disabled:bg-gray-100 disabled:cursor-not-allowed
-                    ${
-                      errors.location
-                        ? "border-red-300 focus:ring-red-300"
-                        : "border-gray-300"
-                    }
-                    ${loading ? "bg-gray-100" : "bg-white"}
-                  `}
+                  className={inputCls(errors.location) + " pl-9"}
                 />
-              </div>
-              {errors.location && (
-                <p className="mt-1 text-sm text-red-600">{errors.location}</p>
-              )}
-              <p className="mt-1 text-xs text-gray-500">
-                Start typing to search for the workplace location
-              </p>
+              </FieldWrapper>
             </div>
-          </div>
 
-          {/* Row 2: Post Type + Priority Level */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Post Type */}
-            <div>
-              <Label>Post Type</Label>
-              <div className="relative">
+            {/* Post type + Priority */}
+            <div className="grid sm:grid-cols-2 gap-5">
+              <div>
+                <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">
+                  Post Type
+                </Label>
                 <Select
                   value={formData.post_type}
-                  onValueChange={(v) => handleInputChange("post_type", v)}
+                  onValueChange={(v) => set("post_type", v)}
                   disabled={loading}
                 >
-                  <SelectTrigger
-                    className={`
-                      w-full px-4 py-5 pl-11 pr-11 border rounded-lg
-                      transition-all duration-200
-                      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                       disabled:cursor-not-allowed
-                      ${loading ? "bg-gray-100 opacity-70" : "bg-white"}
-                      [&>span:last-child]:hidden
-                    `}
-                  >
-                    <SelectValue placeholder="Select post type" />
+                  <SelectTrigger className="w-full h-10 border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
+                    <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent>
-                    {postTypeOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        <div className="font-medium">{option.label}</div>
-                      </SelectItem>
-                    ))}
+                    <SelectItem value={POST_TYPES.JOB}>Job Posting</SelectItem>
+                    <SelectItem value={POST_TYPES.GENERAL}>
+                      General / Announcement
+                    </SelectItem>
+                    <SelectItem value={POST_TYPES.ANNOUNCEMENT}>
+                      Announcement
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-            </div>
 
-            {/* Priority Level */}
-            <div>
-              <Label>Priority Level</Label>
-              <div className="relative">
+              <div>
+                <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">
+                  Priority Level
+                </Label>
                 <Select
                   value={formData.priority}
-                  onValueChange={(v) => handleInputChange("priority", v)}
+                  onValueChange={(v) => set("priority", v)}
                   disabled={loading}
                 >
-                  <SelectTrigger
-                    className={`
-                      w-full px-4 py-5 pl-11 pr-11 border rounded-lg
-                      transition-all duration-200
-                      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                     disabled:cursor-not-allowed
-                      ${loading ? "bg-gray-100 opacity-70" : "bg-white"}
-                      [&>span:last-child]:hidden
-                    `}
-                  >
-                    <SelectValue placeholder="Select post type" />
+                  <SelectTrigger className="w-full h-10 border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
+                    <SelectValue>
+                      {formData.priority && (
+                        <span
+                          className={cn(
+                            "text-xs font-semibold px-2 py-0.5 rounded-full border",
+                            currentPriority.color
+                          )}
+                        >
+                          {currentPriority.label}
+                        </span>
+                      )}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    {priorityOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        <div className="font-medium">{option.label}</div>
-                      </SelectItem>
-                    ))}
+                    {Object.entries(PRIORITY_CONFIG).map(
+                      ([value, { label, color }]) => (
+                        <SelectItem key={value} value={value}>
+                          <span
+                            className={cn(
+                              "text-xs font-semibold px-2 py-0.5 rounded-full border",
+                              color
+                            )}
+                          >
+                            {label}
+                          </span>
+                        </SelectItem>
+                      )
+                    )}
                   </SelectContent>
                 </Select>
               </div>
             </div>
-          </div>
 
-          {/* Row 3: Salary Range + Expiry Date */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Salary Range */}
-            <div>
-              <Label htmlFor="salary_range">Salary Range</Label>
-              <div className="relative">
+            {/* Salary + Expiry */}
+            <div className="grid sm:grid-cols-2 gap-5">
+              <FieldWrapper
+                label="Salary Range"
+                hint="Optional"
+                error={errors.salary_range}
+                icon={<DollarSign className="w-4 h-4" />}
+              >
                 <input
-                  id="salary_range"
                   type="text"
                   value={formData.salary_range || ""}
-                  onChange={(e) =>
-                    handleInputChange("salary_range", e.target.value)
-                  }
+                  onChange={(e) => set("salary_range", e.target.value)}
                   disabled={loading}
-                  placeholder="e.g. USh 1,000,000 - 2,000,000"
-                  className={`
-                    w-full px-4 py-2.5 pl-11 pr-11 border rounded-lg
-                    transition-all duration-200 placeholder:text-gray-400
-                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                    disabled:bg-gray-100 disabled:cursor-not-allowed
-                    ${
-                      errors.salary_range
-                        ? "border-red-300 focus:ring-red-300"
-                        : "border-gray-300"
-                    }
-                    ${loading ? "bg-gray-100" : "bg-white"}
-                  `}
+                  placeholder="e.g. USh 1,000,000 – 2,000,000"
+                  className={inputCls(errors.salary_range) + " pl-9"}
                 />
-              </div>
-              {errors.salary_range && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.salary_range}
-                </p>
-              )}
-              <p className="mt-1 text-xs text-gray-500">Optional</p>
-            </div>
+              </FieldWrapper>
 
-            {/* Expiry Date */}
-            <div>
-              <Label htmlFor="expires_at">Expiry Date</Label>
-              <div className="relative">
+              <FieldWrapper
+                label="Expiry Date"
+                hint="Optional"
+                error={errors.expires_at}
+                icon={<Calendar className="w-4 h-4" />}
+              >
                 <input
-                  id="expires_at"
                   type="date"
                   value={formData.expires_at || ""}
-                  onChange={(e) =>
-                    handleInputChange("expires_at", e.target.value)
-                  }
+                  onChange={(e) => set("expires_at", e.target.value)}
                   disabled={loading}
                   min={new Date().toISOString().split("T")[0]}
-                  className={`
-                    w-full px-4 py-2.5 pl-11 pr-4 border rounded-lg
-                    transition-all duration-200
-                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                    disabled:bg-gray-100 disabled:cursor-not-allowed
-                    ${
-                      errors.expires_at
-                        ? "border-red-300 focus:ring-red-300"
-                        : "border-gray-300"
-                    }
-                    ${loading ? "bg-gray-100" : "bg-white"}
-                  `}
+                  className={inputCls(errors.expires_at) + " pl-9"}
                 />
-              </div>
-              {errors.expires_at && (
-                <p className="mt-1 text-sm text-red-600">{errors.expires_at}</p>
-              )}
-              <p className="mt-1 text-xs text-gray-500">Optional</p>
+              </FieldWrapper>
             </div>
           </div>
 
-          {/* Full-width Textareas */}
-          <div>
-            <Label htmlFor="description">
-              Job Description <span className="text-red-600">*</span>
-            </Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
-              rows={20}
-              placeholder="Describe the role, responsibilities, and what you're looking for..."
-              className={`
-                w-full px-4 py-3 border rounded-lg resize-none  min-h-30   h-30
-                transition-all duration-200
-                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                disabled:bg-gray-100 disabled:cursor-not-allowed
-                ${
-                  errors.description
-                    ? "border-red-300 focus:ring-red-300"
-                    : "border-gray-300"
-                }
-                ${loading ? "bg-gray-100" : "bg-white"}
-              `}
-              disabled={loading}
-            />
-            <div className="flex justify-end mt-1">
-              <p className="text-xs text-gray-500">
+          {/* ── Description card ── */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-2">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                Job Description{" "}
+                <span className="text-red-500 font-normal normal-case">*</span>
+              </Label>
+              <span
+                className={cn(
+                  "text-xs font-medium",
+                  formData.description.length > 900
+                    ? "text-red-500"
+                    : "text-gray-400"
+                )}
+              >
                 {formData.description.length}/1000
-              </p>
+              </span>
             </div>
-            {errors.description && (
-              <p className="mt-1 text-sm text-red-600">{errors.description}</p>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor="requirements">Requirements</Label>
             <Textarea
-              id="requirements"
-              value={formData.requirements || ""}
-              onChange={(e) =>
-                handleInputChange("requirements", e.target.value)
-              }
+              value={formData.description}
+              onChange={(e) => set("description", e.target.value)}
               rows={8}
-              placeholder="List key skills, qualifications, and experience needed..."
-              className={`
-                w-full px-4 py-3 border rounded-lg resize-none  min-h-30   h-30
-                transition-all duration-200
-                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                disabled:bg-gray-100 disabled:cursor-not-allowed
-                ${
-                  errors.requirements
-                    ? "border-red-300 focus:ring-red-300"
-                    : "border-gray-300"
-                }
-                ${loading ? "bg-gray-100" : "bg-white"}
-              `}
+              placeholder="Describe the role, responsibilities, and what you're looking for in the ideal candidate..."
+              className={cn(
+                "resize-none border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors",
+                errors.description
+                  ? "border-red-300 bg-red-50/30"
+                  : "border-gray-200"
+              )}
               disabled={loading}
             />
-            <div className="flex justify-end mt-1">
-              <p className="text-xs text-gray-500">
-                {(formData.requirements || "").length}/500
-              </p>
-            </div>
-            {errors.requirements && (
-              <p className="mt-1 text-sm text-red-600">{errors.requirements}</p>
+            {errors.description && (
+              <p className="text-red-500 text-xs">{errors.description}</p>
             )}
           </div>
 
-          {/* Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 pt-8">
+          {/* ── Requirements card ── */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-2">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                Requirements
+              </Label>
+              <span
+                className={cn(
+                  "text-xs font-medium",
+                  (formData.requirements?.length ?? 0) > 450
+                    ? "text-red-500"
+                    : "text-gray-400"
+                )}
+              >
+                {formData.requirements?.length ?? 0}/500
+              </span>
+            </div>
+            <Textarea
+              value={formData.requirements || ""}
+              onChange={(e) => set("requirements", e.target.value)}
+              rows={6}
+              placeholder="List key skills, qualifications, and experience — one per line works great..."
+              className={cn(
+                "resize-none border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors",
+                errors.requirements
+                  ? "border-red-300 bg-red-50/30"
+                  : "border-gray-200"
+              )}
+              disabled={loading}
+            />
+            {errors.requirements && (
+              <p className="text-red-500 text-xs">{errors.requirements}</p>
+            )}
+          </div>
+
+          {/* ── Action buttons ── */}
+          <div className="flex flex-col sm:flex-row gap-3 pb-8">
             <Button
               type="button"
               variant="outline"
               onClick={() => (onCancel ? onCancel() : router.push("/jobs"))}
-              className="flex-1 h-11 rounded-2xl"
+              className="flex-1 h-11 border-gray-200 rounded-xl font-semibold"
               disabled={loading}
             >
               Cancel
@@ -591,7 +502,7 @@ export default function JobCreationForm({
             <Button
               type="submit"
               disabled={loading}
-              className="flex-1 h-11 bg-blue-600 hover:bg-blue-700 rounded-2xl"
+              className="flex-1 h-11 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-sm hover:shadow-md transition-all"
             >
               {loading ? (
                 <>
@@ -601,7 +512,7 @@ export default function JobCreationForm({
               ) : (
                 <>
                   <Save className="h-4 w-4 mr-2" />
-                  Create Job Posting
+                  Publish Job Posting
                 </>
               )}
             </Button>

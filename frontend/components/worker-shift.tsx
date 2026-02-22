@@ -1,212 +1,299 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { Calendar, Clock, Coffee, Loader2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Calendar, Clock, Coffee } from "lucide-react";
 import { useWorkforce } from "@/lib/redux/use-workforce";
+import { cn } from "@/lib/utils";
 
-const MyShiftsPage = () => {
+const DAYS = [
+  "MONDAY",
+  "TUESDAY",
+  "WEDNESDAY",
+  "THURSDAY",
+  "FRIDAY",
+  "SATURDAY",
+  "SUNDAY",
+];
+
+const SHIFT_TYPE_CONFIG: Record<string, { label: string; color: string }> = {
+  MORNING: {
+    label: "Morning",
+    color: "bg-amber-50 text-amber-700 border-amber-200",
+  },
+  AFTERNOON: {
+    label: "Afternoon",
+    color: "bg-orange-50 text-orange-700 border-orange-200",
+  },
+  EVENING: {
+    label: "Evening",
+    color: "bg-violet-50 text-violet-700 border-violet-200",
+  },
+  NIGHT: { label: "Night", color: "bg-blue-50 text-blue-700 border-blue-200" },
+  FULL_DAY: {
+    label: "Full Day",
+    color: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  },
+};
+
+function formatTime(time: string) {
+  return new Date(`2000-01-01T${time}`).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+function getDuration(start: string, end: string) {
+  return (
+    (new Date(`2000-01-01T${end}`).getTime() -
+      new Date(`2000-01-01T${start}`).getTime()) /
+    (1000 * 60 * 60)
+  ).toFixed(1);
+}
+
+// ── Skeletons ─────────────────────────────────────────────────────────────────
+function StatSkeleton() {
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 p-5 animate-pulse h-24" />
+  );
+}
+
+function DaySkeleton() {
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-pulse">
+      <div className="h-11 bg-gray-50 border-b border-gray-100" />
+      <div className="p-5 space-y-2">
+        <div className="h-4 bg-gray-100 rounded w-1/3" />
+        <div className="h-3 bg-gray-100 rounded w-1/4" />
+      </div>
+    </div>
+  );
+}
+
+export default function MyShiftsPage() {
   const { myShifts, loadMyShifts } = useWorkforce();
-  const [loading, setLoading] = React.useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadMyShifts().finally(() => setLoading(false));
   }, [loadMyShifts]);
 
-  const daysOfWeek = [
-    "MONDAY",
-    "TUESDAY",
-    "WEDNESDAY",
-    "THURSDAY",
-    "FRIDAY",
-    "SATURDAY",
-    "SUNDAY",
-  ];
+  const getShiftsByDay = (day: string) =>
+    myShifts.filter((s) => s.day_of_week === day);
 
-  const getShiftsByDay = (day: string) => {
-    return myShifts.filter((shift) => shift.day_of_week === day);
-  };
+  const activeDays = DAYS.filter((d) => getShiftsByDay(d).length > 0).length;
+  const avgHours =
+    myShifts.length > 0
+      ? (
+          myShifts.reduce(
+            (sum, s) => sum + parseFloat(getDuration(s.start_time, s.end_time)),
+            0
+          ) / myShifts.length
+        ).toFixed(1)
+      : "0";
 
-  const getShiftTypeColor = (type: string) => {
-    const colors: Record<string, string> = {
-      MORNING: "bg-yellow-100 text-yellow-800 border-yellow-200",
-      AFTERNOON: "bg-orange-100 text-orange-800 border-orange-200",
-      EVENING: "bg-purple-100 text-purple-800 border-purple-200",
-      NIGHT: "bg-blue-100 text-blue-800 border-blue-200",
-      FULL_DAY: "bg-green-100 text-green-800 border-green-200",
-    };
-    return colors[type] || "bg-gray-100 text-gray-800 border-gray-200";
-  };
-
-  const formatTime = (time: string) => {
-    return new Date(`2000-01-01T${time}`).toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-      </div>
-    );
-  }
+  // Today's day name for highlighting
+  const todayName = new Date()
+    .toLocaleDateString("en-US", { weekday: "long" })
+    .toUpperCase();
 
   return (
-    <div className="bg-white rounded-lg p-2 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
-      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-            <Calendar className="w-8 h-8 text-blue-600" />
-            My Shifts
-          </h1>
-          <p className="text-gray-600 mt-2">Your weekly schedule</p>
+    <div className="bg-gray-50 -ml-4 -mt-5 min-h-screen -mr-4">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8 space-y-5">
+        {/* ── Header ── */}
+        <div className="bg-white rounded-2xl border border-gray-100 px-6 py-5">
+          <h1 className="text-2xl font-bold text-gray-900">My Shifts</h1>
+          <p className="text-gray-500 text-sm mt-0.5">Your weekly schedule</p>
         </div>
 
-        {/* Summary */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* Card 1: Total Shifts */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <p className="text-base text-gray-600">Total Shifts</p>
-            <p className="text-2xl font-bold text-gray-900 mt-2">
-              {myShifts.length}
-            </p>
+        {/* ── Stats row ── */}
+        {loading ? (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <StatSkeleton key={i} />
+            ))}
           </div>
-
-          {/* Card 2: This Week */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <p className="text-base text-gray-600">This Week</p>
-            <p className="text-2xl font-bold text-blue-600 mt-2">
-              {
-                daysOfWeek.filter((day) => getShiftsByDay(day).length > 0)
-                  .length
-              }
-            </p>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-white rounded-2xl border border-gray-100 p-5">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">
+                Total Shifts
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
+                {myShifts.length}
+              </p>
+            </div>
+            <div className="bg-white rounded-2xl border border-blue-100 p-5">
+              <p className="text-xs font-semibold text-blue-400 uppercase tracking-wide mb-1">
+                Active Days
+              </p>
+              <p className="text-2xl font-bold text-blue-700">{activeDays}</p>
+            </div>
+            <div className="bg-white rounded-2xl border border-emerald-100 p-5">
+              <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wide mb-1">
+                Avg Hours / Day
+              </p>
+              <p className="text-2xl font-bold text-emerald-700">
+                {avgHours}
+                <span className="text-sm font-normal text-gray-400 ml-1">
+                  hrs
+                </span>
+              </p>
+            </div>
+            <div className="bg-white rounded-2xl border border-violet-100 p-5">
+              <p className="text-xs font-semibold text-violet-400 uppercase tracking-wide mb-1">
+                Days Off
+              </p>
+              <p className="text-2xl font-bold text-violet-700">
+                {7 - activeDays}
+              </p>
+            </div>
           </div>
+        )}
 
-          {/* Card 3: Avg Hours/Day */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <p className="text-base text-gray-600">Avg Hours/Day</p>
-            <p className="text-2xl font-bold text-green-600 mt-2">
-              {myShifts.length > 0
-                ? (
-                    myShifts.reduce((sum, shift) => {
-                      const start = new Date(`2000-01-01T${shift.start_time}`);
-                      const end = new Date(`2000-01-01T${shift.end_time}`);
-                      return (
-                        sum +
-                        (end.getTime() - start.getTime()) / (1000 * 60 * 60)
-                      );
-                    }, 0) / myShifts.length
-                  ).toFixed(1)
-                : "0"}
-              h
-            </p>
+        {/* ── Weekly schedule ── */}
+        {loading ? (
+          <div className="space-y-3">
+            {[...Array(5)].map((_, i) => (
+              <DaySkeleton key={i} />
+            ))}
           </div>
-
-          {/* Card 4: Active Days */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <p className="text-base text-gray-600">Active Days</p>
-            <p className="text-2xl font-bold text-purple-600 mt-2">
-              {
-                daysOfWeek.filter((day) => getShiftsByDay(day).length > 0)
-                  .length
-              }
-            </p>
-          </div>
-        </div>
-
-        {/* Weekly Schedule */}
-        {myShifts.length === 0 ? (
-          <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-            <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+        ) : myShifts.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-gray-100 py-20 text-center">
+            <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Calendar className="w-8 h-8 text-gray-300" />
+            </div>
+            <h3 className="text-base font-semibold text-gray-900 mb-2">
               No shifts scheduled
             </h3>
-            <p className="text-gray-600">
-              Your shift schedule will appear here
+            <p className="text-gray-500 text-sm max-w-xs mx-auto">
+              Your shift schedule will appear here once assigned by your
+              employer.
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {daysOfWeek.map((day) => {
+          <div className="space-y-3">
+            {DAYS.map((day) => {
               const dayShifts = getShiftsByDay(day);
+              const isToday = day === todayName;
+              const hasShifts = dayShifts.length > 0;
 
               return (
                 <div
                   key={day}
-                  className="bg-white rounded-lg border border-gray-200 overflow-hidden"
+                  className={cn(
+                    "bg-white rounded-2xl border overflow-hidden transition-all",
+                    isToday
+                      ? "border-blue-200 shadow-sm shadow-blue-50"
+                      : "border-gray-100",
+                    !hasShifts && "opacity-60"
+                  )}
                 >
-                  <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
-                    <h3 className="font-semibold text-gray-900 capitalize">
-                      {day.toLowerCase()}
-                    </h3>
+                  {/* Day header */}
+                  <div
+                    className={cn(
+                      "px-5 py-3 flex items-center justify-between border-b",
+                      isToday
+                        ? "bg-blue-50 border-blue-100"
+                        : "bg-gray-50/60 border-gray-100"
+                    )}
+                  >
+                    <div className="flex items-center gap-2">
+                      <h3
+                        className={cn(
+                          "text-sm font-semibold capitalize",
+                          isToday ? "text-blue-700" : "text-gray-700"
+                        )}
+                      >
+                        {day.charAt(0) + day.slice(1).toLowerCase()}
+                      </h3>
+                      {isToday && (
+                        <span className="text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full border border-blue-200">
+                          Today
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-xs text-gray-400 font-medium">
+                      {hasShifts
+                        ? `${dayShifts.length} shift${
+                            dayShifts.length > 1 ? "s" : ""
+                          }`
+                        : "Day off"}
+                    </span>
                   </div>
 
-                  {dayShifts.length === 0 ? (
-                    <div className="px-6 py-8 text-center text-gray-500">
+                  {/* Shifts */}
+                  {!hasShifts ? (
+                    <div className="px-5 py-4 text-center text-xs text-gray-400">
                       No shifts scheduled
                     </div>
                   ) : (
-                    <div className="divide-y divide-gray-200">
-                      {dayShifts.map((shift) => (
-                        <div
-                          key={shift.id}
-                          className="p-6 hover:bg-gray-50 transition-colors"
-                        >
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-3 mb-3">
-                                <h4 className="text-lg font-medium text-gray-900">
-                                  {shift.name}
-                                </h4>
-                                <span
-                                  className={`px-2 py-1 rounded-full text-xs font-medium border ${getShiftTypeColor(
-                                    shift.shift_type
-                                  )}`}
-                                >
-                                  {shift.shift_type.replace("_", " ")}
-                                </span>
+                    <div className="divide-y divide-gray-50">
+                      {dayShifts.map((shift) => {
+                        const typeConfig = SHIFT_TYPE_CONFIG[
+                          shift.shift_type
+                        ] ?? {
+                          label: shift.shift_type,
+                          color: "bg-gray-50 text-gray-600 border-gray-200",
+                        };
+                        const duration = getDuration(
+                          shift.start_time,
+                          shift.end_time
+                        );
+
+                        return (
+                          <div
+                            key={shift.id}
+                            className="px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                          >
+                            <div className="flex items-start sm:items-center gap-3">
+                              {/* Time block */}
+                              <div
+                                className={cn(
+                                  "shrink-0 text-center px-3 py-2 rounded-xl border min-w-[90px]",
+                                  typeConfig.color
+                                )}
+                              >
+                                <p className="text-xs font-bold">
+                                  {formatTime(shift.start_time)}
+                                </p>
+                                <p className="text-xs opacity-70 mt-0.5">
+                                  {formatTime(shift.end_time)}
+                                </p>
                               </div>
 
-                              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
-                                <div className="flex items-center gap-1">
-                                  <Clock className="w-4 h-4" />
-                                  <span>
-                                    {formatTime(shift.start_time)} -{" "}
-                                    {formatTime(shift.end_time)}
+                              {/* Info */}
+                              <div>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <p className="font-semibold text-gray-900 text-sm">
+                                    {shift.name}
+                                  </p>
+                                  <span
+                                    className={cn(
+                                      "text-xs font-medium px-2 py-0.5 rounded-full border",
+                                      typeConfig.color
+                                    )}
+                                  >
+                                    {typeConfig.label}
                                   </span>
                                 </div>
-
-                                {shift.break_duration && (
-                                  <div className="flex items-center gap-1">
-                                    <Coffee className="w-4 h-4" />
-                                    <span>Break: {shift.break_duration}</span>
-                                  </div>
-                                )}
-
-                                <div className="flex items-center gap-1">
-                                  <span className="font-medium">Duration:</span>
-                                  <span>
-                                    {(
-                                      (new Date(
-                                        `2000-01-01T${shift.end_time}`
-                                      ).getTime() -
-                                        new Date(
-                                          `2000-01-01T${shift.start_time}`
-                                        ).getTime()) /
-                                      (1000 * 60 * 60)
-                                    ).toFixed(1)}
-                                    h
+                                <div className="flex items-center gap-3 mt-1 text-xs text-gray-400 flex-wrap">
+                                  <span className="flex items-center gap-1">
+                                    <Clock className="w-3 h-3" />
+                                    {duration}h duration
                                   </span>
+                                  {shift.break_duration && (
+                                    <span className="flex items-center gap-1">
+                                      <Coffee className="w-3 h-3" />
+                                      Break: {shift.break_duration}
+                                    </span>
+                                  )}
                                 </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -217,6 +304,4 @@ const MyShiftsPage = () => {
       </div>
     </div>
   );
-};
-
-export default MyShiftsPage;
+}

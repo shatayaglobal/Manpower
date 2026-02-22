@@ -7,14 +7,14 @@ import {
   Edit2,
   Trash2,
   Search,
-  Clock,
   AlertCircle,
   Loader2,
   ChevronDown,
   ChevronUp,
   MoreHorizontal,
   X,
-  Users,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,6 +37,111 @@ import { useBusiness } from "@/lib/redux/useBusiness";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import MultiSelect from "./multiple-shift-select";
+import { cn } from "@/lib/utils";
+
+type SortField = "name" | "shift_type" | "day_of_week" | "start_time";
+type SortDirection = "asc" | "desc";
+
+const SHIFT_TYPE_CONFIG: Record<ShiftType, { label: string; color: string }> = {
+  MORNING: {
+    label: "Morning",
+    color: "bg-amber-50 text-amber-700 border-amber-200",
+  },
+  AFTERNOON: {
+    label: "Afternoon",
+    color: "bg-orange-50 text-orange-700 border-orange-200",
+  },
+  EVENING: {
+    label: "Evening",
+    color: "bg-violet-50 text-violet-700 border-violet-200",
+  },
+  NIGHT: { label: "Night", color: "bg-blue-50 text-blue-700 border-blue-200" },
+  FULL_DAY: {
+    label: "Full Day",
+    color: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  },
+};
+
+const DAY_COLORS: Record<DayOfWeek, string> = {
+  MONDAY: "bg-blue-50 text-blue-700 border-blue-200",
+  TUESDAY: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  WEDNESDAY: "bg-amber-50 text-amber-700 border-amber-200",
+  THURSDAY: "bg-orange-50 text-orange-700 border-orange-200",
+  FRIDAY: "bg-violet-50 text-violet-700 border-violet-200",
+  SATURDAY: "bg-pink-50 text-pink-700 border-pink-200",
+  SUNDAY: "bg-red-50 text-red-700 border-red-200",
+};
+
+const DAY_ORDER: DayOfWeek[] = [
+  "MONDAY",
+  "TUESDAY",
+  "WEDNESDAY",
+  "THURSDAY",
+  "FRIDAY",
+  "SATURDAY",
+  "SUNDAY",
+];
+
+function ShiftTypeBadge({ type }: { type: ShiftType }) {
+  const c = SHIFT_TYPE_CONFIG[type] ?? SHIFT_TYPE_CONFIG.MORNING;
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border",
+        c.color
+      )}
+    >
+      {c.label}
+    </span>
+  );
+}
+
+function DayBadge({ day }: { day: DayOfWeek }) {
+  if (!day)
+    return (
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-gray-50 text-gray-500 border-gray-200">
+        N/A
+      </span>
+    );
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border",
+        DAY_COLORS[day]
+      )}
+    >
+      {day.charAt(0) + day.slice(1).toLowerCase()}
+    </span>
+  );
+}
+
+function RowSkeleton() {
+  return (
+    <div className="flex items-center gap-4 px-5 py-4 animate-pulse">
+      <div className="flex-1 space-y-2">
+        <div className="h-3.5 bg-gray-100 rounded w-1/4" />
+        <div className="h-3 bg-gray-100 rounded w-1/3" />
+      </div>
+      <div className="h-3 bg-gray-100 rounded w-20 hidden md:block" />
+      <div className="flex gap-1 hidden sm:flex">
+        <div className="h-5 w-14 bg-gray-100 rounded-full" />
+      </div>
+      <div className="h-5 w-16 bg-gray-100 rounded-full hidden md:block" />
+      <div className="h-3 bg-gray-100 rounded w-20 hidden lg:block" />
+      <div className="w-8 h-8 bg-gray-100 rounded-lg shrink-0" />
+    </div>
+  );
+}
+
+const labelCls =
+  "block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5";
+const inputCls = (err?: string) =>
+  cn(
+    "w-full px-3 py-2.5 border rounded-xl text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+    err ? "border-red-300 bg-red-50/30" : "border-gray-200 bg-white"
+  );
+const selectCls =
+  "w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent";
 
 interface ShiftModalProps {
   shift: Shift | null;
@@ -45,26 +150,352 @@ interface ShiftModalProps {
   staffList: BusinessStaff[];
 }
 
-type SortField = "name" | "shift_type" | "day_of_week" | "start_time";
-type SortDirection = "asc" | "desc";
+function ShiftModal({
+  shift,
+  onClose,
+  businessId,
+  staffList,
+}: ShiftModalProps) {
+  const { addShift, editShift, selectShift } = useWorkforce();
 
+  const [formData, setFormData] = useState<ShiftFormData>({
+    staff: shift?.staff
+      ? Array.isArray(shift.staff)
+        ? shift.staff
+        : [shift.staff]
+      : [],
+    name: shift?.name || "",
+    shift_type: shift?.shift_type || "MORNING",
+    day_of_week: shift?.day_of_week
+      ? Array.isArray(shift.day_of_week)
+        ? shift.day_of_week
+        : [shift.day_of_week]
+      : [],
+    start_time: shift?.start_time || "",
+    end_time: shift?.end_time || "",
+    break_duration: shift?.break_duration || "",
+    is_active: shift?.is_active !== undefined ? shift.is_active : true,
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (shift) {
+      const s = shift as Shift & { days?: DayOfWeek[] };
+      setFormData({
+        staff: Array.isArray(shift.staff)
+          ? shift.staff
+          : shift.staff
+          ? [shift.staff]
+          : [],
+        name: shift.name || "",
+        shift_type: shift.shift_type || "MORNING",
+        day_of_week: s.days
+          ? s.days
+          : Array.isArray(shift.day_of_week)
+          ? shift.day_of_week
+          : shift.day_of_week
+          ? [shift.day_of_week]
+          : [],
+        start_time: shift.start_time || "",
+        end_time: shift.end_time || "",
+        break_duration: shift.break_duration || "",
+        is_active: shift.is_active !== undefined ? shift.is_active : true,
+      });
+    }
+  }, [shift]);
+
+  const set = (k: keyof ShiftFormData, v: unknown) => {
+    setFormData((p) => ({ ...p, [k]: v }));
+    if (errors[k as string]) setErrors((p) => ({ ...p, [k]: "" }));
+  };
+
+  const validate = () => {
+    const e: Record<string, string> = {};
+    if (!formData.staff?.length)
+      e.staff = "At least one staff member is required";
+    if (!formData.name.trim()) e.name = "Shift name is required";
+    if (!formData.start_time) e.start_time = "Start time is required";
+    if (!formData.end_time) e.end_time = "End time is required";
+    if (
+      formData.start_time &&
+      formData.end_time &&
+      formData.start_time >= formData.end_time
+    )
+      e.end_time = "End time must be after start time";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const handleSubmit = async () => {
+    if (!validate()) return;
+    setSubmitting(true);
+    try {
+      const payload = { ...formData, business: businessId };
+      if (shift) {
+        await editShift(shift.id, payload);
+        toast.success("Shift updated!");
+      } else {
+        await addShift(payload);
+        toast.success("Shift created!");
+      }
+      onClose();
+      selectShift(null);
+    } catch (err) {
+      toast.error(
+        axios.isAxiosError(err)
+          ? err.response?.data?.detail || "Failed to save shift"
+          : "Failed to save shift"
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const timeAmPm = (t: string) =>
+    t ? (parseInt(t.split(":")[0]) >= 12 ? "PM" : "AM") : "";
+  const toggleAmPm = (field: "start_time" | "end_time", period: string) => {
+    const t = formData[field] as string;
+    if (!t) return;
+    const [h, m] = t.split(":").map(Number);
+    let hour = h;
+    if (period === "PM" && hour < 12) hour += 12;
+    if (period === "AM" && hour >= 12) hour -= 12;
+    set(
+      field,
+      `${String(hour).padStart(2, "0")}:${String(m).padStart(2, "0")}`
+    );
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-xl">
+        <div className="px-6 py-5 border-b border-gray-100 shrink-0 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-gray-900">
+            {shift ? "Edit Shift" : "Create New Shift"}
+          </h2>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+          {/* Assignment */}
+          <div className="bg-gray-50 rounded-2xl p-4 space-y-4">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+              Assignment
+            </p>
+            <div>
+              <label className={labelCls}>
+                Staff Members{" "}
+                <span className="text-red-500 normal-case font-normal">*</span>
+              </label>
+              <MultiSelect
+                options={staffList
+                  .filter((s) => s.status === "ACTIVE")
+                  .map((s) => ({
+                    value: s.id,
+                    label: `${s.name} — ${s.job_title}`,
+                  }))}
+                selected={formData.staff as string[]}
+                onChange={(vals) => set("staff", vals)}
+                placeholder="Select staff members"
+                error={!!errors.staff}
+              />
+              {errors.staff && (
+                <p className="text-red-500 text-xs mt-1">{errors.staff}</p>
+              )}
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className={labelCls}>
+                  Shift Name{" "}
+                  <span className="text-red-500 normal-case font-normal">
+                    *
+                  </span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => set("name", e.target.value)}
+                  placeholder="e.g. Morning Shift"
+                  className={inputCls(errors.name)}
+                />
+                {errors.name && (
+                  <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+                )}
+              </div>
+              <div>
+                <label className={labelCls}>Shift Type</label>
+                <select
+                  value={formData.shift_type as string}
+                  onChange={(e) =>
+                    set("shift_type", e.target.value as ShiftType)
+                  }
+                  className={selectCls}
+                >
+                  <option value="MORNING">Morning</option>
+                  <option value="AFTERNOON">Afternoon</option>
+                  <option value="EVENING">Evening</option>
+                  <option value="NIGHT">Night</option>
+                  <option value="FULL_DAY">Full Day</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className={labelCls}>Days of Week</label>
+              <MultiSelect
+                options={DAY_ORDER.map((d) => ({
+                  value: d,
+                  label: d.charAt(0) + d.slice(1).toLowerCase(),
+                }))}
+                selected={formData.day_of_week as string[]}
+                onChange={(vals) => set("day_of_week", vals as DayOfWeek[])}
+                placeholder="Select days"
+                error={!!errors.day_of_week}
+              />
+              {errors.day_of_week && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.day_of_week}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Schedule */}
+          <div className="bg-gray-50 rounded-2xl p-4 space-y-4">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+              Schedule
+            </p>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              {(["start_time", "end_time"] as const).map((field) => (
+                <div key={field}>
+                  <label className={labelCls}>
+                    {field === "start_time" ? "Start Time" : "End Time"}{" "}
+                    <span className="text-red-500 normal-case font-normal">
+                      *
+                    </span>
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="time"
+                      value={formData[field] as string}
+                      onChange={(e) => set(field, e.target.value)}
+                      className={cn(
+                        "flex-1 px-3 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+                        errors[field]
+                          ? "border-red-300 bg-red-50/30"
+                          : "border-gray-200 bg-white"
+                      )}
+                    />
+                    <select
+                      value={timeAmPm(formData[field] as string)}
+                      onChange={(e) => toggleAmPm(field, e.target.value)}
+                      className="px-2.5 py-2 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">--</option>
+                      <option value="AM">AM</option>
+                      <option value="PM">PM</option>
+                    </select>
+                  </div>
+                  {errors[field] && (
+                    <p className="text-red-500 text-xs mt-1">{errors[field]}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div>
+              <label className={labelCls}>
+                Break Duration{" "}
+                <span className="text-gray-300 normal-case font-normal">
+                  (optional)
+                </span>
+              </label>
+              <input
+                type="text"
+                value={formData.break_duration as string}
+                onChange={(e) => set("break_duration", e.target.value)}
+                placeholder="00:30:00 (HH:MM:SS)"
+                className={inputCls()}
+              />
+              <p className="text-xs text-gray-400 mt-1">
+                Format: HH:MM:SS — e.g. 00:30:00 for 30 minutes
+              </p>
+            </div>
+
+            <label className="flex items-center gap-3 cursor-pointer">
+              <div
+                className={cn(
+                  "w-9 h-5 rounded-full relative transition-colors",
+                  formData.is_active ? "bg-blue-600" : "bg-gray-200"
+                )}
+                onClick={() => set("is_active", !formData.is_active)}
+              >
+                <div
+                  className={cn(
+                    "absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all",
+                    formData.is_active ? "left-4" : "left-0.5"
+                  )}
+                />
+              </div>
+              <span className="text-sm font-medium text-gray-700">
+                Active shift
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/60 rounded-b-2xl flex gap-3 shrink-0">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            disabled={submitting}
+            className="flex-1 border-gray-200 h-10 rounded-xl font-semibold text-sm"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-10 rounded-xl font-semibold text-sm shadow-sm"
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                {shift ? "Updating..." : "Creating..."}
+              </>
+            ) : shift ? (
+              "Update Shift"
+            ) : (
+              "Create Shift"
+            )}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Main page ──────────────────────────────────────────────────────────────────
 const ShiftManagementPage: React.FC = () => {
-  const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
-  const [localSearchTerm, setLocalSearchTerm] = useState<string>("");
-  const [localDayFilter, setLocalDayFilter] = useState<string>("all");
-  const [localShiftTypeFilter, setLocalShiftTypeFilter] =
-    useState<string>("all");
-  const [localStaffFilter, setLocalStaffFilter] = useState<string>("all");
+  const [showModal, setShowModal] = useState(false);
+  const [search, setSearch] = useState("");
+  const [dayFilter, setDayFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [staffFilter, setStaffFilter] = useState("all");
   const [sortField, setSortField] = useState<SortField>("day_of_week");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [sortDir, setSortDir] = useState<SortDirection>("asc");
+  const [page, setPage] = useState(1);
   const itemsPerPage = 10;
 
-  const {
-    businesses,
-    loading: businessLoading,
-    loadBusinesses,
-  } = useBusiness();
+  const { businesses, loading: bizLoading, loadBusinesses } = useBusiness();
   const {
     shifts,
     selectedShift,
@@ -79,659 +510,139 @@ const ShiftManagementPage: React.FC = () => {
     clearShiftError,
   } = useWorkforce();
 
-  const business = businesses[0] || null;
-  const businessId = business?.id || "";
+  const business = businesses[0] ?? null;
+  const businessId = business?.id ?? "";
   const router = useRouter();
+
+  const reloadParams = {
+    page,
+    search,
+    day_of_week: (dayFilter === "all" ? "" : dayFilter) as DayOfWeek | "",
+    shift_type: (typeFilter === "all" ? "" : typeFilter) as ShiftType | "",
+    staff: staffFilter === "all" ? "" : staffFilter,
+    ordering: sortDir === "desc" ? `-${sortField}` : sortField,
+  };
 
   useEffect(() => {
     loadBusinesses();
   }, [loadBusinesses]);
-
   useEffect(() => {
-    if (businessId) {
-      loadStaff();
-    }
+    if (businessId) loadStaff();
   }, [businessId, loadStaff]);
-
   useEffect(() => {
-    if (businessId) {
-      loadShifts({
-        page: currentPage,
-        search: localSearchTerm,
-        day_of_week:
-          localDayFilter === "all" ? "" : (localDayFilter as DayOfWeek),
-        shift_type:
-          localShiftTypeFilter === "all"
-            ? ""
-            : (localShiftTypeFilter as ShiftType),
-        staff: localStaffFilter === "all" ? "" : localStaffFilter,
-        ordering: sortDirection === "desc" ? `-${sortField}` : sortField,
-      });
-    }
+    if (!businessId) return;
+    loadShifts({
+      page,
+      search,
+      day_of_week: (dayFilter === "all" ? "" : dayFilter) as DayOfWeek | "",
+      shift_type: (typeFilter === "all" ? "" : typeFilter) as ShiftType | "",
+      staff: staffFilter === "all" ? "" : staffFilter,
+      ordering: sortDir === "desc" ? `-${sortField}` : sortField,
+    });
   }, [
     businessId,
-    currentPage,
-    localSearchTerm,
-    localDayFilter,
-    localShiftTypeFilter,
-    localStaffFilter,
+    page,
+    search,
+    dayFilter,
+    typeFilter,
+    staffFilter,
     sortField,
-    sortDirection,
+    sortDir,
     loadShifts,
   ]);
-
   useEffect(() => {
-    setCurrentPage(1);
-  }, [localSearchTerm, localDayFilter, localShiftTypeFilter, localStaffFilter]);
+    setPage(1);
+  }, [search, dayFilter, typeFilter, staffFilter]);
 
-  const handleDeleteShift = async (shiftIds: string[], shiftName: string) => {
-    if (
-      window.confirm(`Are you sure you want to delete shift: ${shiftName}?`)
-    ) {
-      try {
-        await Promise.all(shiftIds.map((id) => removeShift(id)));
-        toast.success("Shift deleted successfully");
-        loadShifts({
-          page: currentPage,
-          search: localSearchTerm,
-          day_of_week:
-            localDayFilter === "all" ? "" : (localDayFilter as DayOfWeek),
-          shift_type:
-            localShiftTypeFilter === "all"
-              ? ""
-              : (localShiftTypeFilter as ShiftType),
-          staff: localStaffFilter === "all" ? "" : localStaffFilter,
-          ordering: sortDirection === "desc" ? `-${sortField}` : sortField,
-        });
-      } catch {
-        toast.error("Failed to delete shift");
-      }
+  const handleSort = (field: SortField) => {
+    if (sortField === field) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else {
+      setSortField(field);
+      setSortDir("asc");
+    }
+    setPage(1);
+  };
+
+  const handleDelete = async (ids: string[], name: string) => {
+    if (!window.confirm(`Delete shift: ${name}?`)) return;
+    try {
+      await Promise.all(ids.map((id) => removeShift(id)));
+      toast.success("Shift deleted");
+      loadShifts(reloadParams);
+    } catch {
+      toast.error("Failed to delete shift");
     }
   };
 
-  const handleEditShift = (
+  const handleEdit = (
     shift: Shift & { days: DayOfWeek[]; shift_ids: string[] }
   ) => {
-    const shiftToEdit: Shift = {
+    selectShift({
       ...shift,
       day_of_week: shift.days[0],
-    };
-
-    selectShift({
-      ...shiftToEdit,
       days: shift.days,
     } as Shift);
-
-    setShowCreateModal(true);
-  };
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortDirection("asc");
-    }
-    setCurrentPage(1);
+    setShowModal(true);
   };
 
-  const handleNextPage = () => {
-    if (shiftPagination.hasNext) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const handlePreviousPage = () => {
-    if (shiftPagination.hasPrevious) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const totalPages = Math.ceil(shiftPagination.count / itemsPerPage);
-
-  const getShiftTypeBadge = (type: ShiftType) => {
-    const typeConfig = {
-      MORNING: {
-        label: "Morning",
-        color: "bg-amber-50 text-amber-600 border border-amber-200",
-      },
-      AFTERNOON: {
-        label: "Afternoon",
-        color: "bg-orange-50 text-orange-600 border border-orange-200",
-      },
-      EVENING: {
-        label: "Evening",
-        color: "bg-purple-50 text-purple-600 border border-purple-200",
-      },
-      NIGHT: {
-        label: "Night",
-        color: "bg-blue-50 text-blue-500 border border-blue-200",
-      },
-      FULL_DAY: {
-        label: "Full Day",
-        color: "bg-green-50 text-green-600 border border-green-200",
-      },
-    };
-
-    const config = typeConfig[type] || typeConfig.MORNING;
-    return (
-      <span
-        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${config.color}`}
-      >
-        {config.label}
-      </span>
-    );
-  };
-
-  const getDayBadge = (day: DayOfWeek) => {
-    if (!day) {
-      return (
-        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-50 text-gray-600 border border-gray-200">
-          N/A
-        </span>
-      );
-    }
-
-    const dayColors: Record<DayOfWeek, string> = {
-      MONDAY: "bg-blue-50 text-blue-500 border border-blue-200",
-      TUESDAY: "bg-green-50 text-green-600 border border-green-200",
-      WEDNESDAY: "bg-amber-50 text-amber-600 border border-amber-200",
-      THURSDAY: "bg-orange-50 text-orange-600 border border-orange-200",
-      FRIDAY: "bg-purple-50 text-purple-600 border border-purple-200",
-      SATURDAY: "bg-pink-50 text-pink-600 border border-pink-200",
-      SUNDAY: "bg-red-50 text-red-600 border border-red-200",
-    };
-
-    return (
-      <span
-        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${dayColors[day]}`}
-      >
-        {day.charAt(0) + day.slice(1).toLowerCase()}
-      </span>
-    );
-  };
-
-  const groupShiftsByNameAndStaff = (shifts: Shift[]) => {
-    const grouped = shifts.reduce((acc, shift) => {
-      const key = `${shift.name}-${shift.staff}-${shift.shift_type}`;
-      if (!acc[key]) {
-        acc[key] = {
-          ...shift,
-          days: [shift.day_of_week],
-          shift_ids: [shift.id],
-        };
-      } else {
-        acc[key].days.push(shift.day_of_week);
-        acc[key].shift_ids.push(shift.id);
+  const groupShifts = (shifts: Shift[]) => {
+    const map = shifts.reduce((acc, s) => {
+      const key = `${s.name}-${s.staff}-${s.shift_type}`;
+      if (!acc[key])
+        acc[key] = { ...s, days: [s.day_of_week], shift_ids: [s.id] };
+      else {
+        acc[key].days.push(s.day_of_week);
+        acc[key].shift_ids.push(s.id);
       }
       return acc;
     }, {} as Record<string, Shift & { days: DayOfWeek[]; shift_ids: string[] }>);
-
-    return Object.values(grouped);
+    return Object.values(map);
   };
 
-  const SortableHeader = ({
-    field,
-    children,
-  }: {
-    field: SortField;
-    children: React.ReactNode;
-  }) => (
-    <th
-      className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
-      onClick={() => handleSort(field)}
-    >
-      <div className="flex items-center space-x-1">
-        <span>{children}</span>
-        {sortField === field &&
-          (sortDirection === "asc" ? (
-            <ChevronUp className="w-4 h-4" />
-          ) : (
-            <ChevronDown className="w-4 h-4" />
-          ))}
-      </div>
-    </th>
-  );
+  const totalPages = Math.ceil(shiftPagination.count / itemsPerPage);
+  const groupedShifts = groupShifts(shifts);
+  const hasFilters =
+    search ||
+    dayFilter !== "all" ||
+    typeFilter !== "all" ||
+    staffFilter !== "all";
 
-  const ShiftModal: React.FC<ShiftModalProps> = ({
-    shift,
-    onClose,
-    businessId,
-    staffList,
-  }) => {
-    const [formData, setFormData] = useState<ShiftFormData>({
-      staff: shift?.staff
-        ? Array.isArray(shift.staff)
-          ? shift.staff
-          : [shift.staff]
-        : [],
-      name: shift?.name || "",
-      shift_type: shift?.shift_type || "MORNING",
-      day_of_week: shift?.day_of_week
-        ? Array.isArray(shift.day_of_week)
-          ? shift.day_of_week
-          : [shift.day_of_week]
-        : [],
-      start_time: shift?.start_time || "",
-      end_time: shift?.end_time || "",
-      break_duration: shift?.break_duration || "",
-      is_active: shift?.is_active !== undefined ? shift.is_active : true,
-    });
-    const [errors, setErrors] = useState<Record<string, string>>({});
-    const [submitting, setSubmitting] = useState<boolean>(false);
-
-    const { addShift, editShift } = useWorkforce();
-
-    useEffect(() => {
-      if (shift) {
-        const shiftWithDays = shift as Shift & { days?: DayOfWeek[] };
-
-        setFormData({
-          staff: Array.isArray(shift.staff)
-            ? shift.staff
-            : shift.staff
-            ? [shift.staff]
-            : [],
-          name: shift.name || "",
-          shift_type: shift.shift_type || "MORNING",
-          day_of_week: shiftWithDays.days
-            ? shiftWithDays.days
-            : Array.isArray(shift.day_of_week)
-            ? shift.day_of_week
-            : shift.day_of_week
-            ? [shift.day_of_week]
-            : [],
-          start_time: shift.start_time || "",
-          end_time: shift.end_time || "",
-          break_duration: shift.break_duration || "",
-          is_active: shift.is_active !== undefined ? shift.is_active : true,
-        });
-      }
-    }, [shift]);
-
-    const validateForm = (): boolean => {
-      const newErrors: Record<string, string> = {};
-
-      if (!formData.staff) newErrors.staff = "Staff member is required";
-      if (!formData.name.trim()) newErrors.name = "Shift name is required";
-      if (!formData.start_time) newErrors.start_time = "Start time is required";
-      if (!formData.end_time) newErrors.end_time = "End time is required";
-
-      if (formData.start_time && formData.end_time) {
-        if (formData.start_time >= formData.end_time) {
-          newErrors.end_time = "End time must be after start time";
-        }
-      }
-
-      setErrors(newErrors);
-      return Object.keys(newErrors).length === 0;
-    };
-
-    const handleSubmit = async (): Promise<void> => {
-      if (!validateForm()) return;
-
-      setSubmitting(true);
-      try {
-        const submitData = {
-          ...formData,
-          business: businessId,
-        };
-
-        if (shift) {
-          await editShift(shift.id, submitData);
-          toast.success("Shift updated successfully!");
-        } else {
-          await addShift(submitData);
-          toast.success("Shift created successfully!");
-        }
-        onClose();
-        selectShift(null);
-        loadShifts({
-          page: currentPage,
-          search: localSearchTerm,
-          day_of_week:
-            localDayFilter === "all" ? "" : (localDayFilter as DayOfWeek),
-          shift_type:
-            localShiftTypeFilter === "all"
-              ? ""
-              : (localShiftTypeFilter as ShiftType),
-          staff: localStaffFilter === "all" ? "" : localStaffFilter,
-          ordering: sortDirection === "desc" ? `-${sortField}` : sortField,
-        });
-      } catch (error: unknown) {
-        let errorMessage = "Failed to save shift. Please try again.";
-
-        if (axios.isAxiosError(error)) {
-          errorMessage = error.response?.data?.detail || errorMessage;
-        }
-
-        toast.error(errorMessage);
-      } finally {
-        setSubmitting(false);
-      }
-    };
-
-    return (
-      <div className="fixed inset-0 bg-black/20 flex items-center justify-center p-4 z-50">
-        <div className="bg-white rounded-lg max-w-full w-full sm:max-w-lg md:max-w-2xl max-h-[90vh] overflow-y-auto">
-          <div className="p-4 sm:p-6 border-b border-gray-200">
-            <div className="flex justify-between items-center">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
-                {shift ? "Edit Shift" : "Create New Shift"}
-              </h2>
-              <button
-                onClick={onClose}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-
-          <div className="p-4 sm:p-6">
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Staff Members *
-                  </label>
-                  <MultiSelect
-                    options={staffList
-                      .filter((s) => s.status === "ACTIVE")
-                      .map((s) => ({
-                        value: s.id,
-                        label: `${s.name} - ${s.job_title}`,
-                      }))}
-                    selected={formData.staff}
-                    onChange={(values) =>
-                      setFormData({ ...formData, staff: values })
-                    }
-                    placeholder="Select staff members"
-                    error={!!errors.staff}
-                  />
-                  {errors.staff && (
-                    <p className="text-red-600 text-sm mt-1">{errors.staff}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Shift Name *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.name ? "border-red-300" : "border-gray-300"
-                    }`}
-                    placeholder="Morning Shift"
-                  />
-                  {errors.name && (
-                    <p className="text-red-600 text-sm mt-1">{errors.name}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Shift Type *
-                  </label>
-                  <select
-                    value={formData.shift_type}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        shift_type: e.target.value as ShiftType,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="MORNING">Morning</option>
-                    <option value="AFTERNOON">Afternoon</option>
-                    <option value="EVENING">Evening</option>
-                    <option value="NIGHT">Night</option>
-                    <option value="FULL_DAY">Full Day</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Days of Week *
-                  </label>
-                  <MultiSelect
-                    options={[
-                      { value: "MONDAY", label: "Monday" },
-                      { value: "TUESDAY", label: "Tuesday" },
-                      { value: "WEDNESDAY", label: "Wednesday" },
-                      { value: "THURSDAY", label: "Thursday" },
-                      { value: "FRIDAY", label: "Friday" },
-                      { value: "SATURDAY", label: "Saturday" },
-                      { value: "SUNDAY", label: "Sunday" },
-                    ]}
-                    selected={formData.day_of_week}
-                    onChange={(values) =>
-                      setFormData({
-                        ...formData,
-                        day_of_week: values as DayOfWeek[],
-                      })
-                    }
-                    placeholder="Select days"
-                    error={!!errors.day_of_week}
-                  />
-                  {errors.day_of_week && (
-                    <p className="text-red-600 text-sm mt-1">
-                      {errors.day_of_week}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div className="grid grid-cols-1 gap-4">
-                {/* Start Time */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Start Time *
-                  </label>
-                  <div className="flex gap-3">
-                    <input
-                      type="time"
-                      value={formData.start_time}
-                      onChange={(e) =>
-                        setFormData({ ...formData, start_time: e.target.value })
-                      }
-                      className={`flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.start_time ? "border-red-300" : "border-gray-300"
-                      }`}
-                    />
-                    {/* AM/PM Picker */}
-                    <select
-                      value={
-                        formData.start_time
-                          ? parseInt(formData.start_time.split(":")[0]) >= 12
-                            ? "PM"
-                            : "AM"
-                          : ""
-                      }
-                      onChange={(e) => {
-                        if (!formData.start_time) return;
-
-                        const [hourStr, minuteStr] =
-                          formData.start_time.split(":");
-                        let hour = parseInt(hourStr, 10);
-                        const minute = parseInt(minuteStr, 10);
-
-                        if (e.target.value === "PM" && hour < 12) hour += 12;
-                        if (e.target.value === "AM" && hour >= 12) hour -= 12;
-
-                        const newTime = `${hour
-                          .toString()
-                          .padStart(2, "0")}:${minute
-                          .toString()
-                          .padStart(2, "0")}`;
-
-                        setFormData({ ...formData, start_time: newTime });
-                      }}
-                      className={`w-24 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.start_time ? "border-red-300" : "border-gray-300"
-                      }`}
-                    >
-                      <option value="">--</option>
-                      <option value="AM">AM</option>
-                      <option value="PM">PM</option>
-                    </select>
-                  </div>
-                  {errors.start_time && (
-                    <p className="text-red-600 text-sm mt-1">
-                      {errors.start_time}
-                    </p>
-                  )}
-                </div>
-
-                {/* End Time */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    End Time *
-                  </label>
-                  <div className="flex gap-3">
-                    <input
-                      type="time"
-                      value={formData.end_time}
-                      onChange={(e) =>
-                        setFormData({ ...formData, end_time: e.target.value })
-                      }
-                      className={`flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.end_time ? "border-red-300" : "border-gray-300"
-                      }`}
-                    />
-                    {/* AM/PM Picker */}
-                    <select
-                      value={
-                        formData.end_time
-                          ? parseInt(formData.end_time.split(":")[0]) >= 12
-                            ? "PM"
-                            : "AM"
-                          : ""
-                      }
-                      onChange={(e) => {
-                        if (!formData.end_time) return;
-
-                        const [hourStr, minuteStr] =
-                          formData.end_time.split(":");
-                        let hour = parseInt(hourStr, 10);
-                        const minute = parseInt(minuteStr, 10);
-
-                        if (e.target.value === "PM" && hour < 12) hour += 12;
-                        if (e.target.value === "AM" && hour >= 12) hour -= 12;
-
-                        const newTime = `${hour
-                          .toString()
-                          .padStart(2, "0")}:${minute
-                          .toString()
-                          .padStart(2, "0")}`;
-
-                        setFormData({ ...formData, end_time: newTime });
-                      }}
-                      className={`w-24 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.end_time ? "border-red-300" : "border-gray-300"
-                      }`}
-                    >
-                      <option value="">--</option>
-                      <option value="AM">AM</option>
-                      <option value="PM">PM</option>
-                    </select>
-                  </div>
-                  {errors.end_time && (
-                    <p className="text-red-600 text-sm mt-1">
-                      {errors.end_time}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Break Duration (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={formData.break_duration}
-                  onChange={(e) =>
-                    setFormData({ ...formData, break_duration: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="00:30:00 (HH:MM:SS)"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Format: HH:MM:SS (e.g., 00:30:00 for 30 minutes)
-                </p>
-              </div>
-
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="is_active"
-                  checked={formData.is_active}
-                  onChange={(e) =>
-                    setFormData({ ...formData, is_active: e.target.checked })
-                  }
-                  className="w-4 h-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <label
-                  htmlFor="is_active"
-                  className="ml-2 text-sm font-medium text-gray-700"
-                >
-                  Active Shift
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <div className="px-4 sm:px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-end space-x-0 sm:space-x-3 gap-4 sm:gap-0">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              disabled={submitting}
-              className="w-full sm:w-auto border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600 min-w-[120px] py-3"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={submitting}
-              className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white min-w-[120px] py-3"
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin text-blue-500" />
-                  {shift ? "Updating..." : "Creating..."}
-                </>
-              ) : shift ? (
-                "Update Shift"
-              ) : (
-                "Create Shift"
-              )}
-            </Button>
-          </div>
-        </div>
-      </div>
+  function SortIcon({ field }: { field: SortField }) {
+    if (sortField !== field) return null;
+    return sortDir === "asc" ? (
+      <ChevronUp className="w-3.5 h-3.5 ml-1" />
+    ) : (
+      <ChevronDown className="w-3.5 h-3.5 ml-1" />
     );
-  };
-
-  if (!businessLoading && !business) {
+  }
+  function ColHeader({ field, label }: { field: SortField; label: string }) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16 text-center">
-          <AlertCircle className="w-16 sm:w-20 h-16 sm:h-20 text-amber-600 mx-auto mb-6" />
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
-            No Business Profile Found
+      <button
+        onClick={() => handleSort(field)}
+        className="flex items-center text-xs font-semibold text-gray-400 uppercase tracking-wide hover:text-gray-700 transition-colors"
+      >
+        {label}
+        <SortIcon field={field} />
+      </button>
+    );
+  }
+
+  if (!bizLoading && !business) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center max-w-sm mx-4">
+          <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-7 h-7 text-amber-600" />
+          </div>
+          <h2 className="text-lg font-bold text-gray-900 mb-2">
+            No Business Profile
           </h2>
-          <p className="text-base sm:text-lg text-gray-600 mb-8">
-            You need to create your business profile before managing shifts.
+          <p className="text-sm text-gray-500 mb-5">
+            Create your business profile before managing shifts.
           </p>
           <Button
             onClick={() => router.push("/business")}
-            className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white min-w-[160px] py-3"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold"
           >
             Create Business Profile
           </Button>
@@ -740,135 +651,113 @@ const ShiftManagementPage: React.FC = () => {
     );
   }
 
-  const activeShifts = shifts.filter((s) => s.is_active).length;
-  const groupedShifts = groupShiftsByNameAndStaff(shifts);
-  const totalGroupedShifts = groupedShifts.length;
-  const activeGroupedShifts = groupedShifts.filter((s) => s.is_active).length;
-
   return (
-    <div className="bg-white rounded-lg p-2 shadow-sm -ml-4 -mt-5 min-h-screen -mr-4">
-      <div className="max-w-full mx-auto px-2 sm:px-6 lg:px-8 py-8">
+    <div className="bg-gray-50 -ml-4 -mt-5 min-h-screen -mr-4">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8 space-y-5">
+        {/* Error */}
         {shiftError && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-            <div className="flex items-center">
-              <AlertCircle className="h-5 w-5 text-red-600 mr-2" />
-              <div>
-                <p className="text-sm text-red-600">{shiftError}</p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={clearShiftError}
-                  className="mt-2 border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
-                >
-                  Dismiss
-                </Button>
-              </div>
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2.5">
+              <AlertCircle className="h-4 w-4 text-red-600 shrink-0" />
+              <p className="text-sm text-red-700">{shiftError}</p>
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={clearShiftError}
+              className="border-red-200 text-red-700 hover:bg-red-100 shrink-0 h-8 px-3 text-xs rounded-xl"
+            >
+              Dismiss
+            </Button>
           </div>
         )}
 
-        <div className="mb-8 -mt-4">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-6">
-            <div className="flex-1">
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                Shift Management
-              </h1>
-              <p className="text-gray-600 text-sm sm:text-base mt-1">
-                Schedule and manage work shifts for your team
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto min-w-0">
-              <Button
-                onClick={() => {
-                  selectShift(null);
-                  setShowCreateModal(true);
-                }}
-                className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white shadow-sm min-w-[120px] py-3"
-              >
-                <Plus className="w-4 h-4 mr-2 text-amber-600" />
-                Create Shift
-              </Button>
-            </div>
+        {/* Header */}
+        <div className="bg-white rounded-2xl border border-gray-100 px-6 py-5 flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Shift Management
+            </h1>
+            <p className="text-gray-500 text-sm mt-0.5">
+              Schedule and manage work shifts for your team
+            </p>
           </div>
+          <Button
+            onClick={() => {
+              selectShift(null);
+              setShowModal(true);
+            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-4 rounded-xl font-semibold text-sm shadow-sm shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5 mr-1.5" />
+            Create Shift
+          </Button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          {/* Total Shifts */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-4 flex items-center gap-4 hover:shadow-md transition-shadow">
-            <div className="w-11 h-11 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Calendar className="w-6 h-6 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">
-                {totalGroupedShifts}
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-4">
+          {[
+            {
+              label: "Total Shifts",
+              value: groupedShifts.length,
+              border: "border-blue-100",
+              text: "text-gray-900",
+            },
+            {
+              label: "Active Shifts",
+              value: groupedShifts.filter((s) => s.is_active).length,
+              border: "border-emerald-100",
+              text: "text-emerald-700",
+            },
+            {
+              label: "Active Staff",
+              value: staff.filter((s) => s.status === "ACTIVE").length,
+              border: "border-violet-100",
+              text: "text-violet-700",
+            },
+          ].map(({ label, value, border, text }) => (
+            <div
+              key={label}
+              className={cn("bg-white rounded-2xl border p-5", border)}
+            >
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">
+                {label}
               </p>
-              <p className="text-sm text-gray-600">Total Shifts</p>
+              <p className={cn("text-2xl font-bold", text)}>{value}</p>
             </div>
-          </div>
-
-          {/* Active Shifts */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-4 flex items-center gap-4 hover:shadow-md transition-shadow">
-            <div className="w-11 h-11 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Clock className="w-6 h-6 text-green-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">
-                {activeGroupedShifts}
-              </p>
-              <p className="text-sm text-gray-600">Active Shifts</p>
-            </div>
-          </div>
-
-          {/* Active Staff */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-4 flex items-center gap-4 hover:shadow-md transition-shadow">
-            <div className="w-11 h-11 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Users className="w-6 h-6 text-purple-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">
-                {staff.filter((s) => s.status === "ACTIVE").length}
-              </p>
-              <p className="text-sm text-gray-600">Active Staff</p>
-            </div>
-          </div>
+          ))}
         </div>
-        <div className="mb-8">
-          <div className="flex flex-wrap items-center gap-4">
-            {/* Search Input */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
+
+        {/* Table card */}
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+          {/* Filters */}
+          <div className="flex flex-wrap items-center gap-3 px-5 py-3.5 border-b border-gray-50">
+            <div className="relative flex-1 min-w-[180px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Search shifts or staff..."
-                value={localSearchTerm}
-                onChange={(e) => setLocalSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
-
-            {/* Day Filter */}
-            <div className="flex items-center gap-2">
-              <select
-                value={localDayFilter}
-                onChange={(e) => setLocalDayFilter(e.target.value)}
-                className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-              >
-                <option value="all">All Days</option>
-                <option value="MONDAY">Monday</option>
-                <option value="TUESDAY">Tuesday</option>
-                <option value="WEDNESDAY">Wednesday</option>
-                <option value="THURSDAY">Thursday</option>
-                <option value="FRIDAY">Friday</option>
-                <option value="SATURDAY">Saturday</option>
-                <option value="SUNDAY">Sunday</option>
-              </select>
-            </div>
-
-            {/* Shift Type Filter */}
             <select
-              value={localShiftTypeFilter}
-              onChange={(e) => setLocalShiftTypeFilter(e.target.value)}
-              className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              value={dayFilter}
+              onChange={(e) => setDayFilter(e.target.value)}
+              className="h-9 px-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Days</option>
+              {DAY_ORDER.map((d) => (
+                <option key={d} value={d}>
+                  {d.charAt(0) + d.slice(1).toLowerCase()}
+                </option>
+              ))}
+            </select>
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              className="h-9 px-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Types</option>
               <option value="MORNING">Morning</option>
@@ -877,12 +766,10 @@ const ShiftManagementPage: React.FC = () => {
               <option value="NIGHT">Night</option>
               <option value="FULL_DAY">Full Day</option>
             </select>
-
-            {/* Staff Filter */}
             <select
-              value={localStaffFilter}
-              onChange={(e) => setLocalStaffFilter(e.target.value)}
-              className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              value={staffFilter}
+              onChange={(e) => setStaffFilter(e.target.value)}
+              className="h-9 px-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Staff</option>
               {staff
@@ -893,292 +780,241 @@ const ShiftManagementPage: React.FC = () => {
                   </option>
                 ))}
             </select>
-          </div>
-        </div>
-
-        {shiftLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-            <p className="ml-2 text-gray-600">Loading shifts...</p>
-          </div>
-        ) : shifts.length === 0 ? (
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 sm:p-12 text-center">
-            <Calendar className="w-16 sm:w-20 h-16 sm:h-20 text-gray-300 mx-auto mb-6" />
-            <h3 className="text-lg sm:text-xl font-medium text-gray-900 mb-3">
-              No shifts scheduled yet
-            </h3>
-            <p className="text-gray-600 text-sm sm:text-base mb-8 max-w-md mx-auto">
-              Start scheduling shifts for your team members.
-            </p>
-            <Button
-              onClick={() => {
-                selectShift(null);
-                setShowCreateModal(true);
-              }}
-              size="lg"
-              className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white shadow-sm min-w-[160px] py-3"
-            >
-              <Plus className="w-5 h-5 mr-2 text-amber-600" />
-              Create Your First Shift
-            </Button>
-          </div>
-        ) : (
-          <>
-            <div className="bg-white overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <SortableHeader field="name">Shift Name</SortableHeader>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
-                        Staff Member
-                      </th>
-                      <SortableHeader field="day_of_week">Day</SortableHeader>
-                      <SortableHeader field="shift_type">Type</SortableHeader>
-                      <SortableHeader field="start_time">Time</SortableHeader>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {groupShiftsByNameAndStaff(shifts).map((shift) => {
-                      const staffMember = staff.find(
-                        (s) => s.id === shift.staff
-                      );
-                      return (
-                        <tr
-                          key={shift.id}
-                          className="hover:bg-gray-50 transition-colors"
-                        >
-                          <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900 truncate">
-                              {shift.name}
-                            </div>
-                            <div className="text-xs text-gray-500 sm:hidden">
-                              {staffMember?.name || "N/A"} -{" "}
-                              {staffMember?.job_title || ""}
-                            </div>
-                          </td>
-                          <td className="px-4 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
-                            <div className="text-sm text-gray-900">
-                              {staffMember?.name || "N/A"}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {staffMember?.job_title}
-                            </div>
-                          </td>
-                          <td className="px-4 sm:px-6 py-4">
-                            <div className="flex flex-wrap gap-1">
-                              {shift.days
-                                .sort((a, b) => {
-                                  const dayOrder = [
-                                    "MONDAY",
-                                    "TUESDAY",
-                                    "WEDNESDAY",
-                                    "THURSDAY",
-                                    "FRIDAY",
-                                    "SATURDAY",
-                                    "SUNDAY",
-                                  ];
-                                  return (
-                                    dayOrder.indexOf(a) - dayOrder.indexOf(b)
-                                  );
-                                })
-                                .map((day) => (
-                                  <span key={day}>{getDayBadge(day)}</span>
-                                ))}
-                            </div>
-                          </td>
-                          <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                            {getShiftTypeBadge(shift.shift_type)}
-                          </td>
-                          <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">
-                              {shift.start_time} - {shift.end_time}
-                            </div>
-                            {shift.break_duration && (
-                              <div className="text-xs text-gray-500">
-                                Break: {shift.break_duration}
-                              </div>
-                            )}
-                          </td>
-                          <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                            {shift.is_active ? (
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-50 text-green-600 border border-green-200">
-                                Active
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-50 text-gray-600 border border-gray-200">
-                                Inactive
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">
-                                  <MoreHorizontal className="w-4 h-4 text-blue-500" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                  onClick={() => handleEditShift(shift)}
-                                >
-                                  <Edit2 className="w-4 h-4 mr-2 text-blue-500" />
-                                  Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  className="text-red-600"
-                                  onClick={() =>
-                                    handleDeleteShift(
-                                      shift.shift_ids,
-                                      shift.name
-                                    )
-                                  }
-                                >
-                                  <Trash2 className="w-4 h-4 mr-2 text-red-600" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {shiftPagination.count > itemsPerPage && (
-              <div className="bg-white px-4 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 sm:px-6 mt-4 rounded-lg gap-4 sm:gap-0">
-                <div className="flex-1 flex justify-between sm:hidden">
-                  <Button
-                    onClick={handlePreviousPage}
-                    disabled={!shiftPagination.hasPrevious || shiftLoading}
-                    variant="outline"
-                    className="w-full sm:w-auto border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600 min-w-[120px] py-3"
-                  >
-                    Previous
-                  </Button>
-                  <span className="text-sm text-gray-700">
-                    Page {currentPage} of {totalPages}
-                  </span>
-                  <Button
-                    onClick={handleNextPage}
-                    disabled={!shiftPagination.hasNext || shiftLoading}
-                    variant="outline"
-                    className="w-full sm:w-auto border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600 min-w-[120px] py-3"
-                  >
-                    Next
-                  </Button>
-                </div>
-                <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-sm text-gray-700">
-                      Showing{" "}
-                      <span className="font-medium">
-                        {(currentPage - 1) * itemsPerPage + 1}
-                      </span>{" "}
-                      -{" "}
-                      <span className="font-medium">
-                        {Math.min(
-                          currentPage * itemsPerPage,
-                          shiftPagination.count
-                        )}
-                      </span>{" "}
-                      of{" "}
-                      <span className="font-medium">
-                        {shiftPagination.count}
-                      </span>{" "}
-                      results
-                    </p>
-                  </div>
-                  <div>
-                    <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                      <Button
-                        onClick={handlePreviousPage}
-                        disabled={!shiftPagination.hasPrevious || shiftLoading}
-                        variant="outline"
-                        className="rounded-r-none border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
-                      >
-                        Previous
-                      </Button>
-                      {Array.from({ length: totalPages }, (_, i) => i + 1)
-                        .filter((page) => {
-                          return (
-                            page === 1 ||
-                            page === totalPages ||
-                            (page >= currentPage - 2 && page <= currentPage + 2)
-                          );
-                        })
-                        .map((page, index, array) => {
-                          if (index > 0 && page - array[index - 1] > 1) {
-                            return (
-                              <React.Fragment key={`ellipsis-${page}`}>
-                                <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
-                                  ...
-                                </span>
-                                <Button
-                                  onClick={() => setCurrentPage(page)}
-                                  variant={
-                                    currentPage === page ? "default" : "outline"
-                                  }
-                                  className="rounded-none border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
-                                  disabled={shiftLoading}
-                                >
-                                  {page}
-                                </Button>
-                              </React.Fragment>
-                            );
-                          }
-                          return (
-                            <Button
-                              key={page}
-                              onClick={() => setCurrentPage(page)}
-                              variant={
-                                currentPage === page ? "default" : "outline"
-                              }
-                              className="rounded-none border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
-                              disabled={shiftLoading}
-                            >
-                              {page}
-                            </Button>
-                          );
-                        })}
-                      <Button
-                        onClick={handleNextPage}
-                        disabled={!shiftPagination.hasNext || shiftLoading}
-                        variant="outline"
-                        className="rounded-l-none border-gray-300 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
-                      >
-                        Next
-                      </Button>
-                    </nav>
-                  </div>
-                </div>
-              </div>
+            {hasFilters && (
+              <button
+                onClick={() => {
+                  setSearch("");
+                  setDayFilter("all");
+                  setTypeFilter("all");
+                  setStaffFilter("all");
+                }}
+                className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors whitespace-nowrap"
+              >
+                Clear filters
+              </button>
             )}
-          </>
-        )}
+            <span className="ml-auto text-xs text-gray-400 font-medium whitespace-nowrap">
+              {groupedShifts.length}{" "}
+              {groupedShifts.length === 1 ? "shift" : "shifts"}
+            </span>
+          </div>
 
-        {showCreateModal && (
-          <ShiftModal
-            shift={selectedShift}
-            businessId={businessId}
-            staffList={staff}
-            onClose={() => {
-              setShowCreateModal(false);
-              selectShift(null);
-            }}
-          />
-        )}
+          {shiftLoading ? (
+            <div className="divide-y divide-gray-50">
+              {[...Array(5)].map((_, i) => (
+                <RowSkeleton key={i} />
+              ))}
+            </div>
+          ) : shifts.length === 0 ? (
+            <div className="text-center py-20">
+              <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Calendar className="w-8 h-8 text-gray-300" />
+              </div>
+              <h3 className="text-base font-semibold text-gray-900 mb-2">
+                No shifts found
+              </h3>
+              <p className="text-sm text-gray-500 max-w-xs mx-auto mb-5">
+                {hasFilters
+                  ? "Try adjusting your filters."
+                  : "Start scheduling shifts for your team members."}
+              </p>
+              {!hasFilters && (
+                <Button
+                  onClick={() => {
+                    selectShift(null);
+                    setShowModal(true);
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-5 rounded-xl font-semibold text-sm"
+                >
+                  <Plus className="w-3.5 h-3.5 mr-1.5" />
+                  Create First Shift
+                </Button>
+              )}
+            </div>
+          ) : (
+            <>
+              {/* Column headers */}
+              <div className="hidden lg:grid grid-cols-[2fr_1.5fr_2fr_1fr_1.5fr_1fr_auto] gap-4 px-5 py-2.5 bg-gray-50/60 border-b border-gray-50">
+                <ColHeader field="name" label="Shift Name" />
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                  Staff
+                </span>
+                <ColHeader field="day_of_week" label="Days" />
+                <ColHeader field="shift_type" label="Type" />
+                <ColHeader field="start_time" label="Time" />
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                  Status
+                </span>
+                <span />
+              </div>
+
+              <div className="divide-y divide-gray-50">
+                {groupedShifts.map((shift) => {
+                  const member = staff.find((s) => s.id === shift.staff);
+                  return (
+                    <div
+                      key={shift.id}
+                      className="grid grid-cols-[1fr_auto] lg:grid-cols-[2fr_1.5fr_2fr_1fr_1.5fr_1fr_auto] gap-4 items-center px-5 py-4 hover:bg-gray-50/60 transition-colors"
+                    >
+                      {/* Name */}
+                      <div className="min-w-0">
+                        <p className="font-semibold text-sm text-gray-900 truncate">
+                          {shift.name}
+                        </p>
+                        <p className="text-xs text-gray-400 truncate lg:hidden">
+                          {member?.name || "—"}
+                        </p>
+                        <div className="flex gap-1.5 mt-1 lg:hidden flex-wrap">
+                          <ShiftTypeBadge type={shift.shift_type} />
+                        </div>
+                      </div>
+
+                      <div className="hidden lg:block text-sm text-gray-700 truncate">
+                        <p className="font-medium truncate">
+                          {member?.name || "—"}
+                        </p>
+                        <p className="text-xs text-gray-400 truncate">
+                          {member?.job_title}
+                        </p>
+                      </div>
+
+                      <div className="hidden lg:flex flex-wrap gap-1">
+                        {[...shift.days]
+                          .sort(
+                            (a, b) =>
+                              DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b)
+                          )
+                          .map((d) => (
+                            <DayBadge key={d} day={d} />
+                          ))}
+                      </div>
+
+                      <div className="hidden lg:block">
+                        <ShiftTypeBadge type={shift.shift_type} />
+                      </div>
+
+                      <div className="hidden lg:block">
+                        <p className="text-sm text-gray-700 whitespace-nowrap">
+                          {shift.start_time} – {shift.end_time}
+                        </p>
+                        {shift.break_duration && (
+                          <p className="text-xs text-gray-400">
+                            Break: {shift.break_duration}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="hidden lg:block">
+                        <span
+                          className={cn(
+                            "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border",
+                            shift.is_active
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              : "bg-gray-50 text-gray-500 border-gray-200"
+                          )}
+                        >
+                          {shift.is_active ? "Active" : "Inactive"}
+                        </span>
+                      </div>
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button className="w-8 h-8 rounded-xl border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:border-gray-300 transition-colors">
+                            <MoreHorizontal className="w-4 h-4" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="rounded-xl">
+                          <DropdownMenuItem onClick={() => handleEdit(shift)}>
+                            <Edit2 className="w-4 h-4 mr-2" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-red-600"
+                            onClick={() =>
+                              handleDelete(shift.shift_ids, shift.name)
+                            }
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Pagination */}
+              {shiftPagination.count > itemsPerPage && (
+                <div className="flex items-center justify-between px-5 py-3.5 border-t border-gray-50">
+                  <p className="text-xs text-gray-400">
+                    {(page - 1) * itemsPerPage + 1}–
+                    {Math.min(page * itemsPerPage, shiftPagination.count)} of{" "}
+                    {shiftPagination.count}
+                  </p>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => setPage((p) => p - 1)}
+                      disabled={!shiftPagination.hasPrevious || shiftLoading}
+                      className="w-8 h-8 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500 hover:border-blue-200 hover:text-blue-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                      .filter(
+                        (p) =>
+                          p === 1 ||
+                          p === totalPages ||
+                          (p >= page - 1 && p <= page + 1)
+                      )
+                      .map((p, i, arr) => (
+                        <React.Fragment key={p}>
+                          {i > 0 && p - arr[i - 1] > 1 && (
+                            <span className="text-xs text-gray-300 px-1">
+                              …
+                            </span>
+                          )}
+                          <button
+                            onClick={() => setPage(p)}
+                            disabled={shiftLoading}
+                            className={cn(
+                              "w-8 h-8 rounded-xl text-xs font-semibold border transition-colors",
+                              page === p
+                                ? "bg-blue-600 text-white border-blue-600"
+                                : "border-gray-200 text-gray-600 hover:border-blue-200 hover:text-blue-600"
+                            )}
+                          >
+                            {p}
+                          </button>
+                        </React.Fragment>
+                      ))}
+                    <button
+                      onClick={() => setPage((p) => p + 1)}
+                      disabled={!shiftPagination.hasNext || shiftLoading}
+                      className="w-8 h-8 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500 hover:border-blue-200 hover:text-blue-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
+
+      {showModal && (
+        <ShiftModal
+          shift={selectedShift}
+          businessId={businessId}
+          staffList={staff}
+          onClose={() => {
+            setShowModal(false);
+            selectShift(null);
+          }}
+        />
+      )}
     </div>
   );
 };

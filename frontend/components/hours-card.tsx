@@ -20,6 +20,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useWorkforce } from "@/lib/redux/use-workforce";
 import { HoursCard } from "@/lib/workforce-types";
@@ -28,6 +29,7 @@ import { useBusiness } from "@/lib/redux/useBusiness";
 import { useRouter } from "next/navigation";
 import { AddWorkerHoursModal } from "./add-workers-hours-modal";
 import { HoursCardDetailsModal } from "./workers-hours-details-modal";
+import { cn } from "@/lib/utils";
 
 const HoursManagementPage = () => {
   const [currentPage] = useState(1);
@@ -85,49 +87,50 @@ const HoursManagementPage = () => {
       const now = new Date();
       const inTime = new Date(h.clock_in_datetime);
       if (inTime.toDateString() === now.toDateString()) {
-        const diff = (now.getTime() - inTime.getTime()) / (1000 * 60 * 60);
-        return Math.max(0, diff);
+        return Math.max(
+          0,
+          (now.getTime() - inTime.getTime()) / (1000 * 60 * 60)
+        );
       }
     }
-
     return h.total_hours_decimal ?? 0;
   };
 
   const getStatusBadge = (h: HoursCard) => {
     if (h.clock_in && !h.clock_out) {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">
+          <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
           Present
         </span>
       );
     }
     if (h.status === "PENDING") {
       return (
-        <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-amber-50 text-amber-700 border-amber-200">
           Awaiting Signature
         </span>
       );
     }
     if (h.status === "SIGNED") {
       return (
-        <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-blue-50 text-blue-700 border-blue-200">
           Awaiting Approval
         </span>
       );
     }
     if (h.status === "APPROVED") {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-          <CheckCircle className="w-3.5 h-3.5" />
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">
+          <CheckCircle className="w-3 h-3" />
           Approved
         </span>
       );
     }
     if (h.status === "REJECTED") {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-          <XCircle className="w-3.5 h-3.5" />
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-red-50 text-red-700 border-red-200">
+          <XCircle className="w-3 h-3" />
           Rejected
         </span>
       );
@@ -145,7 +148,6 @@ const HoursManagementPage = () => {
         totalHours: number;
       }
     >();
-
     hoursCards.forEach((card) => {
       const key = card.staff || card.staff_name || "unknown";
       if (!map.has(key)) {
@@ -160,25 +162,19 @@ const HoursManagementPage = () => {
       group.entries.push(card);
       group.totalHours += calculateTotalHours(card);
     });
-
     map.forEach((group) => {
       group.entries.sort(
-        (a: HoursCard, b: HoursCard) =>
-          new Date(b.date).getTime() - new Date(a.date).getTime()
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
       );
     });
-
     return Array.from(map.values());
   }, [hoursCards]);
 
   useEffect(() => {
     loadBusinesses();
   }, [loadBusinesses]);
-
   useEffect(() => {
-    if (businessId) {
-      loadStaff();
-    }
+    if (businessId) loadStaff();
   }, [businessId, loadStaff]);
 
   const toggleExpand = (workerId: string) => {
@@ -214,7 +210,6 @@ const HoursManagementPage = () => {
 
   const handleReject = async () => {
     if (!selectedHours || !rejectionReason.trim()) return;
-
     try {
       await approveSignedHoursCard(
         selectedHours.id,
@@ -244,17 +239,25 @@ const HoursManagementPage = () => {
     .filter((h) => h.status === "APPROVED")
     .reduce((sum, h) => sum + (h.total_hours_decimal || 0), 0);
 
+  // ── No business guard ──────────────────────────────────────────────────────
   if (!businessLoading && !business) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <AlertCircle className="w-20 h-20 text-yellow-500 mx-auto mb-6" />
-          <h2 className="text-2xl font-bold mb-4">No Business Profile</h2>
-          <p className="text-gray-600 mb-6">
-            Create a business profile to get started
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center max-w-sm mx-4">
+          <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-7 h-7 text-amber-600" />
+          </div>
+          <h2 className="text-lg font-bold text-gray-900 mb-2">
+            No Business Profile
+          </h2>
+          <p className="text-sm text-gray-500 mb-5">
+            Create your business profile before managing hours.
           </p>
-          <Button onClick={() => router.push("/business")}>
-            Create Profile
+          <Button
+            onClick={() => router.push("/business")}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold"
+          >
+            Create Business Profile
           </Button>
         </div>
       </div>
@@ -262,348 +265,367 @@ const HoursManagementPage = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg p-2  -ml-4 -mt-5 min-h-screen -mr-4">
-      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="flex justify-between items-start mb-8">
+    <div className="bg-gray-50 -ml-4 -mt-5 min-h-screen -mr-4">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8 space-y-5">
+        {/* ── Header ── */}
+        <div className="bg-white rounded-2xl border border-gray-100 px-6 py-5 flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-gray-900">
               Hours & Attendance
             </h1>
-            <p className="text-gray-600 mt-1">Review and approve staff hours</p>
+            <p className="text-gray-500 text-sm mt-0.5">
+              Review and approve staff hours
+            </p>
           </div>
           <Button
             onClick={() => setShowClockInModal(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-4 rounded-xl font-semibold text-sm shadow-sm shrink-0"
           >
-            <Plus className="w-4 h-4 mr-2" /> Add Hours
+            <Plus className="w-3.5 h-3.5 mr-1.5" />
+            Add Hours
           </Button>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* Pending Approval */}
-          <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-center justify-between hover:shadow-sm transition-shadow">
-            <div className="text-left">
-              <p className="text-2xl font-bold text-gray-900">{pendingCount}</p>
-              <p className="text-sm text-gray-600 mt-1">Pending Approval</p>
+        {/* ── Stats ── */}
+        <div className="grid grid-cols-3 gap-4">
+          {[
+            {
+              label: "Pending Approval",
+              value: pendingCount,
+              border: "border-amber-100",
+              text: "text-amber-700",
+              icon: <Clock className="w-4 h-4 text-amber-600" />,
+              iconBg: "bg-amber-50",
+            },
+            {
+              label: "Approved",
+              value: approvedCount,
+              border: "border-emerald-100",
+              text: "text-emerald-700",
+              icon: <CheckCircle className="w-4 h-4 text-emerald-600" />,
+              iconBg: "bg-emerald-50",
+            },
+            {
+              label: "Total Hours",
+              value: `${totalApprovedHours.toFixed(1)}h`,
+              border: "border-violet-100",
+              text: "text-violet-700",
+              icon: <Users className="w-4 h-4 text-violet-600" />,
+              iconBg: "bg-violet-50",
+            },
+          ].map(({ label, value, border, text, icon, iconBg }) => (
+            <div
+              key={label}
+              className={cn(
+                "bg-white rounded-2xl border p-5 flex items-center justify-between",
+                border
+              )}
+            >
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">
+                  {label}
+                </p>
+                <p className={cn("text-2xl font-bold", text)}>{value}</p>
+              </div>
+              <div
+                className={cn(
+                  "w-9 h-9 rounded-xl flex items-center justify-center shrink-0",
+                  iconBg
+                )}
+              >
+                {icon}
+              </div>
             </div>
-            <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Clock className="w-5 h-5 text-amber-600" />
-            </div>
-          </div>
-
-          {/* Approved */}
-          <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-center justify-between hover:shadow-sm transition-shadow">
-            <div className="text-left">
-              <p className="text-2xl font-bold text-gray-900">
-                {approvedCount}
-              </p>
-              <p className="text-sm text-gray-600 mt-1">Approved</p>
-            </div>
-            <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
-              <CheckCircle className="w-5 h-5 text-green-600" />
-            </div>
-          </div>
-
-          {/* Total Hours */}
-          <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-center justify-between hover:shadow-sm transition-shadow">
-            <div className="text-left">
-              <p className="text-2xl font-bold text-gray-900">
-                {totalApprovedHours.toFixed(1)}
-              </p>
-              <p className="text-sm text-gray-600 mt-1">Total Hours</p>
-            </div>
-            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Users className="w-5 h-5 text-blue-600" />
-            </div>
-          </div>
+          ))}
         </div>
 
-        {/* Main Table */}
-        {hoursLoading ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
-          </div>
-        ) : hoursCards.length === 0 ? (
-          <div className="bg-white rounded-lg border p-12 text-center">
-            <Clock className="w-20 h-20 text-gray-300 mx-auto mb-6" />
-            <h3 className="text-xl font-medium mb-2">No hours recorded yet</h3>
-            <p className="text-gray-500 mb-6">
-              Start tracking staff hours by adding their first entry
-            </p>
-            <Button
-              onClick={() => setShowClockInModal(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add First Hours
-            </Button>
-          </div>
-        ) : (
-          <div className="bg-white rounded-lg overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="w-10 px-6 py-3"></th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Worker
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Period Hours
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {groupedWorkers.map((group) => {
-                    const { workerId, workerName, entries, totalHours } = group;
-                    const latest = entries[0];
-                    const active = !!latest.clock_in && !latest.clock_out;
-                    const expanded = expandedWorkers.has(workerId);
+        {/* ── Main Table Card ── */}
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+          {hoursLoading ? (
+            <div className="flex justify-center py-20">
+              <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+            </div>
+          ) : hoursCards.length === 0 ? (
+            <div className="text-center py-20">
+              <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Clock className="w-8 h-8 text-gray-300" />
+              </div>
+              <h3 className="text-base font-semibold text-gray-900 mb-2">
+                No hours recorded yet
+              </h3>
+              <p className="text-sm text-gray-500 max-w-xs mx-auto mb-5">
+                Start tracking staff hours by adding their first entry.
+              </p>
+              <Button
+                onClick={() => setShowClockInModal(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-5 rounded-xl font-semibold text-sm"
+              >
+                <Plus className="w-3.5 h-3.5 mr-1.5" />
+                Add First Hours
+              </Button>
+            </div>
+          ) : (
+            <>
+              {/* Column headers */}
+              <div className="hidden lg:grid grid-cols-[auto_2fr_1fr_1.5fr_auto] gap-4 px-5 py-2.5 bg-gray-50/60 border-b border-gray-50">
+                <span className="w-5" />
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                  Worker
+                </span>
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                  Period Hours
+                </span>
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                  Status
+                </span>
+                <span />
+              </div>
 
-                    return (
-                      <React.Fragment key={workerId}>
-                        {/* Main Row */}
-                        <tr
-                          className="hover:bg-gray-50 cursor-pointer transition-colors"
-                          onClick={() => toggleExpand(workerId)}
-                        >
-                          <td className="px-6 py-4">
-                            {expanded ? (
-                              <ChevronUp className="w-5 h-5 text-gray-400" />
-                            ) : (
-                              <ChevronDown className="w-5 h-5 text-gray-400" />
-                            )}
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="flex items-center">
-                              <div className="ml-3">
-                                <p className="font-semibold text-gray-900">
-                                  {workerName}
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                  {entries.length} days recorded
-                                </p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <p className="text-lg font-bold text-gray-900">
-                              {totalHours.toFixed(1)} hrs
-                            </p>
-                          </td>
-                          <td className="px-6 py-4">
-                            {active ? (
-                              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                Present
-                              </span>
-                            ) : (
-                              getStatusBadge(latest)
-                            )}
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger
-                                asChild
-                                onClick={(e) => e.stopPropagation()}
+              <div className="divide-y divide-gray-50">
+                {groupedWorkers.map((group) => {
+                  const { workerId, workerName, entries, totalHours } = group;
+                  const latest = entries[0];
+                  const active = !!latest.clock_in && !latest.clock_out;
+                  const expanded = expandedWorkers.has(workerId);
+
+                  return (
+                    <React.Fragment key={workerId}>
+                      {/* Main row */}
+                      <div
+                        className="grid grid-cols-[auto_1fr_auto] lg:grid-cols-[auto_2fr_1fr_1.5fr_auto] gap-4 items-center px-5 py-4 hover:bg-gray-50/60 transition-colors cursor-pointer"
+                        onClick={() => toggleExpand(workerId)}
+                      >
+                        {/* Chevron */}
+                        <div className="w-5 flex items-center justify-center text-gray-400">
+                          {expanded ? (
+                            <ChevronUp className="w-4 h-4" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4" />
+                          )}
+                        </div>
+
+                        {/* Worker info */}
+                        <div className="min-w-0">
+                          <p className="font-semibold text-sm text-gray-900 truncate">
+                            {workerName}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            {entries.length} days recorded
+                          </p>
+                        </div>
+
+                        {/* Hours */}
+                        <div className="hidden lg:block">
+                          <p className="text-sm font-bold text-gray-900">
+                            {totalHours.toFixed(1)} hrs
+                          </p>
+                        </div>
+
+                        {/* Status */}
+                        <div className="hidden lg:block">
+                          {active ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">
+                              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                              Present
+                            </span>
+                          ) : (
+                            getStatusBadge(latest)
+                          )}
+                        </div>
+
+                        {/* Actions */}
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <button className="w-8 h-8 rounded-xl border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:border-gray-300 transition-colors">
+                                <MoreHorizontal className="w-4 h-4" />
+                              </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              align="end"
+                              className="rounded-xl"
+                            >
+                              <DropdownMenuItem
+                                onClick={() => handleViewDetails(latest)}
                               >
-                                <Button variant="ghost" size="sm">
-                                  <MoreHorizontal className="w-5 h-5" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleViewDetails(latest);
-                                  }}
-                                >
-                                  View Details
-                                </DropdownMenuItem>
-                                {active && (
+                                View Details
+                              </DropdownMenuItem>
+                              {active && (
+                                <>
+                                  <DropdownMenuSeparator />
                                   <DropdownMenuItem
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleClockOutWorker(latest.id);
-                                    }}
                                     className="text-red-600"
+                                    onClick={() =>
+                                      handleClockOutWorker(latest.id)
+                                    }
                                   >
                                     Clock Out
                                   </DropdownMenuItem>
-                                )}
-                                {latest.status === "SIGNED" && (
-                                  <>
-                                    <DropdownMenuItem
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleApprove(latest.id);
-                                      }}
-                                      className="text-green-600"
-                                    >
-                                      Approve
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setSelectedHours(latest);
-                                        setShowRejectModal(true);
-                                      }}
-                                      className="text-red-600"
-                                    >
-                                      Reject
-                                    </DropdownMenuItem>
-                                  </>
-                                )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </td>
-                        </tr>
-
-                        {/* Expanded Row */}
-                        {expanded && (
-                          <tr>
-                            <td colSpan={5} className="px-6 py-4 bg-gray-50">
-                              <div className="space-y-3">
-                                {entries.slice(0, 7).map((entry: HoursCard) => (
-                                  <div
-                                    key={entry.id}
-                                    className="flex justify-between items-center p-4 bg-white rounded-lg border hover:border-gray-300 transition-colors"
+                                </>
+                              )}
+                              {latest.status === "SIGNED" && (
+                                <>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    className="text-emerald-600"
+                                    onClick={() => handleApprove(latest.id)}
                                   >
-                                    <div>
-                                      <p className="font-medium text-gray-900">
-                                        {new Date(
-                                          entry.date
-                                        ).toLocaleDateString("en-US", {
-                                          weekday: "long",
-                                          month: "short",
-                                          day: "numeric",
-                                        })}
-                                      </p>
-                                      <p className="text-sm text-gray-600 mt-1">
-                                        {getFormattedTime(
-                                          entry.clock_in_datetime,
-                                          entry.clock_in
-                                        )}{" "}
-                                        →{" "}
-                                        {entry.clock_out_datetime ||
-                                        entry.clock_out ? (
-                                          getFormattedTime(
-                                            entry.clock_out_datetime,
-                                            entry.clock_out
-                                          )
-                                        ) : (
-                                          <span className="text-green-600 font-medium">
-                                            Active
-                                          </span>
-                                        )}
-                                      </p>
-                                    </div>
-                                    <div className="text-right">
-                                      <p className="font-semibold text-gray-900">
-                                        {calculateTotalHours(entry).toFixed(2)}{" "}
-                                        hrs
-                                      </p>
-                                      <div className="mt-1">
-                                        {getStatusBadge(entry)}
-                                      </div>
-                                    </div>
-                                  </div>
-                                ))}
-                                {entries.length > 7 && (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleViewDetails(latest);
+                                    Approve
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="text-red-600"
+                                    onClick={() => {
+                                      setSelectedHours(latest);
+                                      setShowRejectModal(true);
                                     }}
-                                    className="text-blue-600 hover:underline text-sm font-medium"
                                   >
-                                    View all {entries.length} days →
-                                  </button>
-                                )}
+                                    Reject
+                                  </DropdownMenuItem>
+                                </>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </div>
+
+                      {/* Expanded entries */}
+                      {expanded && (
+                        <div className="px-5 pb-4 bg-gray-50/40 border-t border-gray-50">
+                          <div className="pt-3 space-y-2">
+                            {entries.slice(0, 7).map((entry) => (
+                              <div
+                                key={entry.id}
+                                className="flex justify-between items-center px-4 py-3 bg-white rounded-xl border border-gray-100 hover:border-gray-200 transition-colors"
+                              >
+                                <div>
+                                  <p className="font-semibold text-sm text-gray-900">
+                                    {new Date(entry.date).toLocaleDateString(
+                                      "en-US",
+                                      {
+                                        weekday: "long",
+                                        month: "short",
+                                        day: "numeric",
+                                      }
+                                    )}
+                                  </p>
+                                  <p className="text-xs text-gray-400 mt-0.5">
+                                    {getFormattedTime(
+                                      entry.clock_in_datetime,
+                                      entry.clock_in
+                                    )}
+                                    {" → "}
+                                    {entry.clock_out_datetime ||
+                                    entry.clock_out ? (
+                                      getFormattedTime(
+                                        entry.clock_out_datetime,
+                                        entry.clock_out
+                                      )
+                                    ) : (
+                                      <span className="text-emerald-600 font-medium">
+                                        Active
+                                      </span>
+                                    )}
+                                  </p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-sm font-bold text-gray-900">
+                                    {calculateTotalHours(entry).toFixed(2)} hrs
+                                  </p>
+                                  <div className="mt-1">
+                                    {getStatusBadge(entry)}
+                                  </div>
+                                </div>
                               </div>
-                            </td>
-                          </tr>
-                        )}
-                      </React.Fragment>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* Add Hours Modal */}
-        <AddWorkerHoursModal
-          isOpen={showClockInModal}
-          onClose={() => setShowClockInModal(false)}
-          onSuccess={() =>
-            loadHoursCards({ page: currentPage, ordering: "-date" })
-          }
-        />
-
-        {/* Reject Modal */}
-        {showRejectModal && selectedHours && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-md w-full">
-              <div className="flex justify-between items-center p-6 border-b">
-                <h2 className="text-xl font-semibold">Reject Hours</h2>
-                <button
-                  onClick={closeRejectModal}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+                            ))}
+                            {entries.length > 7 && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleViewDetails(latest);
+                                }}
+                                className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+                              >
+                                View all {entries.length} days →
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
               </div>
-              <div className="p-6">
-                <p className="text-sm text-gray-600 mb-4">
-                  Please provide a reason for rejecting these hours. The staff
-                  member will see this message.
-                </p>
-                <textarea
-                  value={rejectionReason}
-                  onChange={(e) => setRejectionReason(e.target.value)}
-                  rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  placeholder="Enter reason for rejection..."
-                />
-              </div>
-              <div className="flex justify-end gap-3 p-6 border-t bg-gray-50">
-                <Button variant="outline" onClick={closeRejectModal}>
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleReject}
-                  disabled={!rejectionReason.trim()}
-                  className="bg-red-600 hover:bg-red-700 disabled:opacity-50"
-                >
-                  Reject Hours
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Details Modal */}
-        <HoursCardDetailsModal
-          isOpen={showDetailsModal}
-          hours={detailsHours}
-          onClose={() => {
-            setShowDetailsModal(false);
-            setDetailsHours(null);
-          }}
-          getStatusBadge={getStatusBadge}
-          calculateTotalHours={calculateTotalHours}
-        />
+            </>
+          )}
+        </div>
       </div>
+
+      {/* ── Add Hours Modal ── */}
+      <AddWorkerHoursModal
+        isOpen={showClockInModal}
+        onClose={() => setShowClockInModal(false)}
+        onSuccess={() =>
+          loadHoursCards({ page: currentPage, ordering: "-date" })
+        }
+      />
+
+      {/* ── Reject Modal ── */}
+      {showRejectModal && selectedHours && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-xl">
+            <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-gray-900">Reject Hours</h2>
+              <button
+                onClick={closeRejectModal}
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="px-6 py-5">
+              <p className="text-sm text-gray-500 mb-4">
+                Please provide a reason for rejecting these hours. The staff
+                member will see this message.
+              </p>
+              <textarea
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                rows={4}
+                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                placeholder="Enter reason for rejection..."
+              />
+            </div>
+            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/60 rounded-b-2xl flex gap-3">
+              <Button
+                variant="outline"
+                onClick={closeRejectModal}
+                className="flex-1 border-gray-200 h-10 rounded-xl font-semibold text-sm"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleReject}
+                disabled={!rejectionReason.trim()}
+                className="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white h-10 rounded-xl font-semibold text-sm"
+              >
+                Reject Hours
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Details Modal ── */}
+      <HoursCardDetailsModal
+        isOpen={showDetailsModal}
+        hours={detailsHours}
+        onClose={() => {
+          setShowDetailsModal(false);
+          setDetailsHours(null);
+        }}
+        getStatusBadge={getStatusBadge}
+        calculateTotalHours={calculateTotalHours}
+      />
     </div>
   );
 };
