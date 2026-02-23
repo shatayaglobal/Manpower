@@ -9,7 +9,7 @@ import { GoogleMapsProvider } from "@/components/google-maps.provider";
 
 const playfairDisplay = Playfair_Display({
   subsets: ["latin"],
-  display: "swap",
+  display: "block",
   variable: "--font-playfair-display",
   weight: ["400", "600", "700", "900"],
 });

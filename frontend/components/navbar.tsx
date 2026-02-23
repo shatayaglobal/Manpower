@@ -19,10 +19,10 @@ interface AppLayoutProps {
 }
 
 const NAV_LINKS = [
-  { href: "/home",    label: "Home" },
-  { href: "/about",   label: "About" },
+  { href: "/home", label: "Home" },
+  { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
-  { href: "/blog",    label: "Blog" },
+  { href: "/blog", label: "Blog" },
 ];
 
 export default function Navbar({ children }: AppLayoutProps) {
@@ -51,23 +51,27 @@ export default function Navbar({ children }: AppLayoutProps) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  if (isAuthenticated && !user) {
+    return null;
+  }
+
   if (isAuthenticated && user) {
     return <DashboardLayout>{children}</DashboardLayout>;
   }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-
       {/* ── Navbar ── */}
       <header
         className={cn(
           "fixed top-0 left-0 right-0 z-50 bg-white transition-shadow duration-200",
-          scrolled ? "border-b border-gray-100 shadow-sm" : "border-b border-gray-100"
+          scrolled
+            ? "border-b border-gray-100 shadow-sm"
+            : "border-b border-gray-100"
         )}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3 shrink-0">
               <div className="w-9 h-9 rounded-xl overflow-hidden border border-gray-100 shadow-sm">
@@ -120,7 +124,11 @@ export default function Navbar({ children }: AppLayoutProps) {
               className="md:hidden w-9 h-9 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:border-gray-300 transition-colors"
               aria-label="Toggle menu"
             >
-              {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+              {mobileMenuOpen ? (
+                <X className="w-4 h-4" />
+              ) : (
+                <Menu className="w-4 h-4" />
+              )}
             </button>
           </div>
         </div>
@@ -165,34 +173,51 @@ export default function Navbar({ children }: AppLayoutProps) {
       <footer className="bg-white border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
-
             {/* Brand */}
             <div className="space-y-4">
               <Link href="/" className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl overflow-hidden border border-gray-100 shadow-sm">
-                  <Image src="/shataya.jpeg" alt="Shataya Global" width={36} height={36} className="w-full h-full object-cover" />
+                  <Image
+                    src="/shataya.jpeg"
+                    alt="Shataya Global"
+                    width={36}
+                    height={36}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <span className="font-bold text-gray-900 text-sm">
                   Shataya <span className="text-blue-600">Global</span>
                 </span>
               </Link>
               <p className="text-sm text-gray-400 leading-relaxed">
-                Empowering people.<br />Strengthening businesses.
+                Empowering people.
+                <br />
+                Strengthening businesses.
               </p>
-              <p className="text-xs text-gray-300">Hapelech 7, Tel Aviv, Israel</p>
+              <p className="text-xs text-gray-300">
+                Hapelech 7, Tel Aviv, Israel
+              </p>
             </div>
 
             {/* Contact */}
             <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-5">Contact</p>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-5">
+                Contact
+              </p>
               <ul className="space-y-3 text-sm">
                 <li>
-                  <a href="mailto:Shatayaglobal@gmail.com" className="text-gray-500 hover:text-blue-600 transition-colors">
+                  <a
+                    href="mailto:Shatayaglobal@gmail.com"
+                    className="text-gray-500 hover:text-blue-600 transition-colors"
+                  >
                     Shatayaglobal@gmail.com
                   </a>
                 </li>
                 <li>
-                  <a href="tel:+972546126874" className="text-gray-500 hover:text-blue-600 transition-colors">
+                  <a
+                    href="tel:+972546126874"
+                    className="text-gray-500 hover:text-blue-600 transition-colors"
+                  >
                     +972 546 126 874
                   </a>
                 </li>
@@ -201,16 +226,21 @@ export default function Navbar({ children }: AppLayoutProps) {
 
             {/* Links */}
             <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-5">Platform</p>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-5">
+                Platform
+              </p>
               <ul className="space-y-3 text-sm">
                 {[
-                  { href: "/jobs",        label: "Find Jobs" },
+                  { href: "/jobs", label: "Find Jobs" },
                   { href: "/jobs/create", label: "Post a Job" },
-                  { href: "/about",       label: "About Us" },
-                  { href: "/contact",     label: "Contact" },
+                  { href: "/about", label: "About Us" },
+                  { href: "/contact", label: "Contact" },
                 ].map(({ href, label }) => (
                   <li key={href}>
-                    <Link href={href} className="text-gray-500 hover:text-blue-600 transition-colors">
+                    <Link
+                      href={href}
+                      className="text-gray-500 hover:text-blue-600 transition-colors"
+                    >
                       {label}
                     </Link>
                   </li>
@@ -220,7 +250,9 @@ export default function Navbar({ children }: AppLayoutProps) {
 
             {/* Social */}
             <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-5">Follow Us</p>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-5">
+                Follow Us
+              </p>
               <div className="flex gap-2 flex-wrap">
                 {[
                   {
@@ -252,7 +284,11 @@ export default function Navbar({ children }: AppLayoutProps) {
                     aria-label={label}
                     className="w-9 h-9 rounded-xl bg-gray-50 border border-gray-100 hover:border-blue-200 hover:bg-blue-50 flex items-center justify-center transition-all group"
                   >
-                    <svg className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors" fill="currentColor" viewBox="0 0 24 24">
+                    <svg
+                      className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
                       <path d={path} />
                     </svg>
                   </a>
@@ -265,8 +301,18 @@ export default function Navbar({ children }: AppLayoutProps) {
           <div className="border-t border-gray-100 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-400">
             <p>© 2025 Shataya Global Ltd. All rights reserved.</p>
             <div className="flex items-center gap-5">
-              <Link href="/privacy-policy" className="hover:text-blue-600 transition-colors">Privacy Policy</Link>
-              <Link href="/terms" className="hover:text-blue-600 transition-colors">Terms of Service</Link>
+              <Link
+                href="/privacy-policy"
+                className="hover:text-blue-600 transition-colors"
+              >
+                Privacy Policy
+              </Link>
+              <Link
+                href="/terms"
+                className="hover:text-blue-600 transition-colors"
+              >
+                Terms of Service
+              </Link>
             </div>
           </div>
         </div>

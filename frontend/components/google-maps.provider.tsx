@@ -18,6 +18,7 @@ export function GoogleMapsProvider({
     <LoadScript
       googleMapsApiKey={apiKey}
       libraries={["places"]}
+      loadingElement={<></>}
     >
       {children}
     </LoadScript>

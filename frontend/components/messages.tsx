@@ -7,7 +7,7 @@ import { useMessaging } from "@/lib/redux/use-messaging";
 import { websocketActions } from "@/lib/redux/websocket-actions";
 import { setCurrentUserId } from "@/lib/redux/messagingSlice";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Loader2, ArrowLeft, Inbox } from "lucide-react";
+import { MessageCircle, ArrowLeft, Inbox } from "lucide-react";
 import ConversationList from "@/components/conversation-list";
 import ChatWindow from "@/components/chat-window";
 
@@ -94,14 +94,22 @@ export default function MessagesPage() {
             </div>
 
             {loading.conversations ? (
-              <div className="flex-1 flex items-center justify-center">
-                <div className="text-center">
-                  <Loader2 className="h-6 w-6 animate-spin text-blue-500 mx-auto mb-2" />
-                  <p className="text-xs text-gray-400">Loading...</p>
-                </div>
+              <div className="flex-1 overflow-y-auto divide-y divide-gray-50">
+                {[...Array(6)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-3 px-4 py-3.5 animate-pulse"
+                  >
+                    <div className="w-10 h-10 bg-gray-100 rounded-xl shrink-0" />
+                    <div className="flex-1 space-y-2 min-w-0">
+                      <div className="h-3 bg-gray-100 rounded w-2/3" />
+                      <div className="h-2.5 bg-gray-100 rounded w-4/5" />
+                    </div>
+                    <div className="h-2.5 bg-gray-100 rounded w-8 shrink-0" />
+                  </div>
+                ))}
               </div>
             ) : (
-              // ConversationList must be overflow-y-auto internally
               <ConversationList />
             )}
           </div>
