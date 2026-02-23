@@ -160,7 +160,7 @@ export default function HomePage() {
                 The fastest way to hire skilled workers or find your next job.
                 We handle the matching, screening, and scheduling — so you can
                 focus on the work that matters. Trusted by thousands of
-                businesses and professionals across Uganda.
+                businesses and professionals across Israel.
               </p>
 
               <div className="flex flex-wrap gap-3">
@@ -361,9 +361,10 @@ export default function HomePage() {
               Serving Multiple Sectors
             </h2>
             <p className="text-lg text-gray-500 max-w-2xl leading-relaxed">
-              Every industry has its own pace, pressures, and people requirements.
-              We&apos;ve built deep expertise in the sectors where getting the right
-              person on site — fast — makes all the difference.
+              Every industry has its own pace, pressures, and people
+              requirements. We&apos;ve built deep expertise in the sectors where
+              getting the right person on site — fast — makes all the
+              difference.
             </p>
           </div>
 
@@ -472,7 +473,9 @@ export default function HomePage() {
             <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-3">
               Ready to Join the Platform?
             </h2>
-            <p className="text-lg text-gray-500">Choose your path and start today.</p>
+            <p className="text-lg text-gray-500">
+              Choose your path and start today.
+            </p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-5 max-w-3xl mx-auto">
@@ -481,7 +484,9 @@ export default function HomePage() {
               <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mb-5">
                 <Users className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-bold text-gray-900 text-xl mb-3">For Employers</h3>
+              <h3 className="font-bold text-gray-900 text-xl mb-3">
+                For Employers
+              </h3>
               <p className="text-base text-gray-500 mb-6 leading-relaxed">
                 Find qualified workers and manage your team efficiently with
                 smart tools built for growth.
@@ -499,7 +504,9 @@ export default function HomePage() {
               <div className="w-12 h-12 bg-amber-500 rounded-xl flex items-center justify-center mb-5">
                 <Briefcase className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-bold text-gray-900 text-xl mb-3">For Job Seekers</h3>
+              <h3 className="font-bold text-gray-900 text-xl mb-3">
+                For Job Seekers
+              </h3>
               <p className="text-base text-gray-500 mb-6 leading-relaxed">
                 Browse opportunities that match your skills and start your
                 career journey today.
