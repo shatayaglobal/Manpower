@@ -184,6 +184,7 @@ export const StaffModal: React.FC<StaffModalProps> = ({
                   onSelectUser={handleUserSelect}
                   selectedUser={selectedUser}
                   disabled={false}
+                  businessId={businessId}
                 />
               </div>
             ) : !selectedUser ? (

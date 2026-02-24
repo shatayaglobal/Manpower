@@ -393,7 +393,7 @@ export default function JobCreationForm({
                   value={formData.salary_range || ""}
                   onChange={(e) => set("salary_range", e.target.value)}
                   disabled={loading}
-                  placeholder="e.g. USh 1,000,000 – 2,000,000"
+                  placeholder="e.g. $ 500 – 1,000"
                   className={inputCls(errors.salary_range) + " pl-9"}
                 />
               </FieldWrapper>

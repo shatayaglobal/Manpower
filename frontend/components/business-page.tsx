@@ -314,7 +314,7 @@ function BusinessModal({ business, onClose }: ModalProps) {
                     value={formData.phone}
                     onChange={(e) => set("phone", e.target.value)}
                     className={inputCls(errors.phone)}
-                    placeholder="+256-700-000000"
+                    placeholder="+927-700-000000"
                   />
                   {errors.phone && (
                     <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
@@ -445,33 +445,73 @@ function BusinessModal({ business, onClose }: ModalProps) {
                 </div>
               )}
               {/* Service hours */}
+              {/* Service hours */}
               <div>
                 <label className={labelCls}>Service Hours</label>
                 <div className="grid sm:grid-cols-2 gap-4">
-                  {(["Opening", "Closing"] as const).map((label, idx) => (
-                    <div key={label}>
-                      <p className="text-xs text-gray-400 mb-1.5">
-                        {label} Time
-                      </p>
-                      <input
-                        type="time"
-                        value={
-                          formData.service_time.split(" - ")[idx]?.trim() || ""
-                        }
-                        onChange={(e) => {
-                          const parts = formData.service_time
-                            .split(" - ")
-                            .map((s) => s.trim());
-                          parts[idx] = e.target.value;
-                          set(
-                            "service_time",
-                            parts.filter(Boolean).join(" - ")
-                          );
-                        }}
-                        className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                  ))}
+                  {(["Opening", "Closing"] as const).map((label, idx) => {
+                    const raw =
+                      formData.service_time.split(" - ")[idx]?.trim() || "";
+                    const hour = raw ? parseInt(raw.split(":")[0]) : null;
+                    const ampm =
+                      hour === null ? "AM" : hour >= 12 ? "PM" : "AM";
+
+                    const toggleAmPm = (period: "AM" | "PM") => {
+                      if (!raw) return;
+                      const [h, m] = raw.split(":");
+                      let h24 = parseInt(h);
+                      if (period === "AM" && h24 >= 12) h24 -= 12;
+                      if (period === "PM" && h24 < 12) h24 += 12;
+                      const time = `${String(h24).padStart(2, "0")}:${m}`;
+                      const parts = formData.service_time
+                        .split(" - ")
+                        .map((s) => s.trim());
+                      parts[idx] = time;
+                      set("service_time", parts.filter(Boolean).join(" - "));
+                    };
+
+                    return (
+                      <div key={label}>
+                        <p className="text-xs text-gray-400 mb-1.5">
+                          {label} Time
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="time"
+                            value={raw}
+                            onChange={(e) => {
+                              const parts = formData.service_time
+                                .split(" - ")
+                                .map((s) => s.trim());
+                              parts[idx] = e.target.value;
+                              set(
+                                "service_time",
+                                parts.filter(Boolean).join(" - ")
+                              );
+                            }}
+                            className="flex-1 px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                          <div className="flex rounded-xl border border-gray-200 overflow-hidden shrink-0">
+                            {(["AM", "PM"] as const).map((period) => (
+                              <button
+                                key={period}
+                                type="button"
+                                onClick={() => toggleAmPm(period)}
+                                className={cn(
+                                  "px-2.5 py-2.5 text-xs font-semibold transition-colors",
+                                  ampm === period && raw
+                                    ? "bg-blue-600 text-white"
+                                    : "bg-white text-gray-400 hover:text-gray-600"
+                                )}
+                              >
+                                {period}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
                 {formData.service_time && (
                   <p className="text-xs text-gray-400 mt-2">
@@ -639,7 +679,7 @@ export default function MyBusinessPage() {
   if (!business) {
     return (
       <div className="bg-gray-50 -ml-4 -mt-5 min-h-screen -mr-4">
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-8 max-w-4xl mx-auto space-y-6">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-8 space-y-6">
           <div className="bg-white rounded-2xl border border-gray-100 px-8 py-12 text-center">
             <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Building2 className="w-8 h-8 text-blue-600" />

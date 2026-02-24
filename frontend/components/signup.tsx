@@ -65,8 +65,13 @@ export default function SignUpPage() {
   const router = useRouter();
   const { register, googleAuth, clearAuthError, clearAuthSuccessStates } =
     useAuthSlice();
-  const { isRegisterLoading, error, isAuthenticated, isGoogleAuthLoading } =
-    useAuthState();
+  const {
+    isRegisterLoading,
+    error,
+    isAuthenticated,
+    isGoogleAuthLoading,
+    user,
+  } = useAuthState();
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [termsError, setTermsError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -110,8 +115,12 @@ export default function SignUpPage() {
       : "Strong";
 
   useEffect(() => {
-    if (isAuthenticated) router.push("/home");
-  }, [isAuthenticated, router]);
+    if (isAuthenticated && user) {
+      router.push(
+        user.account_type === "BUSINESS" ? "/business" : "/worker-dashboard"
+      );
+    }
+  }, [isAuthenticated, user, router]);
 
   useEffect(() => {
     clearAuthError();
@@ -193,7 +202,11 @@ export default function SignUpPage() {
           accountType === "WORKER" ? "Worker" : "Business"
         } account!`
       );
-      setTimeout(() => router.push("/home"), 100);
+      setTimeout(() => {
+        router.push(
+          accountType === "BUSINESS" ? "/business" : "/worker-dashboard"
+        );
+      }, 100);
     } else {
       toast.error("Google sign-up failed. Please try again.");
       setShowAccountTypeModal(false);

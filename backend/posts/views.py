@@ -470,3 +470,31 @@ class ApplicationStatusUpdateView(UpdateAPIView):
             message_type=message_type,
             job_application=job_application
         )
+
+
+class AcceptedApplicantsView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        if request.user.account_type != 'BUSINESS':
+            raise PermissionDenied("Only business accounts can access this")
+
+        applications = JobApplication.objects.filter(
+            job__user=request.user,
+            status='ACCEPTED'
+        ).select_related('applicant')
+
+        seen = set()
+        users = []
+        for app in applications:
+            u = app.applicant
+            if u.id not in seen:
+                seen.add(u.id)
+                users.append({
+                    "id": str(u.id),
+                    "first_name": u.first_name,
+                    "last_name": u.last_name,
+                    "email": u.email,
+                })
+
+        return Response(users)

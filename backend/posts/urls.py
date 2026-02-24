@@ -25,4 +25,5 @@ urlpatterns = [
     path('business/applications/', views.BusinessApplicationsListView.as_view(), name='business-applications'),
 
     path('applications/<uuid:pk>/status/', views.ApplicationStatusUpdateView.as_view(), name='application-status-update'),
+    path('accepted-applicants/', views.AcceptedApplicantsView.as_view(), name='accepted-applicants'),
 ]

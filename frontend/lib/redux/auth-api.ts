@@ -181,6 +181,12 @@ class AuthService {
     });
     return response.data.results || response.data;
   }
+  async getAcceptedApplicants(businessId: string): Promise<User[]> {
+    const response = await axiosInstance.get("posts/accepted-applicants/", {
+      params: { business: businessId },
+    });
+    return response.data;
+  }
 }
 
 export const authService = new AuthService();

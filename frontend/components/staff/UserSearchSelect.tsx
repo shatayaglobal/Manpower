@@ -10,6 +10,7 @@ interface UserSearchSelectProps {
   selectedUser: User | null;
   disabled?: boolean;
   placeholder?: string;
+  businessId: string;
 }
 
 export const UserSearchSelect: React.FC<UserSearchSelectProps> = ({
@@ -17,6 +18,7 @@ export const UserSearchSelect: React.FC<UserSearchSelectProps> = ({
   selectedUser,
   disabled = false,
   placeholder = "Search users by name or email...",
+  businessId,
 }) => {
   const [query, setQuery] = useState("");
   const [users, setUsers] = useState<User[]>([]);
@@ -26,8 +28,11 @@ export const UserSearchSelect: React.FC<UserSearchSelectProps> = ({
 
 
   useEffect(() => {
-    authService.searchUsers("").then(setUsers).catch(console.error);
-  }, []);
+    if (!businessId) return;
+    authService.getAcceptedApplicants(businessId)
+      .then(setUsers)
+      .catch(console.error);
+  }, [businessId]);
 
 
   useEffect(() => {
