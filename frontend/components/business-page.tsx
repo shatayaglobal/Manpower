@@ -179,7 +179,7 @@ function BusinessModal({ business, onClose }: ModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-xl">
+      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-xl pl-2">
         {/* Header */}
         <div className="px-6 py-5 border-b border-gray-100 shrink-0">
           <div className="flex items-center justify-between mb-4">

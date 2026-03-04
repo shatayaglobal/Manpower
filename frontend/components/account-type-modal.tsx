@@ -25,6 +25,20 @@ export default function AccountTypeModal({
   onCancel,
   isLoading = false,
 }: AccountTypeModalProps) {
+  const [selectedType, setSelectedType] = React.useState<
+    "WORKER" | "BUSINESS" | null
+  >(null);
+
+  const handleSelect = (type: "WORKER" | "BUSINESS") => {
+    if (isLoading) return;
+    setSelectedType(type);
+    onSelect(type);
+  };
+
+  React.useEffect(() => {
+    if (!open) setSelectedType(null);
+  }, [open]);
+
   return (
     <Dialog
       open={open}
@@ -53,17 +67,16 @@ export default function AccountTypeModal({
 
         {/* Grid – mobile: 1 col, desktop: 2 col (original) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3 sm:mt-6">
+          {/* Worker Card */}
           <Card
             className="relative cursor-pointer hover:shadow-lg transition-all duration-200 hover:border-blue-500 group overflow-hidden"
-            onClick={() => !isLoading && onSelect("WORKER")}
+            onClick={() => handleSelect("WORKER")}
           >
             <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
-              {/* Icon */}
               <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto group-hover:bg-blue-100 transition-colors">
                 <User className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
               </div>
 
-              {/* Title + Subtitle */}
               <div className="text-center space-y-1">
                 <h3 className="text-base sm:text-xl font-semibold text-gray-900">
                   Worker
@@ -73,7 +86,6 @@ export default function AccountTypeModal({
                 </p>
               </div>
 
-              {/* Features */}
               <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-gray-600">
                 {[
                   "Browse and apply to jobs",
@@ -87,26 +99,27 @@ export default function AccountTypeModal({
                 ))}
               </ul>
 
-              {/* Button */}
               <Button
                 className="w-full h-9 sm:h-auto text-sm sm:text-base bg-blue-500 hover:bg-blue-600 text-white font-medium"
                 disabled={isLoading}
               >
-                {isLoading ? "Creating..." : "Continue as Worker"}
+                {isLoading && selectedType === "WORKER"
+                  ? "Creating..."
+                  : "Continue as Worker"}
               </Button>
             </div>
           </Card>
+
+          {/* Business Card */}
           <Card
             className="relative cursor-pointer hover:shadow-lg transition-all duration-200 hover:border-amber-500 group overflow-hidden"
-            onClick={() => !isLoading && onSelect("BUSINESS")}
+            onClick={() => handleSelect("BUSINESS")}
           >
             <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
-              {/* Icon */}
               <div className="w-12 h-12 sm:w-16 sm:h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto group-hover:bg-amber-100 transition-colors">
                 <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-amber-600" />
               </div>
 
-              {/* Title + Subtitle */}
               <div className="text-center space-y-1">
                 <h3 className="text-base sm:text-xl font-semibold text-gray-900">
                   Business
@@ -116,7 +129,6 @@ export default function AccountTypeModal({
                 </p>
               </div>
 
-              {/* Features */}
               <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-gray-600">
                 {[
                   "Post job opportunities",
@@ -130,18 +142,18 @@ export default function AccountTypeModal({
                 ))}
               </ul>
 
-              {/* Button */}
               <Button
                 className="w-full h-9 sm:h-auto text-sm sm:text-base bg-amber-500 hover:bg-amber-600 text-white font-medium"
                 disabled={isLoading}
               >
-                {isLoading ? "Creating..." : "Continue as Business"}
+                {isLoading && selectedType === "BUSINESS"
+                  ? "Creating..."
+                  : "Continue as Business"}
               </Button>
             </div>
           </Card>
         </div>
 
-        {/* Footer note */}
         <p className="text-xs text-gray-500 text-center mt-3 sm:mt-4 px-2">
           You can always change your account type later in settings
         </p>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,7 +42,6 @@ export default function SignInPage() {
   const { login, googleAuth, clearAuthError, resetLoading } = useAuthSlice();
   const { isLoginLoading, error, isAuthenticated, isGoogleAuthLoading, user } =
     useAuthState();
-
   const [showAccountTypeModal, setShowAccountTypeModal] = useState(false);
   const [pendingGoogleCredential, setPendingGoogleCredential] = useState<
     string | null
@@ -140,6 +139,12 @@ export default function SignInPage() {
     [googleAuth]
   );
 
+  const handleCredentialResponseRef = useRef(handleCredentialResponse);
+
+  useEffect(() => {
+    handleCredentialResponseRef.current = handleCredentialResponse;
+  }, [handleCredentialResponse]);
+
   const handleAccountTypeSelect = async (type: "WORKER" | "BUSINESS") => {
     if (!pendingGoogleCredential) return;
 
@@ -155,7 +160,10 @@ export default function SignInPage() {
       toast.success(
         `Welcome to your ${type === "WORKER" ? "Worker" : "Business"} account!`
       );
-      // The useEffect will handle the redirect when user data is loaded
+    } else {
+      toast.error("Google sign-in failed. Please try again.");
+      setShowAccountTypeModal(false);
+      setPendingGoogleCredential(null);
     }
   };
 
@@ -183,13 +191,15 @@ export default function SignInPage() {
           };
         };
       };
-
-      const google = window.google as unknown as GoogleGIS | undefined;
+      const google = (window as unknown as { google?: GoogleGIS }).google;
 
       if (google?.accounts?.id) {
         google.accounts.id.initialize({
           client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
-          callback: handleCredentialResponse,
+          callback: (resp: GoogleCredentialResponse) => {
+            // always calls the latest version of the handler
+            handleCredentialResponseRef.current(resp);
+          },
           auto_select: false,
           cancel_on_tap_outside: true,
         });
@@ -210,9 +220,11 @@ export default function SignInPage() {
     };
 
     return () => {
-      document.head.contains(script) && document.head.removeChild(script);
+      if (document.head.contains(script)) {
+        document.head.removeChild(script);
+      }
     };
-  }, [handleCredentialResponse]);
+  }, []);
 
   return (
     <>

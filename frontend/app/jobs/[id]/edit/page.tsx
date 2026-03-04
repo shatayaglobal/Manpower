@@ -63,7 +63,7 @@ function FieldWrapper({
           <span className="text-red-500 normal-case font-normal">*</span>
         )}
       </Label>
-      <div className={cn("relative", icon && "[&>input]:pl-9 [&>*]:pl-9")}>
+      <div className="relative">
         {icon && (
           <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 z-10">
             {icon}
@@ -164,7 +164,11 @@ export default function EditJobPage() {
     }
     setIsSubmitting(true);
     try {
-      await editPost(jobId, formData);
+      const payload = {
+        ...formData,
+        expires_at: formData.expires_at || undefined,
+      };
+      await editPost(jobId, payload);
       toast.success("Job updated successfully!");
       router.push("/jobs");
     } catch (error: unknown) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -115,12 +115,12 @@ export default function SignUpPage() {
       : "Strong";
 
   useEffect(() => {
-    if (isAuthenticated && user) {
+    if (isAuthenticated && user?.account_type) {
       router.push(
         user.account_type === "BUSINESS" ? "/business" : "/worker-dashboard"
       );
     }
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, user?.account_type, router]);
 
   useEffect(() => {
     clearAuthError();
@@ -195,24 +195,23 @@ export default function SignUpPage() {
     });
 
     if (result.success) {
-      setShowAccountTypeModal(false);
       setPendingGoogleCredential(null);
       toast.success(
         `Welcome to your ${
           accountType === "WORKER" ? "Worker" : "Business"
         } account!`
       );
-      setTimeout(() => {
-        router.push(
-          accountType === "BUSINESS" ? "/business" : "/worker-dashboard"
-        );
-      }, 100);
     } else {
       toast.error("Google sign-up failed. Please try again.");
       setShowAccountTypeModal(false);
       setPendingGoogleCredential(null);
     }
   };
+
+  const handleCredentialResponseRef = useRef(handleCredentialResponse);
+  useEffect(() => {
+    handleCredentialResponseRef.current = handleCredentialResponse;
+  }, [handleCredentialResponse]);
 
   useEffect(() => {
     const script = document.createElement("script");
@@ -222,12 +221,14 @@ export default function SignUpPage() {
     document.head.appendChild(script);
 
     script.onload = () => {
-      const google = window.google as unknown as GoogleGIS | undefined;
+      const google = (window as unknown as { google?: GoogleGIS }).google;
 
       if (google?.accounts?.id) {
         google.accounts.id.initialize({
           client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
-          callback: handleCredentialResponse,
+          callback: (resp: GoogleCredentialResponse) => {
+            handleCredentialResponseRef.current(resp);
+          },
           auto_select: false,
           cancel_on_tap_outside: true,
         });
@@ -235,9 +236,7 @@ export default function SignUpPage() {
         const renderButton = (id: string) => {
           const container = document.getElementById(id);
           if (!container) return;
-
           const width = container.parentElement?.offsetWidth || 400;
-
           google.accounts.id.renderButton(container, {
             theme: "outline",
             size: "large",
@@ -252,9 +251,11 @@ export default function SignUpPage() {
     };
 
     return () => {
-      document.head.contains(script) && document.head.removeChild(script);
+      if (document.head.contains(script)) {
+        document.head.removeChild(script);
+      }
     };
-  }, [handleCredentialResponse]);
+  }, []);
 
   return (
     <>
@@ -327,7 +328,7 @@ export default function SignUpPage() {
                 </Separator>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
-                  {/* Account Type - Full Width */}
+                  {/* Account Type */}
                   <div className="space-y-2">
                     <Label
                       htmlFor="account-type"
@@ -522,6 +523,7 @@ export default function SignUpPage() {
                       </div>
                     )}
                   </div>
+
                   <TermsCheckbox
                     checked={termsAccepted}
                     onCheckedChange={(checked) => {
