@@ -29,6 +29,14 @@ export interface Business {
   active_jobs?: number;
   total_applications?: number;
   verification_status?: VerificationStatus;
+  total_active_staff: number;
+  pending_applications: number;
+  total_shifts: number;
+  accepted_applications: number;
+  hours_pending_approval: number;
+  staff_on_leave: number;
+  total_hours_this_week: number;
+  total_approved_hours: number;
 }
 
 // Business Categories matching Django choices
@@ -93,7 +101,7 @@ export interface CreateBusinessRequest {
   workplace_latitude?: number | null;
   workplace_longitude?: number | null;
   clock_in_radius_meters?: number;
-  require_location_for_clock_in?: boolean; 
+  require_location_for_clock_in?: boolean;
 }
 
 export interface UpdateBusinessRequest extends Partial<CreateBusinessRequest> {

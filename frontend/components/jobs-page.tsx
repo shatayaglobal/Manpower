@@ -100,18 +100,18 @@ function JobCard({
 
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-1 mb-0.5">
-            <h3 className="font-semibold text-gray-900 text-sm leading-snug line-clamp-2 group-hover:text-blue-700 transition-colors">
+            <h3 className="font-semibold text-gray-900 text-base leading-snug line-clamp-2 group-hover:text-blue-700 transition-colors">
               {job.title}
             </h3>
             {isUrgent && (
-              <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 shrink-0 ml-1">
+              <span className="inline-flex items-center gap-1 text-base font-semibold px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 shrink-0 ml-1">
                 <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
                 Urgent
               </span>
             )}
           </div>
           {job.location && (
-            <div className="flex items-center gap-1 text-xs text-gray-400">
+            <div className="flex items-center gap-1 text-base text-gray-400">
               <MapPin className="w-3 h-3 shrink-0" />{job.location}
             </div>
           )}
@@ -151,11 +151,11 @@ function JobCard({
 
       {/* Description preview */}
       {job.description && (
-        <p className="text-xs text-gray-500 line-clamp-2 mb-3 leading-relaxed">{job.description}</p>
+        <p className="text-base text-gray-500 line-clamp-2 mb-3 leading-relaxed">{job.description}</p>
       )}
 
       {/* Meta row */}
-      <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-400 mb-4">
+      <div className="flex flex-wrap gap-x-3 gap-y-1 text-base text-gray-400 mb-4">
         {job.salary_range && (
           <span className="flex items-center gap-1 text-emerald-700 font-semibold">
             <DollarSign className="w-3 h-3" />{job.salary_range}
@@ -169,20 +169,20 @@ function JobCard({
 
       {/* Footer */}
       <div className="mt-auto pt-3 border-t border-gray-50 flex items-center justify-between">
-        <span className={cn("text-xs font-medium px-2.5 py-1 rounded-full border", priority.color)}>
+        <span className={cn("text-base font-medium px-2.5 py-1 rounded-full border", priority.color)}>
           {priority.label}
         </span>
 
         {!isBusinessUser && (
           <button
             onClick={e => { e.stopPropagation(); onApply(job.id, job.title); }}
-            className="text-xs font-semibold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-100 px-3 py-1.5 rounded-lg transition-colors"
+            className="text-base font-semibold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-100 px-3 py-1.5 rounded-lg transition-colors"
           >
             Apply Now →
           </button>
         )}
         {/* {isBusinessUser && isOwner && (
-          <span className="text-xs text-gray-400 font-medium">{job.total_applications ?? 0} applicants</span>
+          <span className="text-base text-gray-400 font-medium">{job.total_applications ?? 0} applicants</span>
         )} */}
       </div>
     </div>
@@ -251,7 +251,7 @@ export default function JobsPage() {
             <h1 className="text-2xl font-bold text-gray-900">
               {isBusinessUser ? "Manage Jobs" : "Find Jobs"}
             </h1>
-            <p className="text-gray-500 text-sm mt-0.5">
+            <p className="text-gray-500 text-base mt-0.5">
               {isBusinessUser
                 ? "Post and manage your open positions"
                 : totalPosts > 0 ? `${totalPosts} positions available` : "Browse open positions"}
@@ -277,21 +277,21 @@ export default function JobsPage() {
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && setFilters(p => ({ ...p, page: 1 }))}
-                className="pl-9 h-10 border-gray-200 bg-gray-50 focus:bg-white rounded-xl text-sm"
+                className="pl-9 h-10 border-gray-200 bg-gray-50 focus:bg-white rounded-xl text-base"
               />
             </div>
             <Button
               variant="outline"
               onClick={() => setShowFilters(p => !p)}
               className={cn(
-                "h-10 px-4 rounded-xl border-gray-200 gap-2 shrink-0 text-sm",
+                "h-10 px-4 rounded-xl border-gray-200 gap-2 shrink-0 text-base",
                 showFilters && "border-blue-300 bg-blue-50 text-blue-700"
               )}
             >
               <SlidersHorizontal className="w-4 h-4" />
               Filters
               {activeFilterCount > 0 && (
-                <span className="w-5 h-5 bg-blue-600 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                <span className="w-5 h-5 bg-blue-600 text-white text-base rounded-full flex items-center justify-center font-bold">
                   {activeFilterCount}
                 </span>
               )}
@@ -301,14 +301,14 @@ export default function JobsPage() {
           {showFilters && (
             <div className="mt-4 pt-4 border-t border-gray-100 space-y-4">
               <div>
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2.5">Job Type</p>
+                <p className="text-base font-semibold text-gray-400 uppercase tracking-wide mb-2.5">Job Type</p>
                 <div className="flex flex-wrap gap-2">
                   {TYPE_PILLS.map(t => (
                     <button
                       key={t.value}
                       onClick={() => setSelectedType(selectedType === t.value ? "" : t.value)}
                       className={cn(
-                        "text-xs font-medium px-3.5 py-1.5 rounded-full border transition-all",
+                        "text-base font-medium px-3.5 py-1.5 rounded-full border transition-all",
                         selectedType === t.value
                           ? "bg-blue-600 text-white border-blue-600 shadow-sm"
                           : "bg-white text-gray-600 border-gray-200 hover:border-blue-200 hover:text-blue-600"
@@ -322,14 +322,14 @@ export default function JobsPage() {
 
               {uniqueLocations.length > 0 && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2.5">Location</p>
+                  <p className="text-base font-semibold text-gray-400 uppercase tracking-wide mb-2.5">Location</p>
                   <div className="flex flex-wrap gap-2">
                     {uniqueLocations.map(loc => (
                       <button
                         key={loc}
                         onClick={() => setSelectedLocation(selectedLocation === loc ? "" : loc)}
                         className={cn(
-                          "text-xs font-medium px-3.5 py-1.5 rounded-full border transition-all inline-flex items-center gap-1",
+                          "text-base font-medium px-3.5 py-1.5 rounded-full border transition-all inline-flex items-center gap-1",
                           selectedLocation === loc
                             ? "bg-blue-600 text-white border-blue-600 shadow-sm"
                             : "bg-white text-gray-600 border-gray-200 hover:border-blue-200 hover:text-blue-600"
@@ -345,7 +345,7 @@ export default function JobsPage() {
               {activeFilterCount > 0 && (
                 <button
                   onClick={clearFilters}
-                  className="inline-flex items-center gap-1.5 text-xs text-red-500 hover:text-red-700 font-medium transition-colors"
+                  className="inline-flex items-center gap-1.5 text-base text-red-500 hover:text-red-700 font-medium transition-colors"
                 >
                   <X className="w-3.5 h-3.5" />Clear all filters
                 </button>
@@ -365,7 +365,7 @@ export default function JobsPage() {
               <Briefcase className="w-8 h-8 text-gray-300" />
             </div>
             <h3 className="text-base font-semibold text-gray-900 mb-2">No jobs found</h3>
-            <p className="text-gray-500 text-sm mb-5 max-w-xs mx-auto">
+            <p className="text-gray-500 text-base mb-5 max-w-xs mx-auto">
               {activeFilterCount > 0 || searchTerm
                 ? "Try adjusting your search or clearing your filters."
                 : isBusinessUser
@@ -373,11 +373,11 @@ export default function JobsPage() {
                 : "Check back soon for new openings."}
             </p>
             {(activeFilterCount > 0 || searchTerm) ? (
-              <Button variant="outline" onClick={clearFilters} className="border-gray-200 text-sm">
+              <Button variant="outline" onClick={clearFilters} className="border-gray-200 text-base">
                 <X className="w-3.5 h-3.5 mr-1.5" />Clear Filters
               </Button>
             ) : isBusinessUser ? (
-              <Button onClick={() => router.push("/jobs/create")} className="bg-blue-600 hover:bg-blue-700 text-white text-sm">
+              <Button onClick={() => router.push("/jobs/create")} className="bg-blue-600 hover:bg-blue-700 text-white text-base">
                 <Plus className="w-4 h-4 mr-1.5" />Post a Job
               </Button>
             ) : null}
@@ -386,10 +386,10 @@ export default function JobsPage() {
           <>
             {/* Count row */}
             <div className="flex items-center justify-between px-1">
-              <p className="text-sm text-gray-500">
+              <p className="text-base text-gray-500">
                 <span className="font-semibold text-gray-900">{totalPosts}</span> {totalPosts === 1 ? "job" : "jobs"} found
               </p>
-              <div className="flex items-center gap-1.5 text-xs text-gray-400">
+              <div className="flex items-center gap-1.5 text-base text-gray-400">
                 <TrendingUp className="w-3.5 h-3.5" />Newest first
               </div>
             </div>
@@ -420,11 +420,11 @@ export default function JobsPage() {
                   size="sm"
                   disabled={!hasPreviousPage}
                   onClick={() => setFilters(p => ({ ...p, page: (p.page ?? 1) - 1 }))}
-                  className="border-gray-200 h-9 px-4 rounded-xl disabled:opacity-40 text-sm"
+                  className="border-gray-200 h-9 px-4 rounded-xl disabled:opacity-40 text-base"
                 >
                   <ChevronLeft className="w-4 h-4 mr-1" />Previous
                 </Button>
-                <span className="text-sm font-bold text-gray-700 bg-white border border-gray-200 rounded-xl px-4 h-9 flex items-center min-w-[40px] justify-center">
+                <span className="text-base font-bold text-gray-700 bg-white border border-gray-200 rounded-xl px-4 h-9 flex items-center min-w-[40px] justify-center">
                   {currentPage}
                 </span>
                 <Button
@@ -432,7 +432,7 @@ export default function JobsPage() {
                   size="sm"
                   disabled={!hasNextPage}
                   onClick={() => setFilters(p => ({ ...p, page: (p.page ?? 1) + 1 }))}
-                  className="border-gray-200 h-9 px-4 rounded-xl disabled:opacity-40 text-sm"
+                  className="border-gray-200 h-9 px-4 rounded-xl disabled:opacity-40 text-base"
                 >
                   Next<ChevronRight className="w-4 h-4 ml-1" />
                 </Button>

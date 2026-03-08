@@ -50,8 +50,14 @@ export const applicationsApi = {
     return response.data;
   },
 
-  getBusinessApplications: async () => {
-    const response = await axiosInstance.get<PaginatedResponse<JobApplication>>('/posts/business/applications/');
+  getBusinessApplications: async (filters: { status?: string; job?: string } = {}) => {
+    const params: Record<string, string> = {};
+    if (filters.status) params.status = filters.status.toUpperCase();
+    if (filters.job) params.job = filters.job;
+    const response = await axiosInstance.get<PaginatedResponse<JobApplication>>(
+      '/posts/business/applications/',
+      { params }
+    );
     return response.data.results;
   },
 

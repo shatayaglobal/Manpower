@@ -15,7 +15,7 @@ import {
   ArrowLeft,
   Briefcase,
   DollarSign,
-  ChevronRight,
+  MoreHorizontal,
 } from "lucide-react";
 import { useApplications } from "@/lib/redux/use-applications";
 import { JobApplication } from "@/lib/types";
@@ -76,21 +76,104 @@ function formatDate(dateString: string) {
   }
 }
 
-// ── Skeleton row ──────────────────────────────────────────────────────────────
-function RowSkeleton() {
+function TableSkeleton() {
   return (
-    <div className="flex items-center gap-4 p-4 animate-pulse">
-      <div className="w-9 h-9 bg-gray-100 rounded-xl shrink-0" />
-      <div className="flex-1 space-y-2">
-        <div className="h-3.5 bg-gray-100 rounded w-1/3" />
-        <div className="h-3 bg-gray-100 rounded w-1/4" />
-      </div>
-      <div className="hidden sm:flex gap-6">
-        <div className="h-3 bg-gray-100 rounded w-16" />
-        <div className="h-3 bg-gray-100 rounded w-20" />
-      </div>
-      <div className="h-6 bg-gray-100 rounded-full w-20" />
-    </div>
+    <>
+      {[...Array(5)].map((_, i) => (
+        <tr key={i} className="animate-pulse border-b border-gray-50">
+          <td className="px-5 py-3.5">
+            <div className="space-y-1.5">
+              <div className="h-3.5 bg-gray-100 rounded w-36" />
+              <div className="h-3 bg-gray-100 rounded w-52" />
+            </div>
+          </td>
+          <td className="px-5 py-3.5 hidden md:table-cell">
+            <div className="h-3 bg-gray-100 rounded w-28" />
+          </td>
+          <td className="px-5 py-3.5 hidden lg:table-cell">
+            <div className="h-3 bg-gray-100 rounded w-20" />
+          </td>
+          <td className="px-5 py-3.5 hidden sm:table-cell">
+            <div className="h-3 bg-gray-100 rounded w-24" />
+          </td>
+          <td className="px-5 py-3.5">
+            <div className="h-6 bg-gray-100 rounded-full w-20" />
+          </td>
+          <td className="px-5 py-3.5">
+            <div className="h-7 bg-gray-100 rounded-lg w-16 ml-auto" />
+          </td>
+        </tr>
+      ))}
+    </>
+  );
+}
+
+function ActionMenu({ onView }: { onView: () => void }) {
+  const [open, setOpen] = React.useState(false);
+  const [pos, setPos] = React.useState({ top: 0, right: 0 });
+  const btnRef = React.useRef<HTMLButtonElement>(null);
+  const menuRef = React.useRef<HTMLDivElement>(null);
+
+  const handleOpen = () => {
+    if (btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      setPos({
+        top: rect.bottom + 4,
+        right: window.innerWidth - rect.right,
+      });
+    }
+    setOpen((p) => !p);
+  };
+
+  React.useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(e.target as Node) &&
+        btnRef.current &&
+        !btnRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <>
+      <button
+        ref={btnRef}
+        onClick={handleOpen}
+        className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+      >
+        <MoreHorizontal className="w-4 h-4" />
+      </button>
+
+      {open && (
+        <div
+          ref={menuRef}
+          style={{
+            position: "fixed",
+            top: pos.top,
+            right: pos.right,
+            zIndex: 9999,
+          }}
+          className="bg-white border border-gray-100 rounded-xl shadow-lg py-1 min-w-[120px]"
+        >
+          <button
+            onClick={() => {
+              setOpen(false);
+              onView();
+            }}
+            className="w-full flex items-center gap-2.5 px-3.5 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <Eye className="w-3.5 h-3.5 text-gray-400" />
+            View Job
+          </button>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -127,7 +210,6 @@ export default function ApplicationsPage() {
     );
   }
 
-  // Status summary counts
   const counts = applications.reduce((acc, app) => {
     const s = (app.status || "PENDING").toUpperCase();
     acc[s] = (acc[s] || 0) + 1;
@@ -137,7 +219,7 @@ export default function ApplicationsPage() {
   return (
     <div className="bg-gray-50 -ml-4 -mt-5 min-h-screen -mr-4">
       <div className="w-full px-4 sm:px-6 lg:px-8 py-8 space-y-5">
-        {/* ── Back nav ── */}
+        {/* ── Back ── */}
         <button
           onClick={() => router.back()}
           className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors group"
@@ -160,8 +242,6 @@ export default function ApplicationsPage() {
                 : "Track all your job applications here"}
             </p>
           </div>
-
-          {/* Status summary pills */}
           {applications.length > 0 && (
             <div className="flex flex-wrap gap-2 shrink-0">
               {Object.entries(counts).map(([status, count]) => {
@@ -171,7 +251,7 @@ export default function ApplicationsPage() {
                   <span
                     key={status}
                     className={cn(
-                      "inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border",
+                      "inline-flex items-center gap-1.5 text-base font-semibold px-3 py-1.5 rounded-full border",
                       s.color
                     )}
                   >
@@ -199,15 +279,9 @@ export default function ApplicationsPage() {
           </div>
         )}
 
-        {/* ── Content ── */}
+        {/* ── Table ── */}
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-          {loading ? (
-            <div className="divide-y divide-gray-50">
-              {[...Array(5)].map((_, i) => (
-                <RowSkeleton key={i} />
-              ))}
-            </div>
-          ) : applications.length === 0 ? (
+          {applications.length === 0 && !loading ? (
             <div className="text-center py-20">
               <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Briefcase className="w-8 h-8 text-gray-300" />
@@ -228,95 +302,128 @@ export default function ApplicationsPage() {
               </Button>
             </div>
           ) : (
-            <div className="divide-y divide-gray-50">
-              {applications.map(
-                (application: JobApplication, index: number) => {
-                  const job =
-                    typeof application.job === "object" &&
-                    application.job !== null
-                      ? application.job
-                      : null;
-                  const status = (
-                    application.status || "PENDING"
-                  ).toUpperCase();
-                  const s = STATUS_CONFIG[status] ?? STATUS_CONFIG.PENDING;
-                  const Icon = s.icon;
-
-                  return (
-                    <div
-                      key={application.id || `app-${index}`}
-                      onClick={() => {
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-100 bg-gray-50/60">
+                    <th className="text-left px-5 py-3.5 text-base font-semibold text-gray-400 uppercase tracking-wide">
+                      Job
+                    </th>
+                    <th className="text-left px-5 py-3.5 text-base font-semibold text-gray-400 uppercase tracking-wide hidden md:table-cell">
+                      Location
+                    </th>
+                    <th className="text-left px-5 py-3.5 text-base font-semibold text-gray-400 uppercase tracking-wide hidden lg:table-cell">
+                      Salary
+                    </th>
+                    <th className="text-left px-5 py-3.5 text-base font-semibold text-gray-400 uppercase tracking-wide hidden sm:table-cell">
+                      Applied
+                    </th>
+                    <th className="text-left px-5 py-3.5 text-base font-semibold text-gray-400 uppercase tracking-wide">
+                      Status
+                    </th>
+                    <th className="text-right px-5 py-3.5 text-base font-semibold text-gray-400 uppercase tracking-wide">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {loading ? (
+                    <TableSkeleton />
+                  ) : (
+                    applications.map(
+                      (application: JobApplication, index: number) => {
+                        const job =
+                          typeof application.job === "object" &&
+                          application.job !== null
+                            ? application.job
+                            : null;
+                        const status = (
+                          application.status || "PENDING"
+                        ).toUpperCase();
+                        const s =
+                          STATUS_CONFIG[status] ?? STATUS_CONFIG.PENDING;
+                        const Icon = s.icon;
                         const jobId =
                           typeof application.job === "object" &&
                           application.job !== null
                             ? (application.job as { id: string }).id
                             : application.job;
-                        if (jobId) router.push(`/jobs/${jobId}`);
-                      }}
-                      className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50/70 transition-colors cursor-pointer group"
-                    >
-                      {/* Job icon */}
-                      <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center shrink-0 group-hover:bg-blue-100 transition-colors">
-                        <Briefcase className="w-4 h-4 text-blue-600" />
-                      </div>
 
-                      {/* Job title + description */}
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-gray-900 text-sm truncate group-hover:text-blue-700 transition-colors">
-                          {job?.title || "Job Title Not Available"}
-                        </p>
-                        {job?.description && (
-                          <p className="text-xs text-gray-400 truncate mt-0.5">
-                            {job.description}
-                          </p>
-                        )}
-                      </div>
+                        return (
+                          <tr
+                            key={application.id || `app-${index}`}
+                            className="hover:bg-gray-50/50 transition-colors"
+                          >
+                            {/* Job */}
+                            <td className="px-5 py-3.5">
+                              <p className="font-semibold text-gray-900 text-sm truncate max-w-[180px] sm:max-w-[260px]">
+                                {job?.title || "Job Title Not Available"}
+                              </p>
+                              {job?.description && (
+                                <p className="text-base text-gray-400 truncate mt-0.5 max-w-[180px] sm:max-w-[260px]">
+                                  {job.description}
+                                </p>
+                              )}
+                            </td>
 
-                      {/* Meta — hidden on mobile */}
-                      <div className="hidden md:flex items-center gap-6 shrink-0">
-                        {job?.location ? (
-                          <span className="flex items-center gap-1.5 text-xs text-gray-500">
-                            <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                            {job.location}
-                          </span>
-                        ) : (
-                          <span className="text-xs text-gray-400">
-                            No location
-                          </span>
-                        )}
+                            {/* Location */}
+                            <td className="px-5 py-3.5 hidden md:table-cell">
+                              {job?.location ? (
+                                <span className="flex items-center gap-1.5 text-base text-gray-500">
+                                  {job.location}
+                                </span>
+                              ) : (
+                                <span className="text-base text-gray-300">—</span>
+                              )}
+                            </td>
 
-                        {job?.salary_range ? (
-                          <span className="flex items-center gap-1 text-xs text-emerald-700 font-medium">
-                            <DollarSign className="w-3.5 h-3.5 shrink-0" />
-                            {job.salary_range}
-                          </span>
-                        ) : (
-                          <span className="text-xs text-gray-400 w-20">—</span>
-                        )}
+                            {/* Salary */}
+                            <td className="px-5 py-3.5 hidden lg:table-cell">
+                              {job?.salary_range ? (
+                                <span className="flex items-center gap-1 text-base text-emerald-700 font-semibold">
+                                  {job.salary_range}
+                                </span>
+                              ) : (
+                                <span className="text-base text-gray-300">—</span>
+                              )}
+                            </td>
 
-                        <span className="flex items-center gap-1.5 text-xs text-gray-400">
-                          <Calendar className="w-3.5 h-3.5 shrink-0" />
-                          {formatDate(application.created_at)}
-                        </span>
-                      </div>
+                            {/* Applied date */}
+                            <td className="px-5 py-3.5 hidden sm:table-cell">
+                              <span className="flex items-center gap-1.5 text-base text-gray-400">
+                                {formatDate(application.created_at)}
+                              </span>
+                            </td>
 
-                      {/* Status badge */}
-                      <span
-                        className={cn(
-                          "inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border shrink-0",
-                          s.color
-                        )}
-                      >
-                        <Icon className="w-3 h-3" />
-                        {s.label}
-                      </span>
-
-                      {/* Arrow hint */}
-                      <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-gray-400 shrink-0 transition-colors" />
-                    </div>
-                  );
-                }
-              )}
+                            {/* Status */}
+                            <td className="px-5 py-3.5">
+                              <span
+                                className={cn(
+                                  "inline-flex items-center gap-1.5 text-base font-semibold px-2.5 py-1 rounded-full border whitespace-nowrap",
+                                  s.color
+                                )}
+                              >
+                                <Icon className="w-3 h-3" />
+                                {s.label}
+                              </span>
+                            </td>
+                            {/* Action */}
+                            <td className="px-5 py-3.5">
+                              <div className="flex justify-end">
+                                <ActionMenu
+                                  onView={() => {
+                                    if (jobId) router.push(`/jobs/${jobId}`);
+                                  }}
+                                />
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      }
+                    )
+                  )}
+                </tbody>
+              </table>
             </div>
           )}
         </div>

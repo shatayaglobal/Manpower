@@ -59,12 +59,18 @@ export const updateApplicationStatus = createAsyncThunk<
   return await applicationsApi.updateApplicationStatus(id, status );
 });
 
-export const fetchBusinessApplications = createAsyncThunk<JobApplication[], void>(
+export interface BusinessApplicationFilters {
+  status?: string;
+  job?: string;
+}
+
+export const fetchBusinessApplications = createAsyncThunk<JobApplication[], BusinessApplicationFilters>(
   'applications/fetchBusinessApplications',
-  async () => {
-    return await applicationsApi.getBusinessApplications();
+  async (filters = {}) => {
+    return await applicationsApi.getBusinessApplications(filters);
   }
 );
+
 
 const applicationsSlice = createSlice({
   name: "applications",

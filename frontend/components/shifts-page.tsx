@@ -87,7 +87,7 @@ function ShiftTypeBadge({ type }: { type: ShiftType }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border",
+        "inline-flex items-center px-2.5 py-0.5 rounded-full text-base font-semibold border",
         c.color
       )}
     >
@@ -99,14 +99,14 @@ function ShiftTypeBadge({ type }: { type: ShiftType }) {
 function DayBadge({ day }: { day: DayOfWeek }) {
   if (!day)
     return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-gray-50 text-gray-500 border-gray-200">
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-base font-semibold border bg-gray-50 text-gray-500 border-gray-200">
         N/A
       </span>
     );
   return (
     <span
       className={cn(
-        "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border",
+        "inline-flex items-center px-2.5 py-0.5 rounded-full text-base font-semibold border",
         DAY_COLORS[day]
       )}
     >
@@ -134,14 +134,14 @@ function RowSkeleton() {
 }
 
 const labelCls =
-  "block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5";
+  "block text-base font-semibold text-gray-500 uppercase tracking-wide mb-1.5";
 const inputCls = (err?: string) =>
   cn(
-    "w-full px-3 py-2.5 border rounded-xl text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+    "w-full px-3 py-2.5 border rounded-xl text-base transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
     err ? "border-red-300 bg-red-50/30" : "border-gray-200 bg-white"
   );
 const selectCls =
-  "w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent";
+  "w-full px-3 py-2.5 border border-gray-200 rounded-xl text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent";
 
 interface ShiftModalProps {
   shift: Shift | null;
@@ -285,7 +285,7 @@ function ShiftModal({
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
           {/* Assignment */}
           <div className="bg-gray-50 rounded-2xl p-4 space-y-4">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+            <p className="text-base font-bold text-gray-400 uppercase tracking-widest">
               Assignment
             </p>
             <div>
@@ -306,7 +306,7 @@ function ShiftModal({
                 error={!!errors.staff}
               />
               {errors.staff && (
-                <p className="text-red-500 text-xs mt-1">{errors.staff}</p>
+                <p className="text-red-500 text-base mt-1">{errors.staff}</p>
               )}
             </div>
 
@@ -326,7 +326,7 @@ function ShiftModal({
                   className={inputCls(errors.name)}
                 />
                 {errors.name && (
-                  <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+                  <p className="text-red-500 text-base mt-1">{errors.name}</p>
                 )}
               </div>
               <div>
@@ -360,7 +360,7 @@ function ShiftModal({
                 error={!!errors.day_of_week}
               />
               {errors.day_of_week && (
-                <p className="text-red-500 text-xs mt-1">
+                <p className="text-red-500 text-base mt-1">
                   {errors.day_of_week}
                 </p>
               )}
@@ -369,7 +369,7 @@ function ShiftModal({
 
           {/* Schedule */}
           <div className="bg-gray-50 rounded-2xl p-4 space-y-4">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+            <p className="text-base font-bold text-gray-400 uppercase tracking-widest">
               Schedule
             </p>
 
@@ -388,7 +388,7 @@ function ShiftModal({
                       value={formData[field] as string}
                       onChange={(e) => set(field, e.target.value)}
                       className={cn(
-                        "flex-1 px-3 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+                        "flex-1 px-3 py-2.5 border rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
                         errors[field]
                           ? "border-red-300 bg-red-50/30"
                           : "border-gray-200 bg-white"
@@ -397,7 +397,7 @@ function ShiftModal({
                     <select
                       value={timeAmPm(formData[field] as string)}
                       onChange={(e) => toggleAmPm(field, e.target.value)}
-                      className="px-2.5 py-2 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="px-2.5 py-2 border border-gray-200 rounded-xl text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">--</option>
                       <option value="AM">AM</option>
@@ -405,7 +405,7 @@ function ShiftModal({
                     </select>
                   </div>
                   {errors[field] && (
-                    <p className="text-red-500 text-xs mt-1">{errors[field]}</p>
+                    <p className="text-red-500 text-base mt-1">{errors[field]}</p>
                   )}
                 </div>
               ))}
@@ -425,7 +425,7 @@ function ShiftModal({
                 placeholder="00:30:00 (HH:MM:SS)"
                 className={inputCls()}
               />
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-base text-gray-400 mt-1">
                 Format: HH:MM:SS — e.g. 00:30:00 for 30 minutes
               </p>
             </div>
@@ -445,7 +445,7 @@ function ShiftModal({
                   )}
                 />
               </div>
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-base font-medium text-gray-700">
                 Active shift
               </span>
             </label>
@@ -457,14 +457,14 @@ function ShiftModal({
             variant="outline"
             onClick={onClose}
             disabled={submitting}
-            className="flex-1 border-gray-200 h-10 rounded-xl font-semibold text-sm"
+            className="flex-1 border-gray-200 h-10 rounded-xl font-semibold text-base"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={submitting}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-10 rounded-xl font-semibold text-sm shadow-sm"
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-10 rounded-xl font-semibold text-base shadow-sm"
           >
             {submitting ? (
               <>
@@ -619,7 +619,7 @@ const ShiftManagementPage: React.FC = () => {
     return (
       <button
         onClick={() => handleSort(field)}
-        className="flex items-center text-xs font-semibold text-gray-400 uppercase tracking-wide hover:text-gray-700 transition-colors"
+        className="flex items-center text-base font-semibold text-gray-400 uppercase tracking-wide hover:text-gray-700 transition-colors"
       >
         {label}
         <SortIcon field={field} />
@@ -637,7 +637,7 @@ const ShiftManagementPage: React.FC = () => {
           <h2 className="text-lg font-bold text-gray-900 mb-2">
             No Business Profile
           </h2>
-          <p className="text-sm text-gray-500 mb-5">
+          <p className="text-base text-gray-500 mb-5">
             Create your business profile before managing shifts.
           </p>
           <Button
@@ -659,13 +659,13 @@ const ShiftManagementPage: React.FC = () => {
           <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-center justify-between gap-4">
             <div className="flex items-center gap-2.5">
               <AlertCircle className="h-4 w-4 text-red-600 shrink-0" />
-              <p className="text-sm text-red-700">{shiftError}</p>
+              <p className="text-base text-red-700">{shiftError}</p>
             </div>
             <Button
               variant="outline"
               size="sm"
               onClick={clearShiftError}
-              className="border-red-200 text-red-700 hover:bg-red-100 shrink-0 h-8 px-3 text-xs rounded-xl"
+              className="border-red-200 text-red-700 hover:bg-red-100 shrink-0 h-8 px-3 text-base rounded-xl"
             >
               Dismiss
             </Button>
@@ -678,7 +678,7 @@ const ShiftManagementPage: React.FC = () => {
             <h1 className="text-2xl font-bold text-gray-900">
               Shift Management
             </h1>
-            <p className="text-gray-500 text-sm mt-0.5">
+            <p className="text-gray-500 text-base mt-0.5">
               Schedule and manage work shifts for your team
             </p>
           </div>
@@ -687,7 +687,7 @@ const ShiftManagementPage: React.FC = () => {
               selectShift(null);
               setShowModal(true);
             }}
-            className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-4 rounded-xl font-semibold text-sm shadow-sm shrink-0"
+            className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-4 rounded-xl font-semibold text-base shadow-sm shrink-0"
           >
             <Plus className="w-3.5 h-3.5 mr-1.5" />
             Create Shift
@@ -720,7 +720,7 @@ const ShiftManagementPage: React.FC = () => {
               key={label}
               className={cn("bg-white rounded-2xl border p-5", border)}
             >
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">
+              <p className="text-base font-semibold text-gray-400 uppercase tracking-wide mb-1">
                 {label}
               </p>
               <p className={cn("text-2xl font-bold", text)}>{value}</p>
@@ -739,13 +739,13 @@ const ShiftManagementPage: React.FC = () => {
                 placeholder="Search shifts or staff..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
             <select
               value={dayFilter}
               onChange={(e) => setDayFilter(e.target.value)}
-              className="h-9 px-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="h-9 px-3 border border-gray-200 rounded-xl text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Days</option>
               {DAY_ORDER.map((d) => (
@@ -757,7 +757,7 @@ const ShiftManagementPage: React.FC = () => {
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="h-9 px-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="h-9 px-3 border border-gray-200 rounded-xl text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Types</option>
               <option value="MORNING">Morning</option>
@@ -769,7 +769,7 @@ const ShiftManagementPage: React.FC = () => {
             <select
               value={staffFilter}
               onChange={(e) => setStaffFilter(e.target.value)}
-              className="h-9 px-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="h-9 px-3 border border-gray-200 rounded-xl text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Staff</option>
               {staff
@@ -788,12 +788,12 @@ const ShiftManagementPage: React.FC = () => {
                   setTypeFilter("all");
                   setStaffFilter("all");
                 }}
-                className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors whitespace-nowrap"
+                className="text-base font-semibold text-blue-600 hover:text-blue-800 transition-colors whitespace-nowrap"
               >
                 Clear filters
               </button>
             )}
-            <span className="ml-auto text-xs text-gray-400 font-medium whitespace-nowrap">
+            <span className="ml-auto text-base text-gray-400 font-medium whitespace-nowrap">
               {groupedShifts.length}{" "}
               {groupedShifts.length === 1 ? "shift" : "shifts"}
             </span>
@@ -813,7 +813,7 @@ const ShiftManagementPage: React.FC = () => {
               <h3 className="text-base font-semibold text-gray-900 mb-2">
                 No shifts found
               </h3>
-              <p className="text-sm text-gray-500 max-w-xs mx-auto mb-5">
+              <p className="text-base text-gray-500 max-w-xs mx-auto mb-5">
                 {hasFilters
                   ? "Try adjusting your filters."
                   : "Start scheduling shifts for your team members."}
@@ -824,7 +824,7 @@ const ShiftManagementPage: React.FC = () => {
                     selectShift(null);
                     setShowModal(true);
                   }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-5 rounded-xl font-semibold text-sm"
+                  className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-5 rounded-xl font-semibold text-base"
                 >
                   <Plus className="w-3.5 h-3.5 mr-1.5" />
                   Create First Shift
@@ -836,13 +836,13 @@ const ShiftManagementPage: React.FC = () => {
               {/* Column headers */}
               <div className="hidden lg:grid grid-cols-[2fr_1.5fr_2fr_1fr_1.5fr_1fr_auto] gap-4 px-5 py-2.5 bg-gray-50/60 border-b border-gray-50">
                 <ColHeader field="name" label="Shift Name" />
-                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                <span className="text-base font-semibold text-gray-400 uppercase tracking-wide">
                   Staff
                 </span>
                 <ColHeader field="day_of_week" label="Days" />
                 <ColHeader field="shift_type" label="Type" />
                 <ColHeader field="start_time" label="Time" />
-                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                <span className="text-base font-semibold text-gray-400 uppercase tracking-wide">
                   Status
                 </span>
                 <span />
@@ -858,10 +858,10 @@ const ShiftManagementPage: React.FC = () => {
                     >
                       {/* Name */}
                       <div className="min-w-0">
-                        <p className="font-semibold text-sm text-gray-900 truncate">
+                        <p className="font-semibold text-base text-gray-900 truncate">
                           {shift.name}
                         </p>
-                        <p className="text-xs text-gray-400 truncate lg:hidden">
+                        <p className="text-base text-gray-400 truncate lg:hidden">
                           {member?.name || "—"}
                         </p>
                         <div className="flex gap-1.5 mt-1 lg:hidden flex-wrap">
@@ -869,11 +869,11 @@ const ShiftManagementPage: React.FC = () => {
                         </div>
                       </div>
 
-                      <div className="hidden lg:block text-sm text-gray-700 truncate">
+                      <div className="hidden lg:block text-base text-gray-700 truncate">
                         <p className="font-medium truncate">
                           {member?.name || "—"}
                         </p>
-                        <p className="text-xs text-gray-400 truncate">
+                        <p className="text-base text-gray-400 truncate">
                           {member?.job_title}
                         </p>
                       </div>
@@ -894,11 +894,11 @@ const ShiftManagementPage: React.FC = () => {
                       </div>
 
                       <div className="hidden lg:block">
-                        <p className="text-sm text-gray-700 whitespace-nowrap">
+                        <p className="text-base text-gray-700 whitespace-nowrap">
                           {shift.start_time} – {shift.end_time}
                         </p>
                         {shift.break_duration && (
-                          <p className="text-xs text-gray-400">
+                          <p className="text-base text-gray-400">
                             Break: {shift.break_duration}
                           </p>
                         )}
@@ -907,7 +907,7 @@ const ShiftManagementPage: React.FC = () => {
                       <div className="hidden lg:block">
                         <span
                           className={cn(
-                            "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border",
+                            "inline-flex items-center px-2.5 py-0.5 rounded-full text-base font-semibold border",
                             shift.is_active
                               ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                               : "bg-gray-50 text-gray-500 border-gray-200"
@@ -948,7 +948,7 @@ const ShiftManagementPage: React.FC = () => {
               {/* Pagination */}
               {shiftPagination.count > itemsPerPage && (
                 <div className="flex items-center justify-between px-5 py-3.5 border-t border-gray-50">
-                  <p className="text-xs text-gray-400">
+                  <p className="text-base text-gray-400">
                     {(page - 1) * itemsPerPage + 1}–
                     {Math.min(page * itemsPerPage, shiftPagination.count)} of{" "}
                     {shiftPagination.count}
@@ -971,7 +971,7 @@ const ShiftManagementPage: React.FC = () => {
                       .map((p, i, arr) => (
                         <React.Fragment key={p}>
                           {i > 0 && p - arr[i - 1] > 1 && (
-                            <span className="text-xs text-gray-300 px-1">
+                            <span className="text-base text-gray-300 px-1">
                               …
                             </span>
                           )}
@@ -979,7 +979,7 @@ const ShiftManagementPage: React.FC = () => {
                             onClick={() => setPage(p)}
                             disabled={shiftLoading}
                             className={cn(
-                              "w-8 h-8 rounded-xl text-xs font-semibold border transition-colors",
+                              "w-8 h-8 rounded-xl text-base font-semibold border transition-colors",
                               page === p
                                 ? "bg-blue-600 text-white border-blue-600"
                                 : "border-gray-200 text-gray-600 hover:border-blue-200 hover:text-blue-600"

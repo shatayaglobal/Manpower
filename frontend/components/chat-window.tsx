@@ -73,13 +73,13 @@ export default function ChatWindow() {
       {/* ── Chat header — fixed, never scrolls ── */}
       <div className="flex items-center gap-3 px-5 py-3.5 border-b border-gray-100 bg-white shrink-0">
         <Avatar className="w-9 h-9">
-          <AvatarFallback className="bg-blue-50 text-blue-700 text-xs font-semibold">
+          <AvatarFallback className="bg-blue-50 text-blue-700 text-base font-semibold">
             {getInitials(selectedUser.first_name, selectedUser.last_name, selectedUser.email)}
           </AvatarFallback>
         </Avatar>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-gray-900 truncate">{displayName}</p>
-          <span className={`text-xs font-medium ${isBusiness ? "text-blue-600" : "text-gray-400"}`}>
+          <p className="text-base font-semibold text-gray-900 truncate">{displayName}</p>
+          <span className={`text-base font-medium ${isBusiness ? "text-blue-600" : "text-gray-400"}`}>
             {isBusiness ? "Business" : "Worker"}
           </span>
         </div>
@@ -97,8 +97,8 @@ export default function ChatWindow() {
         ) : messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
-              <p className="text-sm font-medium text-gray-500">No messages yet</p>
-              <p className="text-xs text-gray-400 mt-1">Say hello to start the conversation!</p>
+              <p className="text-base font-medium text-gray-500">No messages yet</p>
+              <p className="text-base text-gray-400 mt-1">Say hello to start the conversation!</p>
             </div>
           </div>
         ) : (
@@ -112,7 +112,7 @@ export default function ChatWindow() {
             return (
               <div key={msg.id} className={`flex ${isOwn ? "justify-end" : "justify-start"}`}>
                 <div
-                  className={`max-w-[72%] px-3.5 py-2.5 rounded-2xl text-sm ${
+                  className={`max-w-[72%] px-3.5 py-2.5 rounded-2xl text-base ${
                     isSystem
                       ? "bg-amber-50 border border-amber-200 text-amber-900 rounded-xl"
                       : isOwn
@@ -121,7 +121,7 @@ export default function ChatWindow() {
                   }`}
                 >
                   {isSystem && (
-                    <p className="text-xs font-semibold mb-1">
+                    <p className="text-base font-semibold mb-1">
                       {msg.message_type === "APPLICATION_ACCEPTED" && "🎉 Application Accepted"}
                       {msg.message_type === "APPLICATION_REJECTED" && "❌ Application Update"}
                       {msg.message_type === "SYSTEM" && "🔔 System"}
@@ -129,11 +129,11 @@ export default function ChatWindow() {
                   )}
                   <p className="break-words leading-relaxed">{msg.message}</p>
                   <div className="flex items-center justify-end gap-1.5 mt-1">
-                    <span className={`text-xs ${isOwn && !isSystem ? "text-blue-400" : "text-gray-400"}`}>
+                    <span className={`text-base ${isOwn && !isSystem ? "text-blue-400" : "text-gray-400"}`}>
                       {formatTime(msg.created_at)}
                     </span>
                     {isOwn && !isSystem && (
-                      <span className="text-xs text-blue-400">{msg.is_read ? "✓✓" : "✓"}</span>
+                      <span className="text-base text-blue-400">{msg.is_read ? "✓✓" : "✓"}</span>
                     )}
                   </div>
                 </div>
@@ -153,7 +153,7 @@ export default function ChatWindow() {
           value={newMessage}
           onChange={e => setNewMessage(e.target.value)}
           placeholder="Type a message..."
-          className="flex-1 h-10 border-gray-200 bg-gray-50 focus:bg-white rounded-xl text-sm"
+          className="flex-1 h-10 border-gray-200 bg-gray-50 focus:bg-white rounded-xl text-base"
           disabled={isSending}
         />
         <Button

@@ -48,7 +48,7 @@ export default function MessagesPage() {
           <h2 className="text-lg font-semibold text-gray-900 mb-1">
             Access Required
           </h2>
-          <p className="text-gray-500 text-sm">
+          <p className="text-gray-500 text-base">
             Please sign in to access your messages.
           </p>
         </div>
@@ -72,7 +72,7 @@ export default function MessagesPage() {
             <h1 className="text-lg font-bold text-gray-900 leading-none">
               Messages
             </h1>
-            <p className="text-xs text-gray-400 mt-0.5">
+            <p className="text-base text-gray-400 mt-0.5">
               Stay connected with employers
             </p>
           </div>
@@ -88,7 +88,7 @@ export default function MessagesPage() {
           >
             {/* Sidebar header */}
             <div className="px-4 py-3.5 border-b border-gray-100 shrink-0">
-              <h2 className="text-sm font-semibold text-gray-900">
+              <h2 className="text-base font-semibold text-gray-900">
                 Conversations
               </h2>
             </div>
@@ -149,7 +149,7 @@ export default function MessagesPage() {
                   <h3 className="text-base font-semibold text-gray-900 mb-1">
                     No conversation selected
                   </h3>
-                  <p className="text-sm text-gray-500 leading-relaxed">
+                  <p className="text-base text-gray-500 leading-relaxed">
                     Choose a conversation from the sidebar to start messaging.
                   </p>
                 </div>

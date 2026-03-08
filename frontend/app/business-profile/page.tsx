@@ -4,8 +4,6 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
@@ -17,14 +15,70 @@ import {
   Edit,
   Save,
   X,
-  Camera,
   Clock,
-  Home,
+  Phone,
+  Loader2,
+  Briefcase,
+  Users,
+  ChevronRight,
 } from "lucide-react";
 import type { RootState } from "@/lib/redux/store";
 import { useBusiness } from "@/lib/redux/useBusiness";
-import type { BusinessCategory, BusinessSize, CreateBusinessRequest } from "@/lib/business-types";
+import type {
+  BusinessCategory,
+  BusinessSize,
+  CreateBusinessRequest,
+} from "@/lib/business-types";
 import { AddressAutocomplete } from "@/components/address-auto-complete";
+import { cn } from "@/lib/utils";
+
+const inputCls = (disabled?: boolean) =>
+  cn(
+    "w-full px-3 py-2.5 border rounded-xl text-base transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400",
+    disabled
+      ? "bg-gray-50 cursor-not-allowed border-gray-200"
+      : "bg-white border-gray-200 hover:border-gray-300"
+  );
+
+const selectCls = (disabled?: boolean) =>
+  cn(
+    "w-full px-3 py-2.5 border rounded-xl text-base transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 appearance-none",
+    disabled
+      ? "bg-gray-50 cursor-not-allowed border-gray-200"
+      : "bg-white border-gray-200 hover:border-gray-300"
+  );
+
+function SectionLabel({
+  icon,
+  children,
+}: {
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center gap-2 mb-5">
+      <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+        {icon}
+      </div>
+      <span className="text-base font-bold text-gray-500 uppercase tracking-widest">
+        {children}
+      </span>
+    </div>
+  );
+}
+
+function InfoRow({ label, value }: { label: string; value?: string | null }) {
+  return (
+    <div>
+      <p className="text-base font-semibold text-gray-400 uppercase tracking-wide mb-1">
+        {label}
+      </p>
+      <p className="text-base font-medium text-gray-900">
+        {value || <span className="text-gray-300 font-normal">Not set</span>}
+      </p>
+    </div>
+  );
+}
 
 export default function BusinessProfilePage() {
   const router = useRouter();
@@ -39,7 +93,7 @@ export default function BusinessProfilePage() {
 
   const [formData, setFormData] = useState<CreateBusinessRequest>({
     name: "",
-    category: "OTHER" as BusinessCategory,  
+    category: "OTHER" as BusinessCategory,
     size: "SMALL" as BusinessSize,
     description: "",
     email: user?.email || "",
@@ -64,13 +118,11 @@ export default function BusinessProfilePage() {
       router.push("/login");
       return;
     }
-
     if (user.account_type !== "BUSINESS") {
       toast.error("This page is for business accounts only");
       router.push("/profile");
       return;
     }
-
     loadBusinesses();
   }, [isAuthenticated, user, router, loadBusinesses]);
 
@@ -179,450 +231,489 @@ export default function BusinessProfilePage() {
 
   if (loading && !business) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center space-y-4">
-          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-gray-600 font-medium">
-            Loading business profile...
-          </p>
-        </div>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <Loader2 className="h-7 w-7 animate-spin text-blue-600" />
       </div>
     );
   }
 
+  const sizeLabel: Record<string, string> = {
+    SMALL: "1–10 employees",
+    MEDIUM: "11–50 employees",
+    LARGE: "51–200 employees",
+    ENTERPRISE: "200+ employees",
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 pb-12">
-      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            {isNewBusiness
-              ? "Create Your Business Profile"
-              : "Business Profile"}
+    <div className="bg-gray-50 -ml-4 -mt-5 min-h-screen -mr-4">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+        {/* ── Page title ── */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">
+            {isNewBusiness ? "Create Business Profile" : "Business Profile"}
           </h1>
-          <p className="mt-2 text-gray-600">
+          <p className="text-gray-500 text-base mt-1">
             {isNewBusiness
-              ? "Let's get your business set up so customers can find you."
+              ? "Set up your business so workers and customers can find you."
               : "Manage and update your business information."}
           </p>
         </div>
 
-        {/* Hero / Summary Card */}
-        <Card className="mb-8 shadow-sm">
-          <CardContent className="p-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-              <div className="relative flex-shrink-0">
-                <div className="w-20 h-20 rounded-xl bg-gray-100 border-2 border-gray-200 flex items-center justify-center overflow-hidden">
-                  <Home className="h-12 w-12 text-gray-400" />
-                </div>
-                {isEditing && (
-                  <Button
-                    size="icon"
-                    className="absolute -bottom-2 -right-2 rounded-full border-2 border-white shadow-sm"
-                  >
-                    <Camera className="h-4 w-4" />
-                  </Button>
+        {/* ── Hero summary strip ── */}
+        {!isNewBusiness && business && (
+          <div className="bg-white rounded-2xl border border-gray-100 px-6 py-5 mb-5 flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+              <Building2 className="w-6 h-6 text-blue-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-lg font-bold text-gray-900 truncate">
+                {business.name}
+              </h2>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
+                {(business.city || business.country) && (
+                  <span className="flex items-center gap-1 text-base text-gray-500">
+                    <MapPin className="w-3.5 h-3.5" />
+                    {[business.city, business.country]
+                      .filter(Boolean)
+                      .join(", ")}
+                  </span>
+                )}
+                {business.email && (
+                  <span className="flex items-center gap-1 text-base text-gray-500">
+                    <Mail className="w-3.5 h-3.5" />
+                    {business.email}
+                  </span>
+                )}
+                {business.service_time && (
+                  <span className="flex items-center gap-1 text-base text-gray-500">
+                    <Clock className="w-3.5 h-3.5" />
+                    {business.service_time}
+                  </span>
                 )}
               </div>
+            </div>
+            {!isEditing && (
+              <button
+                onClick={() => setIsEditing(true)}
+                className="inline-flex items-center gap-1.5 text-base font-semibold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-100 px-3 py-1.5 rounded-lg transition-colors shrink-0"
+              >
+                <Edit className="w-3.5 h-3.5" />
+                Edit Profile
+              </button>
+            )}
+          </div>
+        )}
 
-              <div className="flex-1 min-w-0">
-                <h2 className="text-2xl font-bold truncate">
-                  {formData.name || "Your Business"}
-                </h2>
-                <p className="text-blue-600 font-medium mt-1 capitalize">
-                  {formData.category || "Category not set"}
-                </p>
-                <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-700">
-                  <span className="flex items-center gap-1.5">
-                    <MapPin className="h-4 w-4 text-gray-500" />
-                    {formData.city && formData.country
-                      ? `${formData.city}, ${formData.country}`
-                      : "Location not set"}
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <Mail className="h-4 w-4 text-gray-500" />
-                    {formData.email || "—"}
-                  </span>
+        {/* ── View mode ── */}
+        {!isEditing && business && (
+          <div className="bg-white rounded-2xl border border-gray-100 divide-y divide-gray-50">
+            {/* Basic Info */}
+            <div className="p-6">
+              <SectionLabel icon={<Briefcase className="w-3.5 h-3.5" />}>
+                Basic Information
+              </SectionLabel>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <InfoRow label="Business Name" value={business.name} />
+                <InfoRow
+                  label="Category"
+                  value={
+                    business.category
+                      ? business.category.charAt(0) +
+                        business.category.slice(1).toLowerCase()
+                      : null
+                  }
+                />
+                <InfoRow
+                  label="Company Size"
+                  value={business.size ? sizeLabel[business.size] : null}
+                />
+                <InfoRow label="Service Hours" value={business.service_time} />
+              </div>
+              {business.description && (
+                <div className="mt-5">
+                  <p className="text-base font-semibold text-gray-400 uppercase tracking-wide mb-1.5">
+                    Description
+                  </p>
+                  <p className="text-base text-gray-700 leading-relaxed whitespace-pre-line">
+                    {business.description}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Contact */}
+            <div className="p-6">
+              <SectionLabel icon={<Mail className="w-3.5 h-3.5" />}>
+                Contact
+              </SectionLabel>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <InfoRow label="Email" value={business.email} />
+                <InfoRow label="Phone" value={business.phone} />
+                <div>
+                  <p className="text-base font-semibold text-gray-400 uppercase tracking-wide mb-1">
+                    Website
+                  </p>
+                  {business.website ? (
+                    <a
+                      href={
+                        business.website.startsWith("http")
+                          ? business.website
+                          : `https://${business.website}`
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-base font-medium text-blue-600 hover:text-blue-700 inline-flex items-center gap-1.5"
+                    >
+                      <Globe className="w-3.5 h-3.5" />
+                      Visit website
+                    </a>
+                  ) : (
+                    <span className="text-base text-gray-300">Not set</span>
+                  )}
                 </div>
               </div>
-
-              {!isEditing && !isNewBusiness && (
-                <Button variant="outline" onClick={() => setIsEditing(true)}>
-                  <Edit className="mr-2 h-4 w-4" />
-                  Edit Profile
-                </Button>
-              )}
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Main Content Card */}
-        <Card className="shadow-sm">
-          <CardHeader className="border-b">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-semibold text-gray-900">
-                Company Details
-              </h3>
-
-              {isEditing && (
-                <div className="flex gap-3">
-                  {!isNewBusiness && (
-                    <Button
-                      variant="outline"
-                      onClick={handleCancel}
-                      disabled={loading}
-                    >
-                      <X className="mr-2 h-4 w-4" />
-                      Cancel
-                    </Button>
-                  )}
-                  <Button
-                    onClick={handleSave}
-                    disabled={loading}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    <Save className="mr-2 h-4 w-4" />
-                    {loading ? "Saving..." : "Save Changes"}
-                  </Button>
-                </div>
-              )}
+            {/* Location */}
+            <div className="p-6">
+              <SectionLabel icon={<MapPin className="w-3.5 h-3.5" />}>
+                Location
+              </SectionLabel>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <InfoRow label="Street" value={business.street} />
+                <InfoRow label="Address" value={business.address} />
+                <InfoRow label="City" value={business.city} />
+                <InfoRow label="Country" value={business.country} />
+                <InfoRow label="Postal Code" value={business.postal_code} />
+              </div>
             </div>
-          </CardHeader>
+          </div>
+        )}
 
-          <CardContent className="p-6 lg:p-8">
-            {isEditing ? (
-              <div className="space-y-8">
-                {/* Basic Info */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-1.5">
-                      Business Name{" "}
-                      <span className="text-red-500 text-base">*</span>
-                    </Label>
-                    <Input
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      placeholder="Your Company Ltd"
-                    />
-                  </div>
+        {/* ── Empty state ── */}
+        {!isEditing && !business && (
+          <div className="bg-white rounded-2xl border border-gray-100 text-center py-20">
+            <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Building2 className="w-8 h-8 text-gray-300" />
+            </div>
+            <h3 className="text-base font-semibold text-gray-900 mb-2">
+              No business profile yet
+            </h3>
+            <p className="text-gray-500 text-base mb-6 max-w-xs mx-auto">
+              Create your profile to start managing your business on the
+              platform.
+            </p>
+            <Button
+              onClick={() => setIsEditing(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl"
+            >
+              Create Business Profile
+            </Button>
+          </div>
+        )}
 
-                  <div className="space-y-2">
-                    <Label>Category</Label>
-                    <select
-                      name="category"
-                      value={formData.category}
-                      onChange={handleInputChange}
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                    >
-                      <option value="">Select category</option>
-                      <option value="RESTAURANT">Restaurant</option>
-                      <option value="RETAIL">Retail</option>
-                      <option value="HEALTHCARE">Healthcare</option>
-                      <option value="TECHNOLOGY">Technology</option>
-                      <option value="CONSTRUCTION">Construction</option>
-                      <option value="EDUCATION">Education</option>
-                      <option value="MANUFACTURING">Manufacturing</option>
-                      <option value="SERVICES">Services</option>
-                      <option value="OTHER">Other</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label>Company Size</Label>
-                    <select
-                      name="size"
-                      value={formData.size}
-                      onChange={handleInputChange}
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                    >
-                      <option value="SMALL">1–10 employees</option>
-                      <option value="MEDIUM">11–50 employees</option>
-                      <option value="LARGE">51–200 employees</option>
-                      <option value="ENTERPRISE">200+ employees</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Service Hours</Label>
-                    <Input
-                      name="service_time"
-                      value={formData.service_time}
-                      onChange={handleInputChange}
-                      placeholder="Mon–Fri 9:00 AM – 5:00 PM"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Company Description</Label>
-                  <Textarea
-                    name="description"
-                    value={formData.description}
+        {/* ── Edit / Create form ── */}
+        {isEditing && (
+          <div className="bg-white rounded-2xl border border-gray-100 divide-y divide-gray-50">
+            {/* Section 1: Basic Info */}
+            <div className="p-6">
+              <SectionLabel icon={<Briefcase className="w-3.5 h-3.5" />}>
+                Basic Information
+              </SectionLabel>
+              <div className="grid sm:grid-cols-2 gap-5">
+                <div>
+                  <Label className="text-base font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
+                    Business Name{" "}
+                    <span className="text-red-400 normal-case font-normal">
+                      *
+                    </span>
+                  </Label>
+                  <input
+                    name="name"
+                    value={formData.name}
                     onChange={handleInputChange}
-                    placeholder="Tell people about your business, what you do, your values..."
-                    rows={4}
+                    placeholder="Your Company Ltd"
+                    className={inputCls(loading)}
                   />
                 </div>
 
-                {/* Contact */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-1.5">
-                      Email <span className="text-red-500 text-base">*</span>
-                    </Label>
-                    <Input
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-1.5">
-                      Phone <span className="text-red-500 text-base">*</span>
-                    </Label>
-                    <Input
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Website</Label>
-                    <Input
-                      name="website"
-                      type="url"
-                      value={formData.website}
-                      onChange={handleInputChange}
-                      placeholder="https://yourcompany.com"
-                    />
-                  </div>
+                <div>
+                  <Label className="text-base font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
+                    Category
+                  </Label>
+                  <select
+                    name="category"
+                    value={formData.category}
+                    onChange={handleInputChange}
+                    className={selectCls(loading)}
+                    disabled={loading}
+                  >
+                    <option value="">Select category</option>
+                    <option value="RESTAURANT">Restaurant</option>
+                    <option value="RETAIL">Retail</option>
+                    <option value="HEALTHCARE">Healthcare</option>
+                    <option value="TECHNOLOGY">Technology</option>
+                    <option value="CONSTRUCTION">Construction</option>
+                    <option value="EDUCATION">Education</option>
+                    <option value="MANUFACTURING">Manufacturing</option>
+                    <option value="SERVICES">Services</option>
+                    <option value="OTHER">Other</option>
+                  </select>
                 </div>
 
-                {/* Location */}
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <Label>Street Address</Label>
-                    <Input
-                      name="street"
-                      value={formData.street}
-                      onChange={handleInputChange}
-                      placeholder="Plot 45, John Babiha Avenue"
-                    />
-                  </div>
+                <div>
+                  <Label className="text-base font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
+                    Company Size
+                  </Label>
+                  <select
+                    name="size"
+                    value={formData.size}
+                    onChange={handleInputChange}
+                    className={selectCls(loading)}
+                    disabled={loading}
+                  >
+                    <option value="SMALL">1–10 employees</option>
+                    <option value="MEDIUM">11–50 employees</option>
+                    <option value="LARGE">51–200 employees</option>
+                    <option value="ENTERPRISE">200+ employees</option>
+                  </select>
+                </div>
 
-                  <div>
-                    <Label className="flex items-center gap-1 mb-1.5">
-                      Business Address <span className="text-red-500">*</span>
-                    </Label>
-                    <AddressAutocomplete
-                      value={formData.address}
-                      onChange={(address) =>
-                        setFormData({ ...formData, address })
-                      }
-                      onPlaceSelected={(place) => {
-                        setFormData({
-                          ...formData,
-                          address: place.address,
-                          street: place.street,
-                          city: place.city,
-                          country: place.country,
-                          postal_code:
-                            place.postal_code || formData.postal_code,
-                          workplace_latitude: place.latitude
-                            ? Number(place.latitude.toFixed(6))
-                            : null,
-                          workplace_longitude: place.longitude
-                            ? Number(place.longitude.toFixed(6))
-                            : null,
-                        });
-                      }}
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Start typing to search for your address
-                    </p>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-1.5">
-                        City <span className="text-red-500 text-base">*</span>
-                      </Label>
-                      <Input
-                        name="city"
-                        value={formData.city}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-1.5">
-                        Country{" "}
-                        <span className="text-red-500 text-base">*</span>
-                      </Label>
-                      <Input
-                        name="country"
-                        value={formData.country}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-
-                    <div className="space-y-2 mt-2">
-                      <Label>Postal Code</Label>
-                      <Input
-                        name="postal_code"
-                        value={formData.postal_code}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  </div>
+                <div>
+                  <Label className="text-base font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
+                    Service Hours{" "}
+                    <span className="text-gray-300 normal-case font-normal">
+                      — Optional
+                    </span>
+                  </Label>
+                  <input
+                    name="service_time"
+                    value={formData.service_time}
+                    onChange={handleInputChange}
+                    placeholder="Mon–Fri 9:00 AM – 5:00 PM"
+                    className={inputCls(loading)}
+                  />
                 </div>
               </div>
-            ) : (
-              <div className="space-y-8">
-                {business ? (
-                  <div className="space-y-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <p className="text-sm text-gray-500 mb-1">Category</p>
-                        <p className="font-medium capitalize">
-                          {business.category?.toLowerCase() || "Not set"}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500 mb-1">
-                          Company Size
-                        </p>
-                        <p className="font-medium">
-                          {business.size
-                            ? {
-                                SMALL: "1–10 employees",
-                                MEDIUM: "11–50 employees",
-                                LARGE: "51–200 employees",
-                                ENTERPRISE: "200+ employees",
-                              }[business.size]
-                            : "Not set"}
-                        </p>
-                      </div>
-                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div>
-                        <p className="text-sm text-gray-500 mb-1">Email</p>
-                        <p className="font-medium">
-                          {business.email || "Not set"}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500 mb-1">Phone</p>
-                        <p className="font-medium">
-                          {business.phone || "Not set"}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500 mb-1">Website</p>
-                        {business.website ? (
-                          <a
-                            href={
-                              business.website.startsWith("http")
-                                ? business.website
-                                : `https://${business.website}`
-                            }
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline font-medium inline-flex items-center gap-1.5"
-                          >
-                            <Globe className="h-4 w-4" />
-                            Visit website
-                          </a>
-                        ) : (
-                          <span className="text-gray-500">Not set</span>
-                        )}
-                      </div>
-                    </div>
+              <div className="mt-5">
+                <Label className="text-base font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
+                  Description{" "}
+                  <span className="text-gray-300 normal-case font-normal">
+                    — Optional
+                  </span>
+                </Label>
+                <Textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  placeholder="Tell people about your business, what you do, your values..."
+                  style={{ minHeight: "120px" }}
+                  className="w-full resize-none border border-gray-200 hover:border-gray-300 rounded-xl text-base focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-colors"
+                  disabled={loading}
+                />
+              </div>
+            </div>
 
-                    {business.description && (
-                      <div>
-                        <p className="text-sm text-gray-500 mb-2">
-                          Description
-                        </p>
-                        <p className="text-gray-800 whitespace-pre-line leading-relaxed">
-                          {business.description}
-                        </p>
-                      </div>
-                    )}
+            {/* Section 2: Contact */}
+            <div className="p-6">
+              <SectionLabel icon={<Mail className="w-3.5 h-3.5" />}>
+                Contact
+              </SectionLabel>
+              <div className="grid sm:grid-cols-3 gap-5">
+                <div>
+                  <Label className="text-base font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
+                    Email{" "}
+                    <span className="text-red-400 normal-case font-normal">
+                      *
+                    </span>
+                  </Label>
+                  <input
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className={inputCls(loading)}
+                  />
+                </div>
+                <div>
+                  <Label className="text-base font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
+                    Phone{" "}
+                    <span className="text-red-400 normal-case font-normal">
+                      *
+                    </span>
+                  </Label>
+                  <input
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className={inputCls(loading)}
+                  />
+                </div>
+                <div>
+                  <Label className="text-base font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
+                    Website{" "}
+                    <span className="text-gray-300 normal-case font-normal">
+                      — Optional
+                    </span>
+                  </Label>
+                  <input
+                    name="website"
+                    type="url"
+                    value={formData.website}
+                    onChange={handleInputChange}
+                    placeholder="https://yourcompany.com"
+                    className={inputCls(loading)}
+                  />
+                </div>
+              </div>
+            </div>
 
-                    <div>
-                      <p className="text-sm text-gray-500 mb-2 flex items-center gap-1.5">
-                        <MapPin className="h-4 w-4" />
-                        Location
-                      </p>
-                      <div className="space-y-1.5 text-gray-800">
-                        {business.street && (
-                          <p>
-                            <span className="font-medium">Street:</span>{" "}
-                            {business.street}
-                          </p>
-                        )}
-                        {business.address && (
-                          <p>
-                            <span className="font-medium">Address:</span>{" "}
-                            {business.address}
-                          </p>
-                        )}
-                        {(business.city || business.country) && (
-                          <p>
-                            <span className="font-medium">City / Country:</span>{" "}
-                            {[business.city, business.country]
-                              .filter(Boolean)
-                              .join(", ")}
-                          </p>
-                        )}
-                        {business.postal_code && (
-                          <p>
-                            <span className="font-medium">Postal Code:</span>{" "}
-                            {business.postal_code}
-                          </p>
-                        )}
-                      </div>
-                    </div>
+            {/* Section 3: Location */}
+            <div className="p-6">
+              <SectionLabel icon={<MapPin className="w-3.5 h-3.5" />}>
+                Location
+              </SectionLabel>
+              <div className="grid sm:grid-cols-2 gap-5">
+                <div>
+                  <Label className="text-base font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
+                    Street Address{" "}
+                    <span className="text-gray-300 normal-case font-normal">
+                      — Optional
+                    </span>
+                  </Label>
+                  <input
+                    name="street"
+                    value={formData.street}
+                    onChange={handleInputChange}
+                    placeholder="Plot 45, John Babiha Avenue"
+                    className={inputCls(loading)}
+                  />
+                </div>
 
-                    {business.service_time && (
-                      <div>
-                        <p className="text-sm text-gray-500 mb-2 flex items-center gap-1.5">
-                          <Clock className="h-4 w-4" />
-                          Service Hours
-                        </p>
-                        <p className="text-gray-800">{business.service_time}</p>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="py-16 text-center">
-                    <Building2 className="mx-auto h-16 w-16 text-gray-300" />
-                    <h3 className="mt-6 text-xl font-semibold text-gray-700">
-                      No business profile yet
-                    </h3>
-                    <p className="mt-2 text-gray-500">
-                      Create your profile to start managing your business on the
-                      platform
-                    </p>
-                    <Button
-                      onClick={() => setIsEditing(true)}
-                      className="mt-6 bg-blue-600 hover:bg-blue-700"
-                    >
-                      Create Business Profile
-                    </Button>
-                  </div>
+                <div>
+                  <Label className="text-base font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
+                    Business Address{" "}
+                    <span className="text-red-400 normal-case font-normal">
+                      *
+                    </span>
+                  </Label>
+                  <AddressAutocomplete
+                    value={formData.address}
+                    onChange={(address) =>
+                      setFormData({ ...formData, address })
+                    }
+                    onPlaceSelected={(place) => {
+                      setFormData({
+                        ...formData,
+                        address: place.address,
+                        street: place.street,
+                        city: place.city,
+                        country: place.country,
+                        postal_code: place.postal_code || formData.postal_code,
+                        workplace_latitude: place.latitude
+                          ? Number(place.latitude.toFixed(6))
+                          : null,
+                        workplace_longitude: place.longitude
+                          ? Number(place.longitude.toFixed(6))
+                          : null,
+                      });
+                    }}
+                    className={inputCls(loading)}
+                  />
+                  <p className="text-base text-gray-400 mt-1.5">
+                    Start typing to search for your address
+                  </p>
+                </div>
+
+                <div>
+                  <Label className="text-base font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
+                    City{" "}
+                    <span className="text-red-400 normal-case font-normal">
+                      *
+                    </span>
+                  </Label>
+                  <input
+                    name="city"
+                    value={formData.city}
+                    onChange={handleInputChange}
+                    className={inputCls(loading)}
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-base font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
+                    Country{" "}
+                    <span className="text-red-400 normal-case font-normal">
+                      *
+                    </span>
+                  </Label>
+                  <input
+                    name="country"
+                    value={formData.country}
+                    onChange={handleInputChange}
+                    className={inputCls(loading)}
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-base font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
+                    Postal Code{" "}
+                    <span className="text-gray-300 normal-case font-normal">
+                      — Optional
+                    </span>
+                  </Label>
+                  <input
+                    name="postal_code"
+                    value={formData.postal_code}
+                    onChange={handleInputChange}
+                    className={inputCls(loading)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 bg-gray-50/50 rounded-b-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
+              <p className="text-base text-gray-400">
+                Fields marked <span className="text-red-400">*</span> are
+                required
+              </p>
+              <div className="flex gap-3 w-full sm:w-auto">
+                {!isNewBusiness && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleCancel}
+                    disabled={loading}
+                    className="flex-1 sm:flex-none sm:w-28 h-10 border-gray-200 rounded-xl font-semibold text-base"
+                  >
+                    <X className="w-3.5 h-3.5 mr-1.5" />
+                    Cancel
+                  </Button>
                 )}
+                <Button
+                  onClick={handleSave}
+                  disabled={loading}
+                  className="flex-1 sm:flex-none sm:w-48 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-base shadow-sm hover:shadow-md transition-all"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-1.5" />
+                      {isNewBusiness ? "Create Profile" : "Save Changes"}
+                      <ChevronRight className="h-4 w-4 ml-1" />
+                    </>
+                  )}
+                </Button>
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -106,12 +106,12 @@ export default function InvitationsPage() {
         <div className="bg-white rounded-2xl border border-gray-100 px-6 py-5 flex items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Invitations</h1>
-            <p className="text-gray-500 text-sm mt-0.5">
+            <p className="text-gray-500 text-base mt-0.5">
               Review and respond to job invitations from companies
             </p>
           </div>
           {!loading && invitations.length > 0 && (
-            <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
+            <span className="inline-flex items-center gap-1.5 text-base font-semibold px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
               <Bell className="w-3 h-3" />
               {invitations.length} pending
             </span>
@@ -133,7 +133,7 @@ export default function InvitationsPage() {
             <h3 className="text-base font-semibold text-gray-900 mb-2">
               No pending invitations
             </h3>
-            <p className="text-gray-500 text-sm mb-6 max-w-xs mx-auto">
+            <p className="text-gray-500 text-base mb-6 max-w-xs mx-auto">
               You&apos;ll see invitations here when companies reach out to add
               you as staff.
             </p>
@@ -164,11 +164,11 @@ export default function InvitationsPage() {
                           <h3 className="text-base font-bold text-gray-900">
                             {inv.business_name}
                           </h3>
-                          <p className="text-sm font-semibold text-blue-600 mt-0.5">
+                          <p className="text-base font-semibold text-blue-600 mt-0.5">
                             {inv.job_title}
                           </p>
                         </div>
-                        <span className="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
+                        <span className="inline-flex items-center text-base font-semibold px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
                           Pending
                         </span>
                       </div>
@@ -178,21 +178,21 @@ export default function InvitationsPage() {
                   {/* Details row */}
                   <div className="grid sm:grid-cols-3 gap-3 mb-4">
                     {inv.department && (
-                      <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 rounded-xl px-3 py-2.5">
+                      <div className="flex items-center gap-2 text-base text-gray-600 bg-gray-50 rounded-xl px-3 py-2.5">
                         <Briefcase className="w-4 h-4 text-gray-400 shrink-0" />
                         <div>
-                          <p className="text-xs text-gray-400">Department</p>
-                          <p className="font-medium text-gray-900 text-xs mt-0.5">
+                          <p className="text-base text-gray-400">Department</p>
+                          <p className="font-medium text-gray-900 text-base mt-0.5">
                             {inv.department}
                           </p>
                         </div>
                       </div>
                     )}
-                    <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 rounded-xl px-3 py-2.5">
+                    <div className="flex items-center gap-2 text-base text-gray-600 bg-gray-50 rounded-xl px-3 py-2.5">
                       <Calendar className="w-4 h-4 text-gray-400 shrink-0" />
                       <div>
-                        <p className="text-xs text-gray-400">Start Date</p>
-                        <p className="font-medium text-gray-900 text-xs mt-0.5">
+                        <p className="text-base text-gray-400">Start Date</p>
+                        <p className="font-medium text-gray-900 text-base mt-0.5">
                           {new Date(inv.hire_date).toLocaleDateString("en-US", {
                             month: "short",
                             day: "numeric",
@@ -201,11 +201,11 @@ export default function InvitationsPage() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 rounded-xl px-3 py-2.5">
+                    <div className="flex items-center gap-2 text-base text-gray-600 bg-gray-50 rounded-xl px-3 py-2.5">
                       <Briefcase className="w-4 h-4 text-gray-400 shrink-0" />
                       <div>
-                        <p className="text-xs text-gray-400">Employment Type</p>
-                        <p className="font-medium text-gray-900 text-xs mt-0.5 capitalize">
+                        <p className="text-base text-gray-400">Employment Type</p>
+                        <p className="font-medium text-gray-900 text-base mt-0.5 capitalize">
                           {inv.employment_type.replace(/_/g, " ")}
                         </p>
                       </div>
@@ -215,10 +215,10 @@ export default function InvitationsPage() {
                   {/* Message */}
                   {inv.message && (
                     <div className="mb-5 px-4 py-3 bg-blue-50/60 border border-blue-100 rounded-xl">
-                      <p className="text-xs font-semibold text-blue-600 mb-1">
+                      <p className="text-base font-semibold text-blue-600 mb-1">
                         Message from employer
                       </p>
-                      <p className="text-sm text-gray-700 leading-relaxed">
+                      <p className="text-base text-gray-700 leading-relaxed">
                         {inv.message}
                       </p>
                     </div>

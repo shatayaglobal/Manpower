@@ -23,14 +23,14 @@ interface ClockInData {
 }
 
 const labelCls =
-  "block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5";
+  "block text-base font-semibold text-gray-500 uppercase tracking-wide mb-1.5";
 const inputCls = (err?: boolean) =>
   cn(
-    "w-full px-3 py-2.5 border rounded-xl text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+    "w-full px-3 py-2.5 border rounded-xl text-base transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
     err ? "border-red-300 bg-red-50/30" : "border-gray-200 bg-white"
   );
 const selectCls =
-  "w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent";
+  "w-full px-3 py-2.5 border border-gray-200 rounded-xl text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent";
 
 export const AddWorkerHoursModal = ({
   isOpen,
@@ -147,7 +147,7 @@ export const AddWorkerHoursModal = ({
           onClick={() => onChange(period)}
           disabled={disabled}
           className={cn(
-            "px-3 py-2.5 text-xs font-semibold transition-colors",
+            "px-3 py-2.5 text-base font-semibold transition-colors",
             i === 1 && "border-l border-gray-200",
             value === period
               ? "bg-blue-600 text-white"
@@ -179,7 +179,7 @@ export const AddWorkerHoursModal = ({
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
           {/* Assignment section */}
           <div className="bg-gray-50 rounded-2xl p-4 space-y-4">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+            <p className="text-base font-bold text-gray-400 uppercase tracking-widest">
               Assignment
             </p>
 
@@ -222,7 +222,7 @@ export const AddWorkerHoursModal = ({
 
           {/* Schedule section */}
           <div className="bg-gray-50 rounded-2xl p-4 space-y-4">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+            <p className="text-base font-bold text-gray-400 uppercase tracking-widest">
               Schedule
             </p>
 
@@ -247,7 +247,7 @@ export const AddWorkerHoursModal = ({
                 />
               </div>
               {clockInTime && (
-                <p className="text-xs text-blue-600 font-medium mt-1.5">
+                <p className="text-base text-blue-600 font-medium mt-1.5">
                   Selected: {clockInTime} {clockInAMPM}
                 </p>
               )}
@@ -276,7 +276,7 @@ export const AddWorkerHoursModal = ({
                 />
               </div>
               {clockOutTime && (
-                <p className="text-xs text-blue-600 font-medium mt-1.5">
+                <p className="text-base text-blue-600 font-medium mt-1.5">
                   Selected: {clockOutTime} {clockOutAMPM}
                 </p>
               )}
@@ -303,7 +303,7 @@ export const AddWorkerHoursModal = ({
 
           {/* Tip */}
           <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3">
-            <p className="text-xs text-blue-700">
+            <p className="text-base text-blue-700">
               <span className="font-semibold">Tip:</span> Leave clock out time
               empty if the worker is starting their shift now. You can clock
               them out later.
@@ -317,14 +317,14 @@ export const AddWorkerHoursModal = ({
             variant="outline"
             onClick={handleClose}
             disabled={isSubmitting}
-            className="flex-1 border-gray-200 h-10 rounded-xl font-semibold text-sm"
+            className="flex-1 border-gray-200 h-10 rounded-xl font-semibold text-base"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={isSubmitting || !selectedStaffId || !clockInTime}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-10 rounded-xl font-semibold text-sm shadow-sm disabled:opacity-50"
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-10 rounded-xl font-semibold text-base shadow-sm disabled:opacity-50"
           >
             {isSubmitting ? (
               <>

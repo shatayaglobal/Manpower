@@ -219,12 +219,11 @@ export const clockInAction = createAsyncThunk(
     } catch (error) {
       const apiError = error as ApiError;
       const errorData = apiError.response?.data || {
-        error: apiError.message || "Failed to clock in"
+        error: apiError.message || "Failed to clock in",
       };
       return rejectWithValue(errorData);
     }
   }
-
 );
 export const clockOutAction = createAsyncThunk(
   "workforce/clockOut",
@@ -235,7 +234,13 @@ export const clockOutAction = createAsyncThunk(
 
 export const signHoursCardAction = createAsyncThunk(
   "workforce/signHoursCard",
-  async ({ hoursCardId, signature }: { hoursCardId: string; signature: string }) => {
+  async ({
+    hoursCardId,
+    signature,
+  }: {
+    hoursCardId: string;
+    signature: string;
+  }) => {
     return await workforceApi.signHoursCard(hoursCardId, signature);
   }
 );
@@ -245,13 +250,17 @@ export const approveSignedHoursCardAction = createAsyncThunk(
   async ({
     hoursCardId,
     status,
-    rejectionReason
+    rejectionReason,
   }: {
     hoursCardId: string;
-    status: 'APPROVED' | 'REJECTED';
-    rejectionReason?: string
+    status: "APPROVED" | "REJECTED";
+    rejectionReason?: string;
   }) => {
-    return await workforceApi.approveSignedHoursCard(hoursCardId, status, rejectionReason);
+    return await workforceApi.approveSignedHoursCard(
+      hoursCardId,
+      status,
+      rejectionReason
+    );
   }
 );
 
@@ -655,95 +664,102 @@ const workforceSlice = createSlice({
         }
       })
       // Worker reducers
-.addCase(fetchMyShifts.fulfilled, (state, action) => {
-  state.myShifts = action.payload;
-})
-.addCase(fetchMyHoursCards.fulfilled, (state, action) => {
-  state.myHoursCards = action.payload;
-  // Set today's hours card if exists and not clocked out
-  const today = new Date().toISOString().split('T')[0];
-  state.todayHoursCard = action.payload.find(
-    (h: HoursCard) => h.date === today && !h.clock_out
-  ) || null;
-})
-.addCase(clockInAction.fulfilled, (state, action) => {
-  state.todayHoursCard = action.payload;
-  state.myHoursCards.unshift(action.payload);
-})
-.addCase(clockOutAction.fulfilled, (state, action) => {
-  state.todayHoursCard = null;
-  const index = state.myHoursCards.findIndex((h) => h.id === action.payload.id);
-  if (index !== -1) {
-    state.myHoursCards[index] = action.payload;
-  }
-})
-.addCase(signHoursCardAction.fulfilled, (state, action) => {
-  const index = state.myHoursCards.findIndex((h) => h.id === action.payload.id);
-  if (index !== -1) {
-    state.myHoursCards[index] = action.payload;
-  }
-})
-.addCase(approveSignedHoursCardAction.fulfilled, (state, action) => {
-  const index = state.hoursCards.findIndex((h) => h.id === action.payload.id);
-  if (index !== -1) {
-    state.hoursCards[index] = action.payload;
-  }
-  if (state.selectedHoursCard?.id === action.payload.id) {
-    state.selectedHoursCard = action.payload;
-  }
-})
-      // .addCase(fetchMyStaffProfile.pending, (state) => {
-      //   state.staffLoading = true;
-      // })
-      // .addCase(fetchMyStaffProfile.fulfilled, (state, action) => {
-      //   state.staffLoading = false;
-      //   state.myStaffProfile = action.payload;
-      // })
-      // .addCase(fetchMyStaffProfile.rejected, (state) => {
-      //   state.staffLoading = false;
-      // })
-      // .addCase(fetchMyShifts.fulfilled, (state, action) => {
-      //   state.myShifts = action.payload;
-      // })
-      // .addCase(fetchMyHoursCards.fulfilled, (state, action) => {
-      //   state.myHoursCards = action.payload;
-      //   // Set today's hours card
-      //   const today = new Date().toISOString().split('T')[0];
-      //   state.todayHoursCard = action.payload.find(
-      //     (h: HoursCard) => h.date === today && !h.clock_out
-      //   ) || null;
-      // })
-      // .addCase(clockInAction.fulfilled, (state, action) => {
-      //   state.todayHoursCard = action.payload;
-      //   state.myHoursCards.unshift(action.payload);
-      // })
-      // .addCase(clockOutAction.fulfilled, (state, action) => {
-      //   state.todayHoursCard = action.payload;
-      //   const index = state.myHoursCards.findIndex(
-      //     (h) => h.id === action.payload.id
-      //   );
-      //   if (index !== -1) {
-      //     state.myHoursCards[index] = action.payload;
-      //   }
-      // })
-      // .addCase(startBreakAction.fulfilled, (state, action) => {
-      //   state.todayHoursCard = action.payload;
-      //   const index = state.myHoursCards.findIndex(
-      //     (h) => h.id === action.payload.id
-      //   );
-      //   if (index !== -1) {
-      //     state.myHoursCards[index] = action.payload;
-      //   }
-      // })
-      // .addCase(endBreakAction.fulfilled, (state, action) => {
-      //   state.todayHoursCard = action.payload;
-      //   const index = state.myHoursCards.findIndex(
-      //     (h) => h.id === action.payload.id
-      //   );
-      //   if (index !== -1) {
-      //     state.myHoursCards[index] = action.payload;
-      //   }
-      // })
+      .addCase(fetchMyShifts.fulfilled, (state, action) => {
+        state.myShifts = action.payload;
+      })
+      .addCase(fetchMyHoursCards.fulfilled, (state, action) => {
+        state.myHoursCards = action.payload;
+        // Set today's hours card if exists and not clocked out
+        const today = new Date().toISOString().split("T")[0];
+        state.todayHoursCard =
+          action.payload.find(
+            (h: HoursCard) => h.date === today && !h.clock_out_datetime
+          ) || null;
+      })
+      .addCase(clockInAction.fulfilled, (state, action) => {
+        state.todayHoursCard = action.payload;
+        state.myHoursCards.unshift(action.payload);
+      })
+      .addCase(clockOutAction.fulfilled, (state, action) => {
+        state.todayHoursCard = null;
+        const index = state.myHoursCards.findIndex(
+          (h) => h.id === action.payload.id
+        );
+        if (index !== -1) {
+          state.myHoursCards[index] = action.payload;
+        }
+      })
+      .addCase(signHoursCardAction.fulfilled, (state, action) => {
+        const index = state.myHoursCards.findIndex(
+          (h) => h.id === action.payload.id
+        );
+        if (index !== -1) {
+          state.myHoursCards[index] = action.payload;
+        }
+      })
+      .addCase(approveSignedHoursCardAction.fulfilled, (state, action) => {
+        const index = state.hoursCards.findIndex(
+          (h) => h.id === action.payload.id
+        );
+        if (index !== -1) {
+          state.hoursCards[index] = action.payload;
+        }
+        if (state.selectedHoursCard?.id === action.payload.id) {
+          state.selectedHoursCard = action.payload;
+        }
+      });
+    // .addCase(fetchMyStaffProfile.pending, (state) => {
+    //   state.staffLoading = true;
+    // })
+    // .addCase(fetchMyStaffProfile.fulfilled, (state, action) => {
+    //   state.staffLoading = false;
+    //   state.myStaffProfile = action.payload;
+    // })
+    // .addCase(fetchMyStaffProfile.rejected, (state) => {
+    //   state.staffLoading = false;
+    // })
+    // .addCase(fetchMyShifts.fulfilled, (state, action) => {
+    //   state.myShifts = action.payload;
+    // })
+    // .addCase(fetchMyHoursCards.fulfilled, (state, action) => {
+    //   state.myHoursCards = action.payload;
+    //   // Set today's hours card
+    //   const today = new Date().toISOString().split('T')[0];
+    //   state.todayHoursCard = action.payload.find(
+    //     (h: HoursCard) => h.date === today && !h.clock_out
+    //   ) || null;
+    // })
+    // .addCase(clockInAction.fulfilled, (state, actaion) => {
+    //   state.todayHoursCard = action.payload;
+    //   state.myHoursCards.unshift(action.payload);
+    // })
+    // .addCase(clockOutAction.fulfilled, (state, action) => {
+    //   state.todayHoursCard = action.payload;
+    //   const index = state.myHoursCards.findIndex(
+    //     (h) => h.id === action.payload.id
+    //   );
+    //   if (index !== -1) {
+    //     state.myHoursCards[index] = action.payload;
+    //   }
+    // })
+    // .addCase(startBreakAction.fulfilled, (state, action) => {
+    //   state.todayHoursCard = action.payload;
+    //   const index = state.myHoursCards.findIndex(
+    //     (h) => h.id === action.payload.id
+    //   );
+    //   if (index !== -1) {
+    //     state.myHoursCards[index] = action.payload;
+    //   }
+    // })
+    // .addCase(endBreakAction.fulfilled, (state, action) => {
+    //   state.todayHoursCard = action.payload;
+    //   const index = state.myHoursCards.findIndex(
+    //     (h) => h.id === action.payload.id
+    //   );
+    //   if (index !== -1) {
+    //     state.myHoursCards[index] = action.payload;
+    //   }
+    // })
   },
 });
 

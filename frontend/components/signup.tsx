@@ -315,14 +315,14 @@ export default function SignUpPage() {
                       />
                     </div>
                   </div>
-                  <p className="text-center text-sm text-gray-500">
+                  <p className="text-center text-base text-gray-500">
                     You&apos;ll choose your account type after signing in with
                     Google
                   </p>
                 </div>
 
                 <Separator>
-                  <span className="bg-white px-3 text-sm text-gray-500">
+                  <span className="bg-white px-3 text-base text-gray-500">
                     Or continue with email
                   </span>
                 </Separator>
@@ -332,7 +332,7 @@ export default function SignUpPage() {
                   <div className="space-y-2">
                     <Label
                       htmlFor="account-type"
-                      className="text-sm font-medium"
+                      className="text-base font-medium"
                     >
                       Account Type
                     </Label>
@@ -367,7 +367,7 @@ export default function SignUpPage() {
                     <div className="space-y-2">
                       <Label
                         htmlFor="first-name"
-                        className="text-sm font-medium"
+                        className="text-base font-medium"
                       >
                         First Name
                       </Label>
@@ -384,7 +384,7 @@ export default function SignUpPage() {
                     <div className="space-y-2">
                       <Label
                         htmlFor="last-name"
-                        className="text-sm font-medium"
+                        className="text-base font-medium"
                       >
                         Last Name
                       </Label>
@@ -402,7 +402,7 @@ export default function SignUpPage() {
 
                   {/* Email */}
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-medium">
+                    <Label htmlFor="email" className="text-base font-medium">
                       Email Address
                     </Label>
                     <div className="relative">
@@ -423,7 +423,7 @@ export default function SignUpPage() {
 
                   {/* Password */}
                   <div className="space-y-2">
-                    <Label htmlFor="password" className="text-sm font-medium">
+                    <Label htmlFor="password" className="text-base font-medium">
                       Password
                     </Label>
                     <div className="relative">
@@ -461,7 +461,7 @@ export default function SignUpPage() {
                             }}
                           />
                         </div>
-                        <span className="text-xs font-medium text-gray-600">
+                        <span className="text-base font-medium text-gray-600">
                           {strengthText}
                         </span>
                       </div>
@@ -472,7 +472,7 @@ export default function SignUpPage() {
                   <div className="space-y-2">
                     <Label
                       htmlFor="confirm-password"
-                      className="text-sm font-medium"
+                      className="text-base font-medium"
                     >
                       Confirm Password
                     </Label>
@@ -508,14 +508,14 @@ export default function SignUpPage() {
                         {formData.password === formData.confirmPassword ? (
                           <>
                             <CheckCircle2 className="h-4 w-4 text-green-500" />
-                            <span className="text-sm text-green-600">
+                            <span className="text-base text-green-600">
                               Passwords match
                             </span>
                           </>
                         ) : (
                           <>
                             <AlertCircle className="h-4 w-4 text-red-500" />
-                            <span className="text-sm text-red-600">
+                            <span className="text-base text-red-600">
                               Passwords do not match
                             </span>
                           </>
@@ -548,7 +548,7 @@ export default function SignUpPage() {
               </CardContent>
             </Card>
 
-            <p className="text-center text-sm text-gray-600">
+            <p className="text-center text-base text-gray-600">
               Already have an account?{" "}
               <Link
                 href="/login"

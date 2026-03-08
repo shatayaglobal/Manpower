@@ -272,14 +272,14 @@ export default function SignInPage() {
                     className={!isGoogleButtonReady ? "opacity-0" : ""}
                   />
                 </div>
-                <p className="text-xs text-center text-gray-500">
+                <p className="text-base text-center text-gray-500">
                   Google sign-in creates a Worker account
                 </p>
               </div>
 
               <div className="relative">
                 <Separator />
-                <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-3 text-xs text-gray-500">
+                <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-3 text-base text-gray-500">
                   Or continue with email
                 </span>
               </div>
@@ -317,7 +317,7 @@ export default function SignInPage() {
                     <Label htmlFor="password">Password</Label>
                     <Link
                       href="/forgot-password"
-                      className="text-xs text-blue-600 hover:underline"
+                      className="text-base text-blue-600 hover:underline"
                       tabIndex={-1}
                     >
                       Forgot?
@@ -374,7 +374,7 @@ export default function SignInPage() {
             </CardContent>
           </Card>
 
-          <p className="text-center text-sm text-gray-600">
+          <p className="text-center text-base text-gray-600">
             No account?{" "}
             <Link
               href="/signup"

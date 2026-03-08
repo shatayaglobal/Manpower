@@ -103,7 +103,7 @@ export default function MyShiftsPage() {
         {/* ── Header ── */}
         <div className="bg-white rounded-2xl border border-gray-100 px-6 py-5">
           <h1 className="text-2xl font-bold text-gray-900">My Shifts</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Your weekly schedule</p>
+          <p className="text-gray-500 text-base mt-0.5">Your weekly schedule</p>
         </div>
 
         {/* ── Stats row ── */}
@@ -116,7 +116,7 @@ export default function MyShiftsPage() {
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white rounded-2xl border border-gray-100 p-5">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">
+              <p className="text-base font-semibold text-gray-400 uppercase tracking-wide mb-1">
                 Total Shifts
               </p>
               <p className="text-2xl font-bold text-gray-900">
@@ -124,24 +124,24 @@ export default function MyShiftsPage() {
               </p>
             </div>
             <div className="bg-white rounded-2xl border border-blue-100 p-5">
-              <p className="text-xs font-semibold text-blue-400 uppercase tracking-wide mb-1">
+              <p className="text-base font-semibold text-blue-400 uppercase tracking-wide mb-1">
                 Active Days
               </p>
               <p className="text-2xl font-bold text-blue-700">{activeDays}</p>
             </div>
             <div className="bg-white rounded-2xl border border-emerald-100 p-5">
-              <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wide mb-1">
+              <p className="text-base font-semibold text-emerald-500 uppercase tracking-wide mb-1">
                 Avg Hours / Day
               </p>
               <p className="text-2xl font-bold text-emerald-700">
                 {avgHours}
-                <span className="text-sm font-normal text-gray-400 ml-1">
+                <span className="text-base font-normal text-gray-400 ml-1">
                   hrs
                 </span>
               </p>
             </div>
             <div className="bg-white rounded-2xl border border-violet-100 p-5">
-              <p className="text-xs font-semibold text-violet-400 uppercase tracking-wide mb-1">
+              <p className="text-base font-semibold text-violet-400 uppercase tracking-wide mb-1">
                 Days Off
               </p>
               <p className="text-2xl font-bold text-violet-700">
@@ -166,7 +166,7 @@ export default function MyShiftsPage() {
             <h3 className="text-base font-semibold text-gray-900 mb-2">
               No shifts scheduled
             </h3>
-            <p className="text-gray-500 text-sm max-w-xs mx-auto">
+            <p className="text-gray-500 text-base max-w-xs mx-auto">
               Your shift schedule will appear here once assigned by your
               employer.
             </p>
@@ -201,19 +201,19 @@ export default function MyShiftsPage() {
                     <div className="flex items-center gap-2">
                       <h3
                         className={cn(
-                          "text-sm font-semibold capitalize",
+                          "text-base font-semibold capitalize",
                           isToday ? "text-blue-700" : "text-gray-700"
                         )}
                       >
                         {day.charAt(0) + day.slice(1).toLowerCase()}
                       </h3>
                       {isToday && (
-                        <span className="text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full border border-blue-200">
+                        <span className="text-base font-semibold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full border border-blue-200">
                           Today
                         </span>
                       )}
                     </div>
-                    <span className="text-xs text-gray-400 font-medium">
+                    <span className="text-base text-gray-400 font-medium">
                       {hasShifts
                         ? `${dayShifts.length} shift${
                             dayShifts.length > 1 ? "s" : ""
@@ -224,7 +224,7 @@ export default function MyShiftsPage() {
 
                   {/* Shifts */}
                   {!hasShifts ? (
-                    <div className="px-5 py-4 text-center text-xs text-gray-400">
+                    <div className="px-5 py-4 text-center text-base text-gray-400">
                       No shifts scheduled
                     </div>
                   ) : (
@@ -254,10 +254,10 @@ export default function MyShiftsPage() {
                                   typeConfig.color
                                 )}
                               >
-                                <p className="text-xs font-bold">
+                                <p className="text-base font-bold">
                                   {formatTime(shift.start_time)}
                                 </p>
-                                <p className="text-xs opacity-70 mt-0.5">
+                                <p className="text-base opacity-70 mt-0.5">
                                   {formatTime(shift.end_time)}
                                 </p>
                               </div>
@@ -265,19 +265,19 @@ export default function MyShiftsPage() {
                               {/* Info */}
                               <div>
                                 <div className="flex items-center gap-2 flex-wrap">
-                                  <p className="font-semibold text-gray-900 text-sm">
+                                  <p className="font-semibold text-gray-900 text-base">
                                     {shift.name}
                                   </p>
                                   <span
                                     className={cn(
-                                      "text-xs font-medium px-2 py-0.5 rounded-full border",
+                                      "text-base font-medium px-2 py-0.5 rounded-full border",
                                       typeConfig.color
                                     )}
                                   >
                                     {typeConfig.label}
                                   </span>
                                 </div>
-                                <div className="flex items-center gap-3 mt-1 text-xs text-gray-400 flex-wrap">
+                                <div className="flex items-center gap-3 mt-1 text-base text-gray-400 flex-wrap">
                                   <span className="flex items-center gap-1">
                                     <Clock className="w-3 h-3" />
                                     {duration}h duration

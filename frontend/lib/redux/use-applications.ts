@@ -33,7 +33,7 @@ export const useApplications = () => {
     [dispatch]
   );
 
-  
+
   const loadUserApplications = useCallback(() => {
     return dispatch(fetchUserApplications());
   }, [dispatch]);
@@ -49,9 +49,12 @@ export const useApplications = () => {
     [dispatch]
   );
 
-  const loadBusinessApplications = useCallback(() => {
-    return dispatch(fetchBusinessApplications());
-  }, [dispatch]);
+  const loadBusinessApplications = useCallback(
+    (filters: { status?: string; job?: string } = {}) => {
+      return dispatch(fetchBusinessApplications(filters));
+    },
+    [dispatch]
+  );
 
   const updateApplicationStatus = useCallback(
     (applicationId: string, status: string) => {

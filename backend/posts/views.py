@@ -482,7 +482,7 @@ class AcceptedApplicantsView(ListAPIView):
         applications = JobApplication.objects.filter(
             job__user=request.user,
             status='ACCEPTED'
-        ).select_related('applicant')
+        ).select_related('applicant', 'job', 'applicant__profile').order_by('-updated_at')
 
         seen = set()
         users = []
@@ -495,6 +495,9 @@ class AcceptedApplicantsView(ListAPIView):
                     "first_name": u.first_name,
                     "last_name": u.last_name,
                     "email": u.email,
+                    "job_title": app.job.title,
+                    "job_id": str(app.job.id),
+                    "applicant_phone": (lambda: app.applicant.profile.phone if hasattr(app.applicant, 'profile') and app.applicant.profile else "")(),
                 })
 
         return Response(users)

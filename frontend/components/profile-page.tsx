@@ -60,7 +60,7 @@ const TABS = [
 ];
 
 const selectStyle =
-  "w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent";
+  "w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -319,7 +319,7 @@ export default function ProfilePage() {
             <p className="text-lg font-bold">
               Welcome! Let&apos;s build your profile 👋
             </p>
-            <p className="text-blue-200 text-sm mt-0.5">
+            <p className="text-blue-200 text-base mt-0.5">
               Complete your profile to unlock all features and get noticed by
               employers.
             </p>
@@ -381,10 +381,10 @@ export default function ProfilePage() {
               <h1 className="text-xl font-bold text-gray-900">
                 {user.first_name} {user.last_name}
               </h1>
-              <p className="text-sm font-semibold text-blue-600 mt-0.5">
+              <p className="text-base font-semibold text-blue-600 mt-0.5">
                 {profile?.profession || "No profession set"}
               </p>
-              <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-gray-400">
+              <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-base text-gray-400">
                 {(profile?.city || profile?.country) && (
                   <span className="flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
@@ -401,7 +401,7 @@ export default function ProfilePage() {
             {/* Edit button */}
             <div className="flex items-center gap-3 shrink-0">
               {completionStatus && (
-                <span className={cn("text-sm font-bold", strengthColor)}>
+                <span className={cn("text-base font-bold", strengthColor)}>
                   {displayPercentage}%
                 </span>
               )}
@@ -433,7 +433,7 @@ export default function ProfilePage() {
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
                       className={cn(
-                        "flex items-center gap-2 px-4 py-4 text-sm font-medium whitespace-nowrap border-b-2 transition-all",
+                        "flex items-center gap-2 px-4 py-4 text-base font-medium whitespace-nowrap border-b-2 transition-all",
                         isActive
                           ? "text-blue-600 border-blue-600"
                           : "text-gray-500 border-transparent hover:text-gray-800"
@@ -454,7 +454,7 @@ export default function ProfilePage() {
                     size="sm"
                     onClick={cancel}
                     disabled={loading}
-                    className="border-gray-200 h-8 px-3 rounded-xl text-xs"
+                    className="border-gray-200 h-8 px-3 rounded-xl text-base"
                   >
                     <X className="h-3.5 w-3.5 mr-1" />
                     Cancel
@@ -463,7 +463,7 @@ export default function ProfilePage() {
                     size="sm"
                     onClick={save}
                     disabled={loading}
-                    className="bg-blue-600 hover:bg-blue-700 text-white h-8 px-3 rounded-xl text-xs"
+                    className="bg-blue-600 hover:bg-blue-700 text-white h-8 px-3 rounded-xl text-base"
                   >
                     <Save className="h-3.5 w-3.5 mr-1" />
                     {loading ? "Saving..." : "Save"}
@@ -481,7 +481,7 @@ export default function ProfilePage() {
                     <div className="space-y-4">
                       <div className="grid sm:grid-cols-2 gap-4">
                         <div>
-                          <Label className="text-xs font-semibold text-gray-500 mb-1.5 block">
+                          <Label className="text-base font-semibold text-gray-500 mb-1.5 block">
                             First Name <span className="text-red-500">*</span>
                           </Label>
                           <Input
@@ -492,7 +492,7 @@ export default function ProfilePage() {
                           />
                         </div>
                         <div>
-                          <Label className="text-xs font-semibold text-gray-500 mb-1.5 block">
+                          <Label className="text-base font-semibold text-gray-500 mb-1.5 block">
                             Last Name <span className="text-red-500">*</span>
                           </Label>
                           <Input
@@ -505,19 +505,19 @@ export default function ProfilePage() {
                       </div>
                       <div className="grid sm:grid-cols-2 gap-4">
                         <div>
-                          <Label className="text-xs font-semibold text-gray-500 mb-1.5 block">
+                          <Label className="text-base font-semibold text-gray-500 mb-1.5 block">
                             Phone <span className="text-red-500">*</span>
                           </Label>
                           <Input
                             name="phone"
                             value={formData.phone}
                             onChange={handleInputChange}
-                            placeholder="+256..."
+                            placeholder="+972..."
                             className="rounded-xl border-gray-200"
                           />
                         </div>
                         <div>
-                          <Label className="text-xs font-semibold text-gray-500 mb-1.5 block">
+                          <Label className="text-base font-semibold text-gray-500 mb-1.5 block">
                             Date of Birth
                           </Label>
                           <Input
@@ -531,7 +531,7 @@ export default function ProfilePage() {
                       </div>
                       <div className="grid sm:grid-cols-3 gap-4">
                         <div>
-                          <Label className="text-xs font-semibold text-gray-500 mb-1.5 block">
+                          <Label className="text-base font-semibold text-gray-500 mb-1.5 block">
                             City
                           </Label>
                           <Input
@@ -542,7 +542,7 @@ export default function ProfilePage() {
                           />
                         </div>
                         <div>
-                          <Label className="text-xs font-semibold text-gray-500 mb-1.5 block">
+                          <Label className="text-base font-semibold text-gray-500 mb-1.5 block">
                             Country
                           </Label>
                           <Input
@@ -553,7 +553,7 @@ export default function ProfilePage() {
                           />
                         </div>
                         <div>
-                          <Label className="text-xs font-semibold text-gray-500 mb-1.5 block">
+                          <Label className="text-base font-semibold text-gray-500 mb-1.5 block">
                             Gender
                           </Label>
                           <select
@@ -573,7 +573,7 @@ export default function ProfilePage() {
                         </div>
                       </div>
                       <div className="max-w-xs">
-                        <Label className="text-xs font-semibold text-gray-500 mb-1.5 block">
+                        <Label className="text-base font-semibold text-gray-500 mb-1.5 block">
                           Marital Status
                         </Label>
                         <select
@@ -636,7 +636,7 @@ export default function ProfilePage() {
                   {isEditing && editingSection === "professional" ? (
                     <div className="space-y-4">
                       <div>
-                        <Label className="text-xs font-semibold text-gray-500 mb-1.5 block">
+                        <Label className="text-base font-semibold text-gray-500 mb-1.5 block">
                           Profession <span className="text-red-500">*</span>
                         </Label>
                         <Input
@@ -649,7 +649,7 @@ export default function ProfilePage() {
                       </div>
                       <div className="grid sm:grid-cols-2 gap-4">
                         <div>
-                          <Label className="text-xs font-semibold text-gray-500 mb-1.5 block">
+                          <Label className="text-base font-semibold text-gray-500 mb-1.5 block">
                             Employment Status{" "}
                             <span className="text-red-500">*</span>
                           </Label>
@@ -667,7 +667,7 @@ export default function ProfilePage() {
                           </select>
                         </div>
                         <div>
-                          <Label className="text-xs font-semibold text-gray-500 mb-1.5 block">
+                          <Label className="text-base font-semibold text-gray-500 mb-1.5 block">
                             Experience Level
                           </Label>
                           <select
@@ -685,7 +685,7 @@ export default function ProfilePage() {
                         </div>
                       </div>
                       <div>
-                        <Label className="text-xs font-semibold text-gray-500 mb-1.5 block">
+                        <Label className="text-base font-semibold text-gray-500 mb-1.5 block">
                           Professional Bio{" "}
                           <span className="text-red-500">*</span>
                         </Label>
@@ -699,7 +699,7 @@ export default function ProfilePage() {
                         />
                       </div>
                       <div>
-                        <Label className="text-xs font-semibold text-gray-500 mb-1.5 block">
+                        <Label className="text-base font-semibold text-gray-500 mb-1.5 block">
                           LinkedIn URL
                         </Label>
                         <Input
@@ -732,24 +732,24 @@ export default function ProfilePage() {
                       </div>
                       {profile?.bio && (
                         <div>
-                          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                          <p className="text-base font-semibold text-gray-400 uppercase tracking-wide mb-2">
                             Bio
                           </p>
-                          <p className="text-sm text-gray-700 leading-relaxed">
+                          <p className="text-base text-gray-700 leading-relaxed">
                             {profile.bio}
                           </p>
                         </div>
                       )}
                       {profile?.linkedin_url && (
                         <div>
-                          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                          <p className="text-base font-semibold text-gray-400 uppercase tracking-wide mb-2">
                             LinkedIn
                           </p>
                           <a
                             href={profile.linkedin_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 text-blue-600 hover:underline text-sm font-medium"
+                            className="inline-flex items-center gap-1.5 text-blue-600 hover:underline text-base font-medium"
                           >
                             <Globe className="h-4 w-4" />
                             View LinkedIn Profile
@@ -767,14 +767,14 @@ export default function ProfilePage() {
                   {/* Skills */}
                   <div>
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                      <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
                         <Award className="h-4 w-4 text-blue-600" />
                         Skills & Expertise
                       </h3>
                     </div>
                     {isEditing && editingSection === "skills" ? (
                       <div>
-                        <Label className="text-xs font-semibold text-gray-500 mb-1.5 block">
+                        <Label className="text-base font-semibold text-gray-500 mb-1.5 block">
                           Skills (comma-separated)
                         </Label>
                         <Textarea
@@ -798,7 +798,7 @@ export default function ProfilePage() {
                         {profile.skills.map((skill: string, i: number) => (
                           <span
                             key={i}
-                            className="text-xs font-semibold px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200"
+                            className="text-base font-semibold px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200"
                           >
                             {skill}
                           </span>
@@ -811,7 +811,7 @@ export default function ProfilePage() {
 
                   {/* Resume */}
                   <div>
-                    <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                    <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2 mb-4">
                       <FileText className="h-4 w-4 text-blue-600" />
                       Resume / CV
                     </h3>
@@ -831,16 +831,16 @@ export default function ProfilePage() {
                             className="hidden"
                           />
                           <Upload className="h-8 w-8 mx-auto mb-3 text-gray-400" />
-                          <p className="text-sm font-semibold text-gray-700">
+                          <p className="text-base font-semibold text-gray-700">
                             {profile?.resume
                               ? "Replace Resume"
                               : "Upload Resume"}
                           </p>
-                          <p className="text-xs text-gray-400 mt-1">
+                          <p className="text-base text-gray-400 mt-1">
                             PDF, DOC, DOCX · max 5MB
                           </p>
                           {files.resume && (
-                            <p className="mt-3 text-sm font-medium text-emerald-600 flex items-center justify-center gap-1.5">
+                            <p className="mt-3 text-base font-medium text-emerald-600 flex items-center justify-center gap-1.5">
                               <CheckCircle className="w-4 h-4" />
                               {files.resume.name}
                             </p>
@@ -852,7 +852,7 @@ export default function ProfilePage() {
                               <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center shrink-0">
                                 <FileText className="h-4 w-4 text-white" />
                               </div>
-                              <span className="text-sm font-medium text-blue-900">
+                              <span className="text-base font-medium text-blue-900">
                                 {profile.resume
                                   .split("/")
                                   .pop()
@@ -866,7 +866,7 @@ export default function ProfilePage() {
                               onClick={() =>
                                 window.open(profile.resume!, "_blank")
                               }
-                              className="text-blue-600 h-8 px-3 text-xs"
+                              className="text-blue-600 h-8 px-3 text-base"
                             >
                               View
                             </Button>
@@ -887,10 +887,10 @@ export default function ProfilePage() {
                             <FileText className="h-5 w-5 text-white" />
                           </div>
                           <div>
-                            <p className="font-semibold text-gray-900 text-sm">
+                            <p className="font-semibold text-gray-900 text-base">
                               Resume Uploaded
                             </p>
-                            <p className="text-xs text-gray-500 mt-0.5">
+                            <p className="text-base text-gray-500 mt-0.5">
                               {profile.resume
                                 .split("/")
                                 .pop()
@@ -906,7 +906,7 @@ export default function ProfilePage() {
                             onClick={() =>
                               window.open(profile.resume!, "_blank")
                             }
-                            className="border-gray-200 h-9 px-3 text-xs rounded-xl"
+                            className="border-gray-200 h-9 px-3 text-base rounded-xl"
                           >
                             View
                           </Button>
@@ -967,10 +967,10 @@ export default function ProfilePage() {
                   </span>
                 </div>
               </div>
-              <p className="text-sm font-semibold text-gray-900 mb-0.5">
+              <p className="text-base font-semibold text-gray-900 mb-0.5">
                 Profile Strength
               </p>
-              <p className="text-xs text-gray-400">
+              <p className="text-base text-gray-400">
                 {displayPercentage === 100
                   ? "Your profile is complete! 🎉"
                   : displayPercentage >= 80
@@ -985,7 +985,7 @@ export default function ProfilePage() {
             {displayPercentage < 100 &&
               (completionStatus?.missing_fields?.length ?? 0) > 0 && (
                 <div className="bg-white rounded-2xl border border-gray-100 p-5">
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                  <h3 className="text-base font-semibold text-gray-500 uppercase tracking-wide mb-3">
                     Complete Your Profile
                   </h3>
                   <div className="space-y-2.5">
@@ -994,7 +994,7 @@ export default function ProfilePage() {
                       .map((field: string, i: number) => (
                         <div
                           key={i}
-                          className="flex items-center gap-2 text-xs text-gray-600"
+                          className="flex items-center gap-2 text-base text-gray-600"
                         >
                           <div className="w-4 h-4 rounded-full border-2 border-gray-200 shrink-0" />
                           <span className="capitalize">
@@ -1006,7 +1006,7 @@ export default function ProfilePage() {
                   {displayPercentage < 80 && (
                     <Button
                       size="sm"
-                      className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white text-xs h-9 rounded-xl"
+                      className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white text-base h-9 rounded-xl"
                       onClick={() => {
                         const first = completionStatus?.missing_fields?.[0];
                         if (
@@ -1067,12 +1067,12 @@ function InfoRow({
 }) {
   return (
     <div>
-      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">
+      <p className="text-base font-semibold text-gray-400 uppercase tracking-wide mb-1">
         {label}
       </p>
       <p
         className={cn(
-          "text-sm font-medium text-gray-900",
+          "text-base font-medium text-gray-900",
           capitalize && "capitalize"
         )}
       >
@@ -1098,11 +1098,11 @@ function EmptySection({
   return (
     <div className="text-center py-12 border-2 border-dashed border-gray-100 rounded-2xl">
       <div className="flex justify-center mb-3">{icon}</div>
-      <p className="text-sm text-gray-500 mb-4">{title}</p>
+      <p className="text-base text-gray-500 mb-4">{title}</p>
       <Button
         onClick={onEdit}
         size="sm"
-        className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-5 rounded-xl text-xs font-semibold"
+        className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-5 rounded-xl text-base font-semibold"
       >
         {buttonLabel}
       </Button>

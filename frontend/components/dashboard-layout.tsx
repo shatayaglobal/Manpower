@@ -192,7 +192,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       subItems: [
         {
           label: "Clock In/Out",
-          href: "/worker-dashboard",
+          href: "/clock-in-out",
           icon: <Clock className="h-4 w-4" />,
         },
         {
@@ -259,13 +259,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 {item.icon}
               </span>
               {item.badge && (
-                <span className="absolute top-1 right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-medium">
+                <span className="absolute top-1 right-1 bg-red-500 text-white text-base rounded-full h-4 w-4 flex items-center justify-center font-medium">
                   {item.badge > 9 ? "9+" : item.badge}
                 </span>
               )}
             </button>
             {/* Tooltip on hover */}
-            <div className="absolute left-full ml-2 top-0 bg-gray-900 text-white text-sm px-3 py-2 rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 shadow-lg">
+            <div className="absolute left-full ml-2 top-0 bg-gray-900 text-white text-base px-3 py-2 rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 shadow-lg">
               {item.label}
               <div className="absolute left-0 top-1/2 -translate-x-1 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45" />
             </div>
@@ -295,13 +295,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               {item.icon}
             </span>
             {item.badge && (
-              <span className="absolute top-1 right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-medium">
+              <span className="absolute top-1 right-1 bg-red-500 text-white text-base rounded-full h-4 w-4 flex items-center justify-center font-medium">
                 {item.badge > 9 ? "9+" : item.badge}
               </span>
             )}
           </Link>
           {/* Tooltip on hover */}
-          <div className="absolute left-full ml-2 top-0 bg-gray-900 text-white text-sm px-3 py-2 rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 shadow-lg">
+          <div className="absolute left-full ml-2 top-0 bg-gray-900 text-white text-base px-3 py-2 rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 shadow-lg">
             {item.label}
             <div className="absolute left-0 top-1/2 -translate-x-1 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45" />
           </div>
@@ -333,7 +333,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               >
                 {item.icon}
               </span>
-              <span className="font-medium text-sm">{item.label}</span>
+              <span className="font-medium text-base">{item.label}</span>
             </div>
             <ChevronRight
               className={cn(
@@ -353,7 +353,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     key={subItem.href}
                     href={subItem.href}
                     className={cn(
-                      "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200",
+                      "flex items-center gap-3 px-3 py-2 rounded-lg text-base transition-all duration-200",
                       isSubActive
                         ? "bg-blue-50 text-blue-600 font-medium"
                         : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
@@ -400,10 +400,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           >
             {item.icon}
           </span>
-          <span className="font-medium text-sm">{item.label}</span>
+          <span className="font-medium text-base">{item.label}</span>
         </div>
         {item.badge && (
-          <span className="bg-red-500 text-white text-xs rounded-full h-5 min-w-5 px-1.5 flex items-center justify-center font-medium">
+          <span className="bg-red-500 text-white text-base rounded-full h-5 min-w-5 px-1.5 flex items-center justify-center font-medium">
             {item.badge > 99 ? "99+" : item.badge}
           </span>
         )}
@@ -467,7 +467,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             >
               <Bell className="h-5 w-5 text-gray-600" />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-medium">
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-base rounded-full h-4 w-4 flex items-center justify-center font-medium">
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}
@@ -480,10 +480,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   variant="ghost"
                   className="flex items-center space-x-2.5 px-2 py-1 hover:bg-gray-100 h-10 rounded-lg"
                 >
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-white text-sm font-semibold shadow-sm">
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-white text-base font-semibold shadow-sm">
                     {getUserInitials()}
                   </div>
-                  <span className="text-gray-700 font-medium hidden md:block text-sm max-w-[100px] truncate">
+                  <span className="text-gray-700 font-medium hidden md:block text-base max-w-[100px] truncate">
                     {getUserDisplayName()}
                   </span>
                   <ChevronDown className="h-4 w-4 text-gray-500 hidden md:block" />
@@ -492,20 +492,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <DropdownMenuContent align="end" className="w-64">
                 <div className="px-3 py-3">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-white text-sm font-semibold shadow-sm">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-white text-base font-semibold shadow-sm">
                       {getUserInitials()}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 truncate">
+                      <p className="text-base font-semibold text-gray-900 truncate">
                         {getUserDisplayName()}
                       </p>
-                      <p className="text-xs text-gray-500 truncate">
+                      <p className="text-base text-gray-500 truncate">
                         {user?.email}
                       </p>
                     </div>
                   </div>
                   {user?.account_type && (
-                    <div className="inline-flex items-center px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-medium">
+                    <div className="inline-flex items-center px-2 py-1 rounded-md bg-blue-50 text-blue-700 text-base font-medium">
                       {user.account_type.toLowerCase()} Account
                     </div>
                   )}
@@ -561,7 +561,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </nav>
         {sidebarCollapsed && (
           <div className="p-4 border-t border-gray-100 flex justify-center">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-white text-sm font-semibold shadow-sm">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-white text-base font-semibold shadow-sm">
               {getUserInitials()}
             </div>
           </div>

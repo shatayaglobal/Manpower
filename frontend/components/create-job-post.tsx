@@ -15,13 +15,13 @@ import {
 import {
   AlertCircle,
   X,
-  Save,
   ArrowLeft,
-  Calendar,
-  DollarSign,
-  MapPin,
   Loader2,
   Briefcase,
+  FileText,
+  ListChecks,
+  Zap,
+  ChevronRight,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { usePosts } from "@/lib/redux/usePosts";
@@ -55,71 +55,39 @@ interface JobCreationFormProps {
   onSuccess?: () => void;
 }
 
-const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
-  [PRIORITY_LEVELS.LOW]: {
-    label: "Low",
-    color: "bg-sky-50 text-sky-700 border-sky-200",
-  },
-  [PRIORITY_LEVELS.MEDIUM]: {
-    label: "Medium",
-    color: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  },
-  [PRIORITY_LEVELS.HIGH]: {
-    label: "High",
-    color: "bg-violet-50 text-violet-700 border-violet-200",
-  },
-  [PRIORITY_LEVELS.URGENT]: {
-    label: "Urgent",
-    color: "bg-red-50 text-red-700 border-red-200",
-  },
+const PRIORITY_CONFIG: Record<string, { label: string; dot: string }> = {
+  [PRIORITY_LEVELS.LOW]: { label: "Low", dot: "bg-sky-400" },
+  [PRIORITY_LEVELS.MEDIUM]: { label: "Medium", dot: "bg-emerald-400" },
+  [PRIORITY_LEVELS.HIGH]: { label: "High", dot: "bg-violet-400" },
+  [PRIORITY_LEVELS.URGENT]: { label: "Urgent", dot: "bg-red-500" },
 };
-
-function FieldWrapper({
-  label,
-  required,
-  hint,
-  error,
-  icon,
-  children,
-}: {
-  label: string;
-  required?: boolean;
-  hint?: string;
-  error?: string;
-  icon?: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">
-        {label}{" "}
-        {required && (
-          <span className="text-red-500 normal-case font-normal">*</span>
-        )}
-      </Label>
-      <div className="relative">
-        {icon && (
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 z-10">
-            {icon}
-          </div>
-        )}
-        <div
-          className={icon ? "[&>*]:pl-9 [&>input]:pl-9 [&>textarea]:pl-9" : ""}
-        >
-          {children}
-        </div>
-      </div>
-      {error && <p className="text-red-500 text-xs mt-1.5">{error}</p>}
-      {hint && !error && <p className="text-xs text-gray-400 mt-1.5">{hint}</p>}
-    </div>
-  );
-}
 
 const inputCls = (err?: string) =>
   cn(
-    "w-full px-3 py-2.5 border rounded-xl text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed",
-    err ? "border-red-300 bg-red-50/30" : "border-gray-200 bg-white"
+    "w-full px-3 py-2.5 border rounded-xl text-base transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 disabled:bg-gray-50 disabled:cursor-not-allowed",
+    err
+      ? "border-red-300 bg-red-50/30"
+      : "border-gray-200 bg-white hover:border-gray-300"
   );
+
+function SectionLabel({
+  icon,
+  children,
+}: {
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center gap-2 mb-5">
+      <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+        {icon}
+      </div>
+      <span className="text-base font-bold text-gray-500 uppercase tracking-widest">
+        {children}
+      </span>
+    </div>
+  );
+}
 
 export default function JobCreationForm({
   onCancel,
@@ -157,7 +125,7 @@ export default function JobCreationForm({
           <h3 className="text-lg font-bold text-gray-900 mb-2">
             Access Denied
           </h3>
-          <p className="text-gray-500 text-sm mb-5">
+          <p className="text-gray-500 text-base mb-5">
             You need a business account to create job postings.
           </p>
           <Button
@@ -233,22 +201,22 @@ export default function JobCreationForm({
 
   return (
     <div className="bg-gray-50 -ml-4 -mt-5 min-h-screen -mr-4">
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-8 max-w-8xl">
-        {/* ── Back nav ── */}
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+        {/* ── Back ── */}
         <button
           onClick={() => (onCancel ? onCancel() : router.push("/jobs"))}
-          className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-900 transition-colors group mb-5"
+          className="inline-flex items-center gap-1.5 text-base text-gray-400 hover:text-gray-900 transition-colors group mb-6"
         >
           <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
           Back to Jobs
         </button>
 
-        {/* ── Header ── */}
-        <div className="bg-white rounded-2xl border border-gray-100 px-6 py-5 mb-5">
+        {/* ── Page title ── */}
+        <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900">
             Create Job Posting
           </h1>
-          <p className="text-gray-500 text-sm mt-0.5">
+          <p className="text-gray-500 text-base mt-1">
             Fill in the details below to publish a new listing
           </p>
         </div>
@@ -258,7 +226,7 @@ export default function JobCreationForm({
           <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-5 flex items-center justify-between gap-4">
             <div className="flex items-center gap-2.5">
               <AlertCircle className="h-4 w-4 text-red-600 shrink-0" />
-              <p className="text-sm text-red-700">{error}</p>
+              <p className="text-base text-red-700">{error}</p>
             </div>
             <button
               onClick={clearPostError}
@@ -269,252 +237,307 @@ export default function JobCreationForm({
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* ── Core details card ── */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-              Job Details
-            </p>
+        <form onSubmit={handleSubmit}>
+          <div className="bg-white rounded-2xl border border-gray-100 divide-y divide-gray-50">
+            {/* ── Section 1: Basic Info ── */}
+            <div className="p-6">
+              <SectionLabel icon={<Briefcase className="w-3.5 h-3.5" />}>
+                Basic Information
+              </SectionLabel>
 
-            {/* Title + Location */}
-            <div className="grid sm:grid-cols-2 gap-5">
-              <FieldWrapper
-                label="Job Title"
-                required
-                error={errors.title}
-                icon={<Briefcase className="w-4 h-4" />}
-              >
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => set("title", e.target.value)}
-                  disabled={loading}
-                  placeholder="e.g. Senior Frontend Developer"
-                  className={inputCls(errors.title) + " pl-9"}
-                />
-              </FieldWrapper>
+              <div className="grid sm:grid-cols-2 gap-5">
+                {/* Title */}
+                <div>
+                  <Label className="text-base font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
+                    Job Title{" "}
+                    <span className="text-red-400 normal-case font-normal">
+                      *
+                    </span>
+                  </Label>
+                  <input
+                    type="text"
+                    value={formData.title}
+                    onChange={(e) => set("title", e.target.value)}
+                    disabled={loading}
+                    placeholder="e.g. Senior Frontend Developer"
+                    className={inputCls(errors.title)}
+                  />
+                  {errors.title && (
+                    <p className="text-red-500 text-base mt-1.5">
+                      {errors.title}
+                    </p>
+                  )}
+                </div>
 
-              <FieldWrapper
-                label="Location"
-                required
-                error={errors.location}
-                hint="Start typing to search"
-                icon={<MapPin className="w-4 h-4" />}
-              >
-                <AddressAutocomplete
-                  value={formData.location || ""}
-                  onChange={(address) => set("location", address)}
-                  onPlaceSelected={(place) => set("location", place.address)}
-                  placeholder="Search for job location..."
-                  className={inputCls(errors.location) + " pl-9"}
-                />
-              </FieldWrapper>
-            </div>
+                {/* Location */}
+                <div>
+                  <Label className="text-base font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
+                    Location{" "}
+                    <span className="text-red-400 normal-case font-normal">
+                      *
+                    </span>
+                  </Label>
+                  <AddressAutocomplete
+                    value={formData.location || ""}
+                    onChange={(address) => set("location", address)}
+                    onPlaceSelected={(place) => set("location", place.address)}
+                    placeholder="Search for job location..."
+                    className={inputCls(errors.location)}
+                  />
+                  {errors.location ? (
+                    <p className="text-red-500 text-base mt-1.5">
+                      {errors.location}
+                    </p>
+                  ) : (
+                    <p className="text-base text-gray-400 mt-1.5">
+                      Start typing to search
+                    </p>
+                  )}
+                </div>
 
-            {/* Post type + Priority */}
-            <div className="grid sm:grid-cols-2 gap-5">
-              <div>
-                <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">
-                  Post Type
-                </Label>
-                <Select
-                  value={formData.post_type}
-                  onValueChange={(v) => set("post_type", v)}
-                  disabled={loading}
-                >
-                  <SelectTrigger className="w-full h-10 border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={POST_TYPES.JOB}>Job Posting</SelectItem>
-                    <SelectItem value={POST_TYPES.GENERAL}>
-                      General / Announcement
-                    </SelectItem>
-                    <SelectItem value={POST_TYPES.ANNOUNCEMENT}>
-                      Announcement
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                {/* Post Type */}
+                <div>
+                  <Label className="text-base font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
+                    Post Type
+                  </Label>
+                  <Select
+                    value={formData.post_type}
+                    onValueChange={(v) => set("post_type", v)}
+                    disabled={loading}
+                  >
+                    <SelectTrigger className="w-full h-[42px] border-gray-200 rounded-xl text-base hover:border-gray-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400">
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={POST_TYPES.JOB}>
+                        Job Posting
+                      </SelectItem>
+                      <SelectItem value={POST_TYPES.GENERAL}>
+                        General / Announcement
+                      </SelectItem>
+                      <SelectItem value={POST_TYPES.ANNOUNCEMENT}>
+                        Announcement
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div>
-                <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">
-                  Priority Level
-                </Label>
-                <Select
-                  value={formData.priority}
-                  onValueChange={(v) => set("priority", v)}
-                  disabled={loading}
-                >
-                  <SelectTrigger className="w-full h-10 border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500">
-                    <SelectValue>
-                      {formData.priority && (
-                        <span
-                          className={cn(
-                            "text-xs font-semibold px-2 py-0.5 rounded-full border",
-                            currentPriority.color
-                          )}
-                        >
-                          {currentPriority.label}
-                        </span>
-                      )}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(PRIORITY_CONFIG).map(
-                      ([value, { label, color }]) => (
-                        <SelectItem key={value} value={value}>
-                          <span
-                            className={cn(
-                              "text-xs font-semibold px-2 py-0.5 rounded-full border",
-                              color
-                            )}
-                          >
-                            {label}
+                {/* Priority */}
+                <div>
+                  <Label className="text-base font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
+                    Priority Level
+                  </Label>
+                  <Select
+                    value={formData.priority}
+                    onValueChange={(v) => set("priority", v)}
+                    disabled={loading}
+                  >
+                    <SelectTrigger className="w-full h-[42px] border-gray-200 rounded-xl text-base hover:border-gray-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400">
+                      <SelectValue>
+                        {formData.priority && (
+                          <span className="flex items-center gap-2">
+                            <span
+                              className={cn(
+                                "w-2 h-2 rounded-full shrink-0",
+                                currentPriority.dot
+                              )}
+                            />
+                            <span className="text-base text-gray-700">
+                              {currentPriority.label}
+                            </span>
                           </span>
-                        </SelectItem>
-                      )
-                    )}
-                  </SelectContent>
-                </Select>
+                        )}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(PRIORITY_CONFIG).map(
+                        ([value, { label, dot }]) => (
+                          <SelectItem key={value} value={value}>
+                            <span className="flex items-center gap-2">
+                              <span
+                                className={cn(
+                                  "w-2 h-2 rounded-full shrink-0",
+                                  dot
+                                )}
+                              />
+                              {label}
+                            </span>
+                          </SelectItem>
+                        )
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Salary */}
+                <div>
+                  <Label className="text-base font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
+                    Salary Range{" "}
+                    <span className="text-gray-300 normal-case font-normal">
+                      — Optional
+                    </span>
+                  </Label>
+                  <input
+                    type="text"
+                    value={formData.salary_range || ""}
+                    onChange={(e) => set("salary_range", e.target.value)}
+                    disabled={loading}
+                    placeholder="e.g. $500 – $1,000 / month"
+                    className={inputCls(errors.salary_range)}
+                  />
+                  {errors.salary_range && (
+                    <p className="text-red-500 text-base mt-1.5">
+                      {errors.salary_range}
+                    </p>
+                  )}
+                </div>
+
+                {/* Expiry */}
+                <div>
+                  <Label className="text-base font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">
+                    Expiry Date{" "}
+                    <span className="text-gray-300 normal-case font-normal">
+                      — Optional
+                    </span>
+                  </Label>
+                  <input
+                    type="date"
+                    value={formData.expires_at || ""}
+                    onChange={(e) => set("expires_at", e.target.value)}
+                    disabled={loading}
+                    min={new Date().toISOString().split("T")[0]}
+                    className={inputCls(errors.expires_at)}
+                  />
+                  {errors.expires_at && (
+                    <p className="text-red-500 text-base mt-1.5">
+                      {errors.expires_at}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Salary + Expiry */}
-            <div className="grid sm:grid-cols-2 gap-5">
-              <FieldWrapper
-                label="Salary Range"
-                hint="Optional"
-                error={errors.salary_range}
-                icon={<DollarSign className="w-4 h-4" />}
-              >
-                <input
-                  type="text"
-                  value={formData.salary_range || ""}
-                  onChange={(e) => set("salary_range", e.target.value)}
-                  disabled={loading}
-                  placeholder="e.g. $ 500 – 1,000"
-                  className={inputCls(errors.salary_range) + " pl-9"}
-                />
-              </FieldWrapper>
-
-              <FieldWrapper
-                label="Expiry Date"
-                hint="Optional"
-                error={errors.expires_at}
-                icon={<Calendar className="w-4 h-4" />}
-              >
-                <input
-                  type="date"
-                  value={formData.expires_at || ""}
-                  onChange={(e) => set("expires_at", e.target.value)}
-                  disabled={loading}
-                  min={new Date().toISOString().split("T")[0]}
-                  className={inputCls(errors.expires_at) + " pl-9"}
-                />
-              </FieldWrapper>
-            </div>
-          </div>
-
-          {/* ── Description card ── */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-2">
-            <div className="flex items-center justify-between">
-              <Label className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                Job Description{" "}
-                <span className="text-red-500 font-normal normal-case">*</span>
-              </Label>
-              <span
+            {/* ── Section 2: Description ── */}
+            <div className="p-6">
+              <SectionLabel icon={<FileText className="w-3.5 h-3.5" />}>
+                Job Description
+              </SectionLabel>
+              <div className="flex items-center justify-between mb-1.5">
+                <Label className="text-base font-semibold text-gray-500 uppercase tracking-wide">
+                  Description{" "}
+                  <span className="text-red-400 normal-case font-normal">
+                    *
+                  </span>
+                </Label>
+                <span
+                  className={cn(
+                    "text-base font-medium",
+                    formData.description.length > 900
+                      ? "text-red-500"
+                      : "text-gray-400"
+                  )}
+                >
+                  {formData.description.length}/1000
+                </span>
+              </div>
+              <Textarea
+                value={formData.description}
+                onChange={(e) => set("description", e.target.value)}
+                style={{ minHeight: "160px" }}
+                placeholder="Describe the role, responsibilities, and what you're looking for in the ideal candidate..."
                 className={cn(
-                  "text-xs font-medium",
-                  formData.description.length > 900
-                    ? "text-red-500"
-                    : "text-gray-400"
+                  "w-full resize-none border rounded-xl text-base focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-colors",
+                  errors.description
+                    ? "border-red-300 bg-red-50/30"
+                    : "border-gray-200 hover:border-gray-300"
                 )}
-              >
-                {formData.description.length}/1000
-              </span>
-            </div>
-            <Textarea
-              value={formData.description}
-              onChange={(e) => set("description", e.target.value)}
-              rows={8}
-              placeholder="Describe the role, responsibilities, and what you're looking for in the ideal candidate..."
-              className={cn(
-                "resize-none border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors",
-                errors.description
-                  ? "border-red-300 bg-red-50/30"
-                  : "border-gray-200"
+                disabled={loading}
+              />
+              {errors.description && (
+                <p className="text-red-500 text-base mt-1.5">
+                  {errors.description}
+                </p>
               )}
-              disabled={loading}
-            />
-            {errors.description && (
-              <p className="text-red-500 text-xs">{errors.description}</p>
-            )}
-          </div>
+            </div>
 
-          {/* ── Requirements card ── */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-2">
-            <div className="flex items-center justify-between">
-              <Label className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+            {/* ── Section 3: Requirements ── */}
+            <div className="p-6">
+              <SectionLabel icon={<ListChecks className="w-3.5 h-3.5" />}>
                 Requirements
-              </Label>
-              <span
+              </SectionLabel>
+              <div className="flex items-center justify-between mb-1.5">
+                <Label className="text-base font-semibold text-gray-500 uppercase tracking-wide">
+                  Requirements{" "}
+                  <span className="text-gray-300 normal-case font-normal">
+                    — Optional
+                  </span>
+                </Label>
+                <span
+                  className={cn(
+                    "text-base font-medium",
+                    (formData.requirements?.length ?? 0) > 450
+                      ? "text-red-500"
+                      : "text-gray-400"
+                  )}
+                >
+                  {formData.requirements?.length ?? 0}/500
+                </span>
+              </div>
+              <Textarea
+                value={formData.requirements || ""}
+                onChange={(e) => set("requirements", e.target.value)}
+                style={{ minHeight: "160px" }}
+                placeholder="List key skills, qualifications, and experience — one per line works great..."
                 className={cn(
-                  "text-xs font-medium",
-                  (formData.requirements?.length ?? 0) > 450
-                    ? "text-red-500"
-                    : "text-gray-400"
+                  "w-full resize-none border rounded-xl text-base focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-colors",
+                  errors.requirements
+                    ? "border-red-300 bg-red-50/30"
+                    : "border-gray-200 hover:border-gray-300"
                 )}
-              >
-                {formData.requirements?.length ?? 0}/500
-              </span>
+                disabled={loading}
+              />
+              {errors.requirements && (
+                <p className="text-red-500 text-base mt-1.5">
+                  {errors.requirements}
+                </p>
+              )}
             </div>
-            <Textarea
-              value={formData.requirements || ""}
-              onChange={(e) => set("requirements", e.target.value)}
-              rows={6}
-              placeholder="List key skills, qualifications, and experience — one per line works great..."
-              className={cn(
-                "resize-none border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors",
-                errors.requirements
-                  ? "border-red-300 bg-red-50/30"
-                  : "border-gray-200"
-              )}
-              disabled={loading}
-            />
-            {errors.requirements && (
-              <p className="text-red-500 text-xs">{errors.requirements}</p>
-            )}
-          </div>
 
-          {/* ── Action buttons ── */}
-          <div className="flex flex-col sm:flex-row gap-3 pb-8">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => (onCancel ? onCancel() : router.push("/jobs"))}
-              className="flex-1 h-11 border-gray-200 rounded-xl font-semibold"
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="flex-1 h-11 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-sm hover:shadow-md transition-all"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Creating...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4 mr-2" />
-                  Publish Job Posting
-                </>
-              )}
-            </Button>
+            {/* ── Footer ── */}
+            <div className="px-6 py-4 bg-gray-50/50 rounded-b-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
+              <p className="text-base text-gray-400 flex items-center gap-1.5">
+                <Zap className="w-3.5 h-3.5 text-amber-400" />
+                Posting will go live immediately after publishing
+              </p>
+              <div className="flex gap-3 w-full sm:w-auto">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => (onCancel ? onCancel() : router.push("/jobs"))}
+                  className="flex-1 sm:flex-none sm:w-28 h-10 border-gray-200 rounded-xl font-semibold text-base"
+                  disabled={loading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 sm:flex-none sm:w-44 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-base shadow-sm hover:shadow-md transition-all"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Publishing...
+                    </>
+                  ) : (
+                    <>
+                      Publish Posting
+                      <ChevronRight className="h-4 w-4 ml-1" />
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
           </div>
         </form>
       </div>

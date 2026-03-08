@@ -84,7 +84,7 @@ export default function Navbar({ children }: AppLayoutProps) {
                   priority
                 />
               </div>
-              <span className="font-bold text-gray-900 text-sm hidden sm:block">
+              <span className="font-bold text-gray-900 text-base hidden sm:block">
                 ShatayaGlobal <span className="text-blue-600">Ltd</span>
               </span>
             </Link>
@@ -95,7 +95,7 @@ export default function Navbar({ children }: AppLayoutProps) {
                 <Link
                   key={href}
                   href={href}
-                  className="px-4 py-2 rounded-xl text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                  className="px-4 py-2 rounded-xl text-base font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors"
                 >
                   {label}
                 </Link>
@@ -106,13 +106,13 @@ export default function Navbar({ children }: AppLayoutProps) {
             <div className="hidden md:flex items-center gap-2">
               <Link
                 href="/login"
-                className="px-4 py-2 rounded-xl text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 rounded-xl text-base font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
               >
                 Sign In
               </Link>
               <Link
                 href="/signup"
-                className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold h-9 px-5 rounded-xl transition-colors shadow-sm"
+                className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white text-base font-semibold h-9 px-5 rounded-xl transition-colors shadow-sm"
               >
                 Get Started
               </Link>
@@ -141,7 +141,7 @@ export default function Navbar({ children }: AppLayoutProps) {
                 key={href}
                 href={href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="block px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                className="block px-4 py-2.5 rounded-xl text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
               >
                 {label}
               </Link>
@@ -150,14 +150,14 @@ export default function Navbar({ children }: AppLayoutProps) {
               <Link
                 href="/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-center w-full border border-gray-200 h-10 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                className="flex items-center justify-center w-full border border-gray-200 h-10 rounded-xl text-base font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
               >
                 Sign In
               </Link>
               <Link
                 href="/signup"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-center w-full bg-blue-600 hover:bg-blue-700 text-white h-10 rounded-xl text-sm font-semibold transition-colors"
+                className="flex items-center justify-center w-full bg-blue-600 hover:bg-blue-700 text-white h-10 rounded-xl text-base font-semibold transition-colors"
               >
                 Get Started
               </Link>
@@ -185,26 +185,26 @@ export default function Navbar({ children }: AppLayoutProps) {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <span className="font-bold text-gray-900 text-sm">
+                <span className="font-bold text-gray-900 text-base">
                   Shataya <span className="text-blue-600">Global</span>
                 </span>
               </Link>
-              <p className="text-sm text-gray-400 leading-relaxed">
+              <p className="text-base text-gray-400 leading-relaxed">
                 Empowering people.
                 <br />
                 Strengthening businesses.
               </p>
-              <p className="text-xs text-gray-300">
+              <p className="text-base text-gray-300">
                 Hapelech 7, Tel Aviv, Israel
               </p>
             </div>
 
             {/* Contact */}
             <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-5">
+              <p className="text-base font-semibold text-gray-400 uppercase tracking-widest mb-5">
                 Contact
               </p>
-              <ul className="space-y-3 text-sm">
+              <ul className="space-y-3 text-base">
                 <li>
                   <a
                     href="mailto:Shatayaglobal@gmail.com"
@@ -226,10 +226,10 @@ export default function Navbar({ children }: AppLayoutProps) {
 
             {/* Links */}
             <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-5">
+              <p className="text-base font-semibold text-gray-400 uppercase tracking-widest mb-5">
                 Platform
               </p>
-              <ul className="space-y-3 text-sm">
+              <ul className="space-y-3 text-base">
                 {[
                   { href: "/jobs", label: "Find Jobs" },
                   { href: "/jobs/create", label: "Post a Job" },
@@ -250,7 +250,7 @@ export default function Navbar({ children }: AppLayoutProps) {
 
             {/* Social */}
             <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-5">
+              <p className="text-base font-semibold text-gray-400 uppercase tracking-widest mb-5">
                 Follow Us
               </p>
               <div className="flex gap-2 flex-wrap">
@@ -298,7 +298,7 @@ export default function Navbar({ children }: AppLayoutProps) {
           </div>
 
           {/* Bottom */}
-          <div className="border-t border-gray-100 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-400">
+          <div className="border-t border-gray-100 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-base text-gray-400">
             <p>© 2025 Shataya Global Ltd. All rights reserved.</p>
             <div className="flex items-center gap-5">
               <Link

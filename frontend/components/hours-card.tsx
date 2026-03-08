@@ -99,7 +99,7 @@ const HoursManagementPage = () => {
   const getStatusBadge = (h: HoursCard) => {
     if (h.clock_in && !h.clock_out) {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-base font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">
           <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
           Present
         </span>
@@ -107,21 +107,21 @@ const HoursManagementPage = () => {
     }
     if (h.status === "PENDING") {
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-amber-50 text-amber-700 border-amber-200">
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-base font-semibold border bg-amber-50 text-amber-700 border-amber-200">
           Awaiting Signature
         </span>
       );
     }
     if (h.status === "SIGNED") {
       return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-blue-50 text-blue-700 border-blue-200">
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-base font-semibold border bg-blue-50 text-blue-700 border-blue-200">
           Awaiting Approval
         </span>
       );
     }
     if (h.status === "APPROVED") {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-base font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">
           <CheckCircle className="w-3 h-3" />
           Approved
         </span>
@@ -129,7 +129,7 @@ const HoursManagementPage = () => {
     }
     if (h.status === "REJECTED") {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-red-50 text-red-700 border-red-200">
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-base font-semibold border bg-red-50 text-red-700 border-red-200">
           <XCircle className="w-3 h-3" />
           Rejected
         </span>
@@ -173,9 +173,14 @@ const HoursManagementPage = () => {
   useEffect(() => {
     loadBusinesses();
   }, [loadBusinesses]);
+
   useEffect(() => {
     if (businessId) loadStaff();
   }, [businessId, loadStaff]);
+
+  useEffect(() => {
+    if (businessId) loadHoursCards({ page: currentPage, ordering: "-date" });
+  }, [businessId, currentPage, loadHoursCards]);
 
   const toggleExpand = (workerId: string) => {
     setExpandedWorkers((prev) => {
@@ -250,7 +255,7 @@ const HoursManagementPage = () => {
           <h2 className="text-lg font-bold text-gray-900 mb-2">
             No Business Profile
           </h2>
-          <p className="text-sm text-gray-500 mb-5">
+          <p className="text-base text-gray-500 mb-5">
             Create your business profile before managing hours.
           </p>
           <Button
@@ -273,13 +278,13 @@ const HoursManagementPage = () => {
             <h1 className="text-2xl font-bold text-gray-900">
               Hours & Attendance
             </h1>
-            <p className="text-gray-500 text-sm mt-0.5">
+            <p className="text-gray-500 text-base mt-0.5">
               Review and approve staff hours
             </p>
           </div>
           <Button
             onClick={() => setShowClockInModal(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-4 rounded-xl font-semibold text-sm shadow-sm shrink-0"
+            className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-4 rounded-xl font-semibold text-base shadow-sm shrink-0"
           >
             <Plus className="w-3.5 h-3.5 mr-1.5" />
             Add Hours
@@ -322,7 +327,7 @@ const HoursManagementPage = () => {
               )}
             >
               <div>
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">
+                <p className="text-base font-semibold text-gray-400 uppercase tracking-wide mb-1">
                   {label}
                 </p>
                 <p className={cn("text-2xl font-bold", text)}>{value}</p>
@@ -353,12 +358,12 @@ const HoursManagementPage = () => {
               <h3 className="text-base font-semibold text-gray-900 mb-2">
                 No hours recorded yet
               </h3>
-              <p className="text-sm text-gray-500 max-w-xs mx-auto mb-5">
+              <p className="text-base text-gray-500 max-w-xs mx-auto mb-5">
                 Start tracking staff hours by adding their first entry.
               </p>
               <Button
                 onClick={() => setShowClockInModal(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-5 rounded-xl font-semibold text-sm"
+                className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-5 rounded-xl font-semibold text-base"
               >
                 <Plus className="w-3.5 h-3.5 mr-1.5" />
                 Add First Hours
@@ -369,13 +374,13 @@ const HoursManagementPage = () => {
               {/* Column headers */}
               <div className="hidden lg:grid grid-cols-[auto_2fr_1fr_1.5fr_auto] gap-4 px-5 py-2.5 bg-gray-50/60 border-b border-gray-50">
                 <span className="w-5" />
-                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                <span className="text-base font-semibold text-gray-400 uppercase tracking-wide">
                   Worker
                 </span>
-                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                <span className="text-base font-semibold text-gray-400 uppercase tracking-wide">
                   Period Hours
                 </span>
-                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                <span className="text-base font-semibold text-gray-400 uppercase tracking-wide">
                   Status
                 </span>
                 <span />
@@ -406,17 +411,17 @@ const HoursManagementPage = () => {
 
                         {/* Worker info */}
                         <div className="min-w-0">
-                          <p className="font-semibold text-sm text-gray-900 truncate">
+                          <p className="font-semibold text-base text-gray-900 truncate">
                             {workerName}
                           </p>
-                          <p className="text-xs text-gray-400">
+                          <p className="text-base text-gray-400">
                             {entries.length} days recorded
                           </p>
                         </div>
 
                         {/* Hours */}
                         <div className="hidden lg:block">
-                          <p className="text-sm font-bold text-gray-900">
+                          <p className="text-base font-bold text-gray-900">
                             {totalHours.toFixed(1)} hrs
                           </p>
                         </div>
@@ -424,7 +429,7 @@ const HoursManagementPage = () => {
                         {/* Status */}
                         <div className="hidden lg:block">
                           {active ? (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-base font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">
                               <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
                               Present
                             </span>
@@ -498,7 +503,7 @@ const HoursManagementPage = () => {
                                 className="flex justify-between items-center px-4 py-3 bg-white rounded-xl border border-gray-100 hover:border-gray-200 transition-colors"
                               >
                                 <div>
-                                  <p className="font-semibold text-sm text-gray-900">
+                                  <p className="font-semibold text-base text-gray-900">
                                     {new Date(entry.date).toLocaleDateString(
                                       "en-US",
                                       {
@@ -508,7 +513,7 @@ const HoursManagementPage = () => {
                                       }
                                     )}
                                   </p>
-                                  <p className="text-xs text-gray-400 mt-0.5">
+                                  <p className="text-base text-gray-400 mt-0.5">
                                     {getFormattedTime(
                                       entry.clock_in_datetime,
                                       entry.clock_in
@@ -528,7 +533,7 @@ const HoursManagementPage = () => {
                                   </p>
                                 </div>
                                 <div className="text-right">
-                                  <p className="text-sm font-bold text-gray-900">
+                                  <p className="text-base font-bold text-gray-900">
                                     {calculateTotalHours(entry).toFixed(2)} hrs
                                   </p>
                                   <div className="mt-1">
@@ -543,7 +548,7 @@ const HoursManagementPage = () => {
                                   e.stopPropagation();
                                   handleViewDetails(latest);
                                 }}
-                                className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+                                className="text-base font-semibold text-blue-600 hover:text-blue-800 transition-colors"
                               >
                                 View all {entries.length} days →
                               </button>
@@ -583,7 +588,7 @@ const HoursManagementPage = () => {
               </button>
             </div>
             <div className="px-6 py-5">
-              <p className="text-sm text-gray-500 mb-4">
+              <p className="text-base text-gray-500 mb-4">
                 Please provide a reason for rejecting these hours. The staff
                 member will see this message.
               </p>
@@ -591,7 +596,7 @@ const HoursManagementPage = () => {
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
                 rows={4}
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
                 placeholder="Enter reason for rejection..."
               />
             </div>
@@ -599,14 +604,14 @@ const HoursManagementPage = () => {
               <Button
                 variant="outline"
                 onClick={closeRejectModal}
-                className="flex-1 border-gray-200 h-10 rounded-xl font-semibold text-sm"
+                className="flex-1 border-gray-200 h-10 rounded-xl font-semibold text-base"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleReject}
                 disabled={!rejectionReason.trim()}
-                className="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white h-10 rounded-xl font-semibold text-sm"
+                className="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white h-10 rounded-xl font-semibold text-base"
               >
                 Reject Hours
               </Button>

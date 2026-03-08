@@ -165,7 +165,7 @@ function WelcomeBanner({ firstName }: { firstName: string }) {
       <div className="relative px-8 py-7 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-full">
+            <span className="inline-flex items-center gap-1.5 text-base font-semibold text-blue-600 bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-full">
               <Zap className="w-3 h-3" />
               New account
             </span>
@@ -173,7 +173,7 @@ function WelcomeBanner({ firstName }: { firstName: string }) {
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
             Welcome{firstName ? `, ${firstName}` : ""}! 👋
           </h1>
-          <p className="text-gray-500 mt-1.5 text-sm sm:text-base max-w-lg leading-relaxed">
+          <p className="text-gray-500 mt-1.5 text-base sm:text-base max-w-lg leading-relaxed">
             Let&apos;s get your profile set up so employers can find you. It
             only takes a few minutes.
           </p>
@@ -187,7 +187,7 @@ function WelcomeBanner({ firstName }: { firstName: string }) {
               Complete Profile <ArrowRight className="w-4 h-4 ml-2" />
             </Link>
           </Button>
-          <p className="text-xs text-gray-400">Takes about 5 minutes</p>
+          <p className="text-base text-gray-400">Takes about 5 minutes</p>
         </div>
       </div>
     </div>
@@ -226,14 +226,14 @@ function HowItWorksSection() {
                 >
                   <Icon className="w-5 h-5" />
                 </div>
-                <span className="text-xs font-bold text-gray-300 mt-2">
+                <span className="text-base font-bold text-gray-300 mt-2">
                   {item.step}
                 </span>
               </div>
-              <p className="font-semibold text-gray-900 text-sm mb-1">
+              <p className="font-semibold text-gray-900 text-base mb-1">
                 {item.title}
               </p>
-              <p className="text-xs text-gray-500 leading-relaxed">
+              <p className="text-base text-gray-500 leading-relaxed">
                 {item.description}
               </p>
             </div>
@@ -256,17 +256,17 @@ function DashboardJobCard({ job }: { job: PostListItem }) {
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-1">
-              <p className="font-semibold text-gray-900 text-sm leading-tight line-clamp-1 group-hover:text-blue-700 transition-colors">
+              <p className="font-semibold text-gray-900 text-base leading-tight line-clamp-1 group-hover:text-blue-700 transition-colors">
                 {job.title}
               </p>
               {job.priority === "URGENT" && (
-                <span className="text-xs bg-red-50 text-red-600 border border-red-100 px-1.5 py-0.5 rounded-full font-medium shrink-0 ml-1">
+                <span className="text-base bg-red-50 text-red-600 border border-red-100 px-1.5 py-0.5 rounded-full font-medium shrink-0 ml-1">
                   Urgent
                 </span>
               )}
             </div>
             {job.location && (
-              <div className="flex items-center gap-1 mt-0.5 text-gray-400 text-xs">
+              <div className="flex items-center gap-1 mt-0.5 text-gray-400 text-base">
                 <MapPin className="w-3 h-3 shrink-0" />
                 {job.location}
               </div>
@@ -277,20 +277,20 @@ function DashboardJobCard({ job }: { job: PostListItem }) {
           <div className="flex items-center gap-2">
             <span
               className={cn(
-                "text-xs font-medium px-2 py-0.5 rounded-full border",
+                "text-base font-medium px-2 py-0.5 rounded-full border",
                 priorityStyle.color
               )}
             >
               {priorityStyle.label}
             </span>
             {job.salary_range && (
-              <span className="flex items-center gap-0.5 text-xs text-gray-500">
+              <span className="flex items-center gap-0.5 text-base text-gray-500">
                 <DollarSign className="w-3 h-3" />
                 {job.salary_range}
               </span>
             )}
           </div>
-          <span className="text-xs text-gray-400">
+          <span className="text-base text-gray-400">
             {formatDate(job.created_at)}
           </span>
         </div>
@@ -500,10 +500,10 @@ export default function WorkerDashboardPage() {
                   <Bell className="w-4 h-4 text-violet-600" />
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-900 text-sm">
+                  <p className="font-semibold text-gray-900 text-base">
                     Check your invitations
                   </p>
-                  <p className="text-gray-500 text-xs">
+                  <p className="text-gray-500 text-base">
                     Employers may have already reached out to you.
                   </p>
                 </div>
@@ -536,7 +536,7 @@ export default function WorkerDashboardPage() {
                 >
                   <Link
                     href="/jobs"
-                    className="flex items-center gap-1 text-sm"
+                    className="flex items-center gap-1 text-base"
                   >
                     See all <ChevronRight className="w-4 h-4" />
                   </Link>
@@ -566,7 +566,7 @@ export default function WorkerDashboardPage() {
             <h1 className="text-2xl font-bold text-gray-900">
               Hello{firstName ? `, ${firstName}` : ""} 👋
             </h1>
-            <p className="text-gray-500 text-sm mt-0.5">
+            <p className="text-gray-500 text-base mt-0.5">
               {new Date().toLocaleDateString("en-US", {
                 weekday: "long",
                 month: "long",
@@ -585,6 +585,84 @@ export default function WorkerDashboardPage() {
           </p>
         </div>
 
+        {/* ── Stats row ── */}
+        {(() => {
+          const today = new Date().toISOString().split("T")[0];
+          const todayCards = myHoursCards.filter((c) => c.date === today);
+          const weekStart = new Date();
+          weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+          const weekHours = myHoursCards
+            .filter(
+              (c) => new Date(c.date) >= weekStart && c.clock_out_datetime
+            )
+            .reduce((s, c) => s + (c.total_hours_decimal ?? 0), 0);
+          const pendingSig = myHoursCards.filter(
+            (c) =>
+              c.status === "PENDING" &&
+              (c.clock_out_datetime || c.clock_out) &&
+              !c.is_signed
+          ).length;
+          const approvedCount = myHoursCards.filter(
+            (c) => c.status === "APPROVED"
+          ).length;
+
+          return (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                {
+                  label: "Today's Sessions",
+                  value: todayCards.length,
+                  sub: isClockedIn
+                    ? "Currently clocked in"
+                    : "No active session",
+                  dot: isClockedIn ? "bg-emerald-400" : "bg-gray-200",
+                  href: "/clock",
+                },
+                {
+                  label: "Hours This Week",
+                  value: `${weekHours.toFixed(1)}h`,
+                  sub: "Completed sessions",
+                  dot: "bg-blue-400",
+                  href: "/my-hours",
+                },
+                {
+                  label: "Needs Signature",
+                  value: pendingSig,
+                  sub: pendingSig > 0 ? "Tap to sign" : "All signed",
+                  dot: pendingSig > 0 ? "bg-amber-400" : "bg-emerald-400",
+                  href: "/my-hours",
+                },
+                {
+                  label: "Approved",
+                  value: approvedCount,
+                  sub: "Hour cards approved",
+                  dot: "bg-emerald-400",
+                  href: "/my-hours",
+                },
+              ].map(({ label, value, sub, dot, href }) => (
+                <Link
+                  key={label}
+                  href={href}
+                  className="bg-white rounded-2xl border border-gray-100 p-4 hover:border-blue-200 hover:shadow-sm transition-all group"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-base font-bold uppercase tracking-widest text-gray-400">
+                      {label}
+                    </p>
+                    <span
+                      className={cn("w-2 h-2 rounded-full shrink-0", dot)}
+                    />
+                  </div>
+                  <p className="text-2xl font-bold text-gray-900 group-hover:text-blue-700 transition-colors">
+                    {value}
+                  </p>
+                  <p className="text-base text-gray-400 mt-0.5">{sub}</p>
+                </Link>
+              ))}
+            </div>
+          );
+        })()}
+
         {/* ── Row 1: Shifts + Clock — equal height ── */}
         <div className="grid gap-5 lg:grid-cols-2">
           {/* TODAY'S SHIFTS */}
@@ -601,7 +679,7 @@ export default function WorkerDashboardPage() {
                   asChild
                   variant="ghost"
                   size="sm"
-                  className="text-blue-600 hover:text-blue-700 h-8 px-2 text-xs"
+                  className="text-blue-600 hover:text-blue-700 h-8 px-2 text-base"
                 >
                   <Link href="/my-shifts" className="flex items-center gap-1">
                     All shifts <ChevronRight className="w-3.5 h-3.5" />
@@ -615,10 +693,10 @@ export default function WorkerDashboardPage() {
                   <div className="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mb-3">
                     <CalendarDays className="w-7 h-7 text-gray-300" />
                   </div>
-                  <p className="text-gray-600 text-sm font-medium">
+                  <p className="text-gray-600 text-base font-medium">
                     No shifts scheduled today
                   </p>
-                  <p className="text-gray-400 text-xs mt-1">
+                  <p className="text-gray-400 text-base mt-1">
                     Your employer will assign shifts here
                   </p>
                 </div>
@@ -630,17 +708,17 @@ export default function WorkerDashboardPage() {
                       className="p-4 bg-gradient-to-br from-indigo-50/70 to-blue-50/40 rounded-xl border border-indigo-100"
                     >
                       <div className="flex items-start justify-between mb-2">
-                        <p className="font-semibold text-gray-900 text-sm leading-tight">
+                        <p className="font-semibold text-gray-900 text-base leading-tight">
                           {shift.name}
                         </p>
                         <Badge
                           variant="secondary"
-                          className="text-xs shrink-0 ml-2"
+                          className="text-base shrink-0 ml-2"
                         >
                           {shift.shift_type.replace(/_/g, " ").toLowerCase()}
                         </Badge>
                       </div>
-                      <p className="text-xl font-bold text-gray-900 font-mono">
+                      <p className="text-base text-gray-700 font-mono mt-1">
                         {shift.start_time} – {shift.end_time}
                       </p>
                     </div>
@@ -671,7 +749,7 @@ export default function WorkerDashboardPage() {
                   Time Clock
                 </CardTitle>
                 {isClockedIn && (
-                  <div className="flex items-center gap-1.5 text-xs text-green-700 font-semibold bg-green-50 border border-green-100 px-2.5 py-1 rounded-full">
+                  <div className="flex items-center gap-1.5 text-base text-green-700 font-semibold bg-green-50 border border-green-100 px-2.5 py-1 rounded-full">
                     <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
                     Live
                   </div>
@@ -683,13 +761,13 @@ export default function WorkerDashboardPage() {
                 {locationError && (
                   <Alert variant="destructive" className="py-2.5">
                     <AlertCircle className="h-3.5 w-3.5" />
-                    <AlertDescription className="flex items-center justify-between text-xs">
+                    <AlertDescription className="flex items-center justify-between text-base">
                       <span>{locationError}</span>
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={getCurrentLocation}
-                        className="ml-2 h-6 text-xs px-2 shrink-0"
+                        className="ml-2 h-6 text-base px-2 shrink-0"
                       >
                         Retry
                       </Button>
@@ -697,7 +775,7 @@ export default function WorkerDashboardPage() {
                   </Alert>
                 )}
                 {locationReady && !locationError && (
-                  <div className="flex items-center gap-1.5 text-xs text-emerald-700 font-medium">
+                  <div className="flex items-center gap-1.5 text-base text-emerald-700 font-medium">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     Location confirmed
                   </div>
@@ -708,7 +786,7 @@ export default function WorkerDashboardPage() {
               <div className="flex-1 flex flex-col items-center justify-center text-center py-4">
                 {isClockedIn && todayHoursCard ? (
                   <div className="w-full py-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border border-green-100">
-                    <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">
+                    <p className="text-base text-gray-500 font-medium uppercase tracking-wide">
                       Clocked in at
                     </p>
                     <p className="text-3xl font-bold text-gray-900 mt-1 font-mono">
@@ -718,7 +796,7 @@ export default function WorkerDashboardPage() {
                       )}
                     </p>
                     {todayHoursCard.clock_in_distance_meters != null && (
-                      <p className="text-xs text-gray-400 mt-2 flex items-center justify-center gap-1">
+                      <p className="text-base text-gray-400 mt-2 flex items-center justify-center gap-1">
                         <MapPin className="w-3 h-3" />
                         {Math.round(todayHoursCard.clock_in_distance_meters)}m
                         from site
@@ -730,10 +808,10 @@ export default function WorkerDashboardPage() {
                     <div className="w-14 h-14 bg-white border border-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-sm">
                       <Clock className="w-7 h-7 text-gray-400" />
                     </div>
-                    <p className="text-sm text-gray-500 font-medium">
+                    <p className="text-base text-gray-500 font-medium">
                       Not clocked in
                     </p>
-                    <p className="text-xs text-gray-400 mt-0.5">
+                    <p className="text-base text-gray-400 mt-0.5">
                       Tap below to start your shift
                     </p>
                   </div>
@@ -744,7 +822,7 @@ export default function WorkerDashboardPage() {
                 onClick={isClockedIn ? handleClockOut : handleClockIn}
                 disabled={clockLoading}
                 className={cn(
-                  "w-full h-11 font-semibold rounded-xl shadow-sm hover:shadow-md transition-all text-sm",
+                  "w-full h-11 font-semibold rounded-xl shadow-sm hover:shadow-md transition-all text-base",
                   isClockedIn
                     ? "bg-red-500 hover:bg-red-600 text-white"
                     : "bg-blue-600 hover:bg-blue-700 text-white"
@@ -787,7 +865,7 @@ export default function WorkerDashboardPage() {
                   asChild
                   variant="ghost"
                   size="sm"
-                  className="text-blue-600 hover:text-blue-700 h-8 px-2 text-xs"
+                  className="text-blue-600 hover:text-blue-700 h-8 px-2 text-base"
                 >
                   <Link
                     href="/jobs/job-applications"
@@ -801,7 +879,7 @@ export default function WorkerDashboardPage() {
               {/* Status summary pills */}
               {applications.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mt-3">
-                  <span className="text-xs text-gray-400 self-center">
+                  <span className="text-base text-gray-400 self-center">
                     {applications.length} total
                   </span>
                   {Object.entries(appCounts).map(([status, count]) => {
@@ -812,7 +890,7 @@ export default function WorkerDashboardPage() {
                       <span
                         key={status}
                         className={cn(
-                          "inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border font-medium",
+                          "inline-flex items-center gap-1 text-base px-2 py-0.5 rounded-full border font-medium",
                           s.color
                         )}
                       >
@@ -831,10 +909,10 @@ export default function WorkerDashboardPage() {
                   <div className="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mb-3">
                     <Briefcase className="w-7 h-7 text-gray-300" />
                   </div>
-                  <p className="text-gray-600 text-sm font-medium">
+                  <p className="text-gray-600 text-base font-medium">
                     No applications yet
                   </p>
-                  <p className="text-gray-400 text-xs mt-1 mb-4">
+                  <p className="text-gray-400 text-base mt-1 mb-4">
                     Start applying to jobs to track them here
                   </p>
                   <Button
@@ -866,17 +944,17 @@ export default function WorkerDashboardPage() {
                             <Briefcase className="w-3.5 h-3.5 text-gray-400" />
                           </div>
                           <div className="min-w-0">
-                            <p className="font-semibold text-gray-900 text-sm truncate">
+                            <p className="font-semibold text-gray-900 text-base truncate">
                               {job?.title || "Job Title"}
                             </p>
                             <div className="flex items-center gap-2 mt-0.5">
                               {job?.location && (
-                                <span className="flex items-center gap-0.5 text-xs text-gray-400">
+                                <span className="flex items-center gap-0.5 text-base text-gray-400">
                                   <MapPin className="w-3 h-3" />
                                   {job.location}
                                 </span>
                               )}
-                              <span className="text-xs text-gray-400">
+                              <span className="text-base text-gray-400">
                                 {formatAppDate(app.created_at)}
                               </span>
                             </div>
@@ -884,7 +962,7 @@ export default function WorkerDashboardPage() {
                         </div>
                         <span
                           className={cn(
-                            "inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border font-medium shrink-0",
+                            "inline-flex items-center gap-1 text-base px-2 py-0.5 rounded-full border font-medium shrink-0",
                             s.color
                           )}
                         >
@@ -913,7 +991,7 @@ export default function WorkerDashboardPage() {
                   asChild
                   variant="ghost"
                   size="sm"
-                  className="text-blue-600 hover:text-blue-700 h-8 px-2 text-xs"
+                  className="text-blue-600 hover:text-blue-700 h-8 px-2 text-base"
                 >
                   <Link href="/my-hours" className="flex items-center gap-1">
                     View all <ChevronRight className="w-3.5 h-3.5" />
@@ -927,10 +1005,10 @@ export default function WorkerDashboardPage() {
                   <div className="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mb-3">
                     <Clock className="w-7 h-7 text-gray-300" />
                   </div>
-                  <p className="text-gray-600 text-sm font-medium">
+                  <p className="text-gray-600 text-base font-medium">
                     No hours recorded yet
                   </p>
-                  <p className="text-gray-400 text-xs mt-1">
+                  <p className="text-gray-400 text-base mt-1">
                     Your hours will appear here after you clock in
                   </p>
                 </div>
@@ -942,14 +1020,14 @@ export default function WorkerDashboardPage() {
                       className="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100/70 transition-colors"
                     >
                       <div>
-                        <p className="font-semibold text-gray-900 text-sm">
+                        <p className="font-semibold text-gray-900 text-base">
                           {new Date(card.date).toLocaleDateString("en-US", {
                             weekday: "short",
                             month: "short",
                             day: "numeric",
                           })}
                         </p>
-                        <p className="text-xs text-gray-400 mt-0.5">
+                        <p className="text-base text-gray-400 mt-0.5">
                           {formatTime(card.clock_in_datetime || card.clock_in)}
                           {card.clock_out_datetime ? (
                             ` – ${formatTime(card.clock_out_datetime)}`
@@ -992,7 +1070,7 @@ export default function WorkerDashboardPage() {
                   asChild
                   variant="ghost"
                   size="sm"
-                  className="text-blue-600 hover:text-blue-700 h-8 px-2 text-xs"
+                  className="text-blue-600 hover:text-blue-700 h-8 px-2 text-base"
                 >
                   <Link href="/jobs" className="flex items-center gap-1">
                     View all <ChevronRight className="w-3.5 h-3.5" />

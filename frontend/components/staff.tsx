@@ -25,10 +25,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useWorkforce } from "@/lib/redux/use-workforce";
-import {
-  EmploymentType,
-  StaffStatus,
-} from "@/lib/workforce-types";
+import { EmploymentType, StaffStatus } from "@/lib/workforce-types";
 import { toast } from "sonner";
 import { useBusiness } from "@/lib/redux/useBusiness";
 import { useRouter } from "next/navigation";
@@ -89,7 +86,7 @@ function Badge({ config }: { config: { label: string; color: string } }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border",
+        "inline-flex items-center px-2.5 py-0.5 rounded-full text-base font-semibold border",
         config.color
       )}
     >
@@ -116,7 +113,7 @@ function RowSkeleton() {
 }
 
 const selectCls =
-  "px-3 py-2 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent";
+  "px-3 py-2 border border-gray-200 rounded-xl text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent";
 
 export default function StaffManagementPage() {
   const [showModal, setShowModal] = useState(false);
@@ -128,7 +125,7 @@ export default function StaffManagementPage() {
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
 
-  const { businesses, loading: bizLoading, loadBusinesses } = useBusiness();
+  const { businesses, loading: bizLoading } = useBusiness();
   const {
     staff,
     selectedStaff,
@@ -159,11 +156,22 @@ export default function StaffManagementPage() {
       page,
       search,
       status: (statusFilter === "all" ? "" : statusFilter) as "" | undefined,
-      employment_type: (typeFilter === "all" ? "" : typeFilter) as "" | undefined,
+      employment_type: (typeFilter === "all" ? "" : typeFilter) as
+        | ""
+        | undefined,
       ordering: sortDir === "desc" ? `-${sortField}` : sortField,
     };
     loadStaff(params);
-  }, [businessId, page, search, statusFilter, typeFilter, sortField, sortDir, loadStaff]);
+  }, [
+    businessId,
+    page,
+    search,
+    statusFilter,
+    typeFilter,
+    sortField,
+    sortDir,
+    loadStaff,
+  ]);
 
   useEffect(() => {
     setPage(1);
@@ -251,7 +259,7 @@ export default function StaffManagementPage() {
       <button
         onClick={() => handleSort(field)}
         className={cn(
-          "flex items-center text-xs font-semibold text-gray-400 uppercase tracking-wide hover:text-gray-700 transition-colors",
+          "flex items-center text-base font-semibold text-gray-400 uppercase tracking-wide hover:text-gray-700 transition-colors",
           className
         )}
       >
@@ -271,7 +279,7 @@ export default function StaffManagementPage() {
           <h2 className="text-lg font-bold text-gray-900 mb-2">
             No Business Profile
           </h2>
-          <p className="text-sm text-gray-500 mb-5">
+          <p className="text-base text-gray-500 mb-5">
             Create your business profile before managing staff.
           </p>
           <Button
@@ -296,13 +304,13 @@ export default function StaffManagementPage() {
           <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-center justify-between gap-4">
             <div className="flex items-center gap-2.5">
               <AlertCircle className="h-4 w-4 text-red-600 shrink-0" />
-              <p className="text-sm text-red-700">{staffError}</p>
+              <p className="text-base text-red-700">{staffError}</p>
             </div>
             <Button
               variant="outline"
               size="sm"
               onClick={clearStaffError}
-              className="border-red-200 text-red-700 hover:bg-red-100 shrink-0 h-8 px-3 text-xs rounded-xl"
+              className="border-red-200 text-red-700 hover:bg-red-100 shrink-0 h-8 px-3 text-base rounded-xl"
             >
               Dismiss
             </Button>
@@ -315,7 +323,7 @@ export default function StaffManagementPage() {
             <h1 className="text-2xl font-bold text-gray-900">
               Staff Management
             </h1>
-            <p className="text-gray-500 text-sm mt-0.5">
+            <p className="text-gray-500 text-base mt-0.5">
               Manage your team members
             </p>
           </div>
@@ -324,7 +332,7 @@ export default function StaffManagementPage() {
               variant="outline"
               onClick={exportToCSV}
               disabled={staff.length === 0}
-              className="border-gray-200 text-gray-700 hover:border-blue-200 hover:text-blue-700 h-9 px-4 rounded-xl font-semibold text-sm"
+              className="border-gray-200 text-gray-700 hover:border-blue-200 hover:text-blue-700 h-9 px-4 rounded-xl font-semibold text-base"
             >
               <Download className="w-3.5 h-3.5 mr-1.5" />
               Export
@@ -334,7 +342,7 @@ export default function StaffManagementPage() {
                 selectStaff(null);
                 setShowModal(true);
               }}
-              className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-4 rounded-xl font-semibold text-sm shadow-sm"
+              className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-4 rounded-xl font-semibold text-base shadow-sm"
             >
               <Plus className="w-3.5 h-3.5 mr-1.5" />
               Add Staff
@@ -368,7 +376,7 @@ export default function StaffManagementPage() {
               key={label}
               className={cn("bg-white rounded-2xl border p-5", border)}
             >
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">
+              <p className="text-base font-semibold text-gray-400 uppercase tracking-wide mb-1">
                 {label}
               </p>
               <p className={cn("text-2xl font-bold", text)}>{value}</p>
@@ -387,7 +395,7 @@ export default function StaffManagementPage() {
                 placeholder="Search staff..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-xl text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
             <div className="flex gap-2">
@@ -421,7 +429,7 @@ export default function StaffManagementPage() {
                   setStatusFilter("all");
                   setTypeFilter("all");
                 }}
-                className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors whitespace-nowrap self-center"
+                className="text-base font-semibold text-blue-600 hover:text-blue-800 transition-colors whitespace-nowrap self-center"
               >
                 Clear filters
               </button>
@@ -443,7 +451,7 @@ export default function StaffManagementPage() {
               <h3 className="text-base font-semibold text-gray-900 mb-2">
                 No staff members found
               </h3>
-              <p className="text-sm text-gray-500 max-w-xs mx-auto mb-5">
+              <p className="text-base text-gray-500 max-w-xs mx-auto mb-5">
                 {hasFilters
                   ? "Try adjusting your filters."
                   : "Start building your team by adding your first member."}
@@ -454,7 +462,7 @@ export default function StaffManagementPage() {
                     selectStaff(null);
                     setShowModal(true);
                   }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-5 rounded-xl font-semibold text-sm"
+                  className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-5 rounded-xl font-semibold text-base"
                 >
                   <Plus className="w-3.5 h-3.5 mr-1.5" />
                   Add First Member
@@ -464,36 +472,36 @@ export default function StaffManagementPage() {
           ) : (
             <>
               {/* Column headers */}
-              <div className="hidden lg:grid grid-cols-[2fr_1.5fr_1.2fr_1fr_1fr_1fr_1fr_auto] gap-4 px-5 py-2.5 bg-gray-50/60 border-b border-gray-50">
+              {/* Header */}
+              <div className="hidden lg:grid grid-cols-[2fr_1.5fr_1.2fr_1fr_1fr_1fr_1fr_64px] gap-4 px-5 py-2.5 bg-gray-50/60 border-b border-gray-50">
                 <ColHeader field="name" label="Name" />
                 <ColHeader field="job_title" label="Job Title" />
                 <ColHeader field="department" label="Dept" />
                 <ColHeader field="employment_type" label="Type" />
                 <ColHeader field="status" label="Status" />
                 <ColHeader field="hire_date" label="Hired" />
-                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                <span className="text-base font-semibold text-gray-400 uppercase tracking-wide">
                   Phone
                 </span>
-                <span />
+                <span className="text-base font-semibold text-gray-400 uppercase tracking-wide">
+                  Actions
+                </span>
               </div>
 
               {/* Rows */}
               <div className="divide-y divide-gray-50">
                 {staff.map((member) => (
-                  <div
-                    key={member.id}
-                    className="grid grid-cols-[1fr_auto] lg:grid-cols-[2fr_1.5fr_1.2fr_1fr_1fr_1fr_1fr_auto] gap-4 items-center px-5 py-4 hover:bg-gray-50/60 transition-colors"
-                  >
+                 <div
+                 key={member.id}
+                 className="grid grid-cols-[1fr_auto] lg:grid-cols-[2fr_1.5fr_1.2fr_1fr_1fr_1fr_1fr_64px] gap-4 items-center px-5 py-4 hover:bg-gray-50/60 transition-colors"
+               >
                     {/* Name (always visible) */}
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
-                        <Users className="w-4 h-4 text-blue-600" />
-                      </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-sm text-gray-900 truncate">
+                        <p className="font-semibold text-base text-gray-900 truncate">
                           {member.name}
                         </p>
-                        <p className="text-xs text-gray-400 truncate lg:hidden">
+                        <p className="text-base text-gray-400 truncate lg:hidden">
                           {member.job_title}
                         </p>
                         {/* Mobile: show badges inline */}
@@ -514,10 +522,10 @@ export default function StaffManagementPage() {
                       </div>
                     </div>
 
-                    <p className="text-sm text-gray-700 hidden lg:block truncate">
+                    <p className="text-base text-gray-700 hidden lg:block truncate">
                       {member.job_title}
                     </p>
-                    <p className="text-sm text-gray-500 hidden lg:block truncate">
+                    <p className="text-base text-gray-500 hidden lg:block truncate">
                       {member.department || "—"}
                     </p>
                     <div className="hidden lg:block">
@@ -535,14 +543,14 @@ export default function StaffManagementPage() {
                         }
                       />
                     </div>
-                    <p className="text-xs text-gray-400 hidden lg:block">
+                    <p className="text-base text-gray-400 hidden lg:block">
                       {new Date(member.hire_date).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
                         year: "numeric",
                       })}
                     </p>
-                    <p className="text-xs text-gray-400 hidden lg:block">
+                    <p className="text-base text-gray-400 hidden lg:block">
                       {member.phone}
                     </p>
 
@@ -586,7 +594,7 @@ export default function StaffManagementPage() {
               {/* Pagination */}
               {staffPagination.count > itemsPerPage && (
                 <div className="flex items-center justify-between px-5 py-3.5 border-t border-gray-50">
-                  <p className="text-xs text-gray-400">
+                  <p className="text-base text-gray-400">
                     {(page - 1) * itemsPerPage + 1}–
                     {Math.min(page * itemsPerPage, staffPagination.count)} of{" "}
                     {staffPagination.count}
@@ -609,7 +617,7 @@ export default function StaffManagementPage() {
                       .map((p, i, arr) => (
                         <React.Fragment key={p}>
                           {i > 0 && p - arr[i - 1] > 1 && (
-                            <span className="text-xs text-gray-300 px-1">
+                            <span className="text-base text-gray-300 px-1">
                               …
                             </span>
                           )}
@@ -617,7 +625,7 @@ export default function StaffManagementPage() {
                             onClick={() => setPage(p)}
                             disabled={staffLoading}
                             className={cn(
-                              "w-8 h-8 rounded-xl text-xs font-semibold border transition-colors",
+                              "w-8 h-8 rounded-xl text-base font-semibold border transition-colors",
                               page === p
                                 ? "bg-blue-600 text-white border-blue-600"
                                 : "border-gray-200 text-gray-600 hover:border-blue-200 hover:text-blue-600"

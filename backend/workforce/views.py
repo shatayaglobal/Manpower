@@ -710,7 +710,7 @@ def clock_out(request, hours_card_id):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-    
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def sign_hours_card(request, hours_card_id):
@@ -734,7 +734,7 @@ def sign_hours_card(request, hours_card_id):
             )
 
         # Must be clocked out before signing
-        if not hours_card.clock_out:
+        if not hours_card.clock_out_datetime:
             return Response(
                 {'error': 'Cannot sign until clocked out'},
                 status=status.HTTP_400_BAD_REQUEST

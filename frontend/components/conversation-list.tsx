@@ -53,8 +53,8 @@ export default function ConversationList() {
           <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
             <MessageCircle className="w-6 h-6 text-gray-300" />
           </div>
-          <p className="text-sm font-medium text-gray-600 mb-1">No conversations yet</p>
-          <p className="text-xs text-gray-400">Messages will appear here</p>
+          <p className="text-base font-medium text-gray-600 mb-1">No conversations yet</p>
+          <p className="text-base text-gray-400">Messages will appear here</p>
         </div>
       </div>
     );
@@ -82,12 +82,12 @@ export default function ConversationList() {
             {/* Avatar */}
             <div className="relative shrink-0">
               <Avatar className="w-10 h-10">
-                <AvatarFallback className={`text-xs font-semibold ${isSelected ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600"}`}>
+                <AvatarFallback className={`text-base font-semibold ${isSelected ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600"}`}>
                   {getInitials(other.name, other.email)}
                 </AvatarFallback>
               </Avatar>
               {conv.unread_count > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-blue-600 text-white text-xs rounded-full flex items-center justify-center font-bold leading-none">
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-blue-600 text-white text-base rounded-full flex items-center justify-center font-bold leading-none">
                   {conv.unread_count > 9 ? "9+" : conv.unread_count}
                 </span>
               )}
@@ -96,16 +96,16 @@ export default function ConversationList() {
             {/* Content */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-2 mb-0.5">
-                <span className={`text-sm font-semibold truncate ${isSelected ? "text-blue-700" : "text-gray-900"}`}>
+                <span className={`text-base font-semibold truncate ${isSelected ? "text-blue-700" : "text-gray-900"}`}>
                   {displayName}
                 </span>
-                <span className="text-xs text-gray-400 shrink-0">{timeAgo(conv.last_message_time)}</span>
+                <span className="text-base text-gray-400 shrink-0">{timeAgo(conv.last_message_time)}</span>
               </div>
               <div className="flex items-center gap-2">
-                <p className={`text-xs truncate flex-1 ${conv.unread_count > 0 ? "text-gray-700 font-medium" : "text-gray-400"}`}>
+                <p className={`text-base truncate flex-1 ${conv.unread_count > 0 ? "text-gray-700 font-medium" : "text-gray-400"}`}>
                   {lastMsg || "No messages yet"}
                 </p>
-                <span className={`text-xs font-medium px-1.5 py-0.5 rounded-full shrink-0 ${
+                <span className={`text-base font-medium px-1.5 py-0.5 rounded-full shrink-0 ${
                   isBusiness ? "bg-blue-50 text-blue-600" : "bg-gray-100 text-gray-500"
                 }`}>
                   {isBusiness ? "Business" : "Worker"}

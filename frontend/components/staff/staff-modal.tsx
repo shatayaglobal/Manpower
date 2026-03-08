@@ -12,7 +12,7 @@ import {
 } from "@/lib/workforce-types";
 import { toast } from "sonner";
 import { UserSearchSelect } from "@/components/staff/UserSearchSelect";
-import type { User } from "@/lib/types";
+import type { JobApplication, User } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface StaffModalProps {
@@ -20,43 +20,53 @@ interface StaffModalProps {
   onClose: () => void;
   businessId: string;
   onSuccess: () => void;
+  application?: JobApplication;
+  applications?: JobApplication[];
+}
+
+interface AcceptedApplicantUser extends User {
+  job_title?: string;
+  job_id?: string;
+  applicant_phone?: string;
 }
 
 const labelCls =
-  "block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5";
+  "block text-base font-semibold text-gray-500 uppercase tracking-wide mb-1.5";
 const inputCls = (err?: string, disabled?: boolean) =>
   cn(
-    "w-full px-3 py-2.5 border rounded-xl text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+    "w-full px-3 py-2.5 border rounded-xl text-base transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
     err ? "border-red-300 bg-red-50/30" : "border-gray-200",
     disabled ? "bg-gray-50 cursor-not-allowed text-gray-500" : "bg-white"
   );
 const selectCls =
-  "w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent";
+  "w-full px-3 py-2.5 border border-gray-200 rounded-xl text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent";
 
 export const StaffModal: React.FC<StaffModalProps> = ({
   staff,
   onClose,
   businessId,
   onSuccess,
+  application,
+  applications = [],
 }) => {
   const { addStaff, editStaff } = useWorkforce();
 
   const [formData, setFormData] = useState<StaffFormData>({
-    name: staff?.name || "",
-    job_title: staff?.job_title || "",
+    name: staff?.name || application?.applicant_name || "",
+    job_title: staff?.job_title || application?.job?.title || "",
     department: staff?.department || "",
     employment_type: staff?.employment_type || "FULL_TIME",
     status: staff?.status || "ACTIVE",
-    email: staff?.email || "",
-    phone: staff?.phone || "",
+    email: staff?.email || application?.applicant_email || "",
+    phone: staff?.phone || application?.applicant_phone || "",
     hourly_rate: staff?.hourly_rate || "",
     hire_date: staff?.hire_date || new Date().toISOString().split("T")[0],
-    user: staff?.user || undefined,
+    user: staff?.user || application?.applicant || undefined,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [showUserSearch, setShowUserSearch] = useState(!staff);
+  const [showUserSearch, setShowUserSearch] = useState(!staff && !application);
 
   const set = (k: keyof StaffFormData, v: string) => {
     setFormData((p) => ({ ...p, [k]: v }));
@@ -81,23 +91,25 @@ export const StaffModal: React.FC<StaffModalProps> = ({
     }
   }, [staff]);
 
-  useEffect(() => {
-    if (selectedUser) {
-      setFormData((p) => ({
-        ...p,
-        name: `${selectedUser.first_name} ${selectedUser.last_name}`,
-        email: selectedUser.email,
-        user: selectedUser.id as string,
-      }));
-    }
-  }, [selectedUser]);
-
   const handleUserSelect = (user: User | null) => {
     setSelectedUser(user);
-    if (!user)
-      setFormData((p) => ({ ...p, user: undefined, name: "", email: "" }));
-  };
+    if (!user) {
+      setFormData((p) => ({ ...p, user: undefined, name: "", email: "", phone: "" }));
+      return;
+    }
 
+    const applicant = user as AcceptedApplicantUser;
+
+    setFormData((p) => ({
+      ...p,
+      name: `${user.first_name} ${user.last_name}`,
+      email: user.email,
+      user: user.id as string,
+      phone: p.phone || applicant.applicant_phone || "",
+      job_title: p.job_title || applicant.job_title || "",
+    }));
+  };
+  
   const validate = (): boolean => {
     const e: Record<string, string> = {};
     if (!formData.name.trim()) e.name = "Name is required";
@@ -140,7 +152,7 @@ export const StaffModal: React.FC<StaffModalProps> = ({
     }
   };
 
-  const isLinked = !!selectedUser || !!staff?.user;
+  const isLinked = !!selectedUser || !!staff?.user || !!application?.applicant;
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
@@ -160,16 +172,28 @@ export const StaffModal: React.FC<StaffModalProps> = ({
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
-          {/* Link user banner — new staff only */}
-          {!staff &&
+
+          {/* Pre-filled from application notice */}
+          {application && !staff && (
+            <div className="flex items-center gap-3 p-3.5 bg-blue-50 border border-blue-100 rounded-2xl">
+              <CheckCircle className="w-4 h-4 text-blue-600 shrink-0" />
+              <p className="text-sm text-blue-700 font-medium">
+                Pre-filled from application for{" "}
+                <span className="font-bold">{application.job?.title}</span>
+              </p>
+            </div>
+          )}
+
+          {/* Link user banner — new staff only, hidden when coming from application */}
+          {!staff && !application &&
             (showUserSearch ? (
               <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4">
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">
+                    <p className="text-base font-semibold text-gray-900">
                       Link to registered user
                     </p>
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="text-base text-gray-500 mt-0.5">
                       Auto-fill name and email from an existing account
                     </p>
                   </div>
@@ -190,7 +214,7 @@ export const StaffModal: React.FC<StaffModalProps> = ({
             ) : !selectedUser ? (
               <button
                 onClick={() => setShowUserSearch(true)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-200 rounded-2xl text-sm text-gray-400 hover:border-blue-300 hover:text-blue-600 transition-colors"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-200 rounded-2xl text-base text-gray-400 hover:border-blue-300 hover:text-blue-600 transition-colors"
               >
                 <UserPlus className="w-4 h-4" />
                 Link to existing user account (optional)
@@ -199,16 +223,16 @@ export const StaffModal: React.FC<StaffModalProps> = ({
               <div className="flex items-center gap-3 p-3.5 bg-emerald-50 border border-emerald-100 rounded-2xl">
                 <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold text-emerald-700">
-                    User linked — name and email auto-filled
+                  <p className="text-base font-semibold text-emerald-700">
+                    User linked — details auto-filled
                   </p>
-                  <p className="text-xs text-emerald-600 truncate">
+                  <p className="text-base text-emerald-600 truncate">
                     {selectedUser.email}
                   </p>
                 </div>
                 <button
                   onClick={() => handleUserSelect(null)}
-                  className="text-xs text-emerald-600 hover:text-emerald-800 font-semibold shrink-0"
+                  className="text-base text-emerald-600 hover:text-emerald-800 font-semibold shrink-0"
                 >
                   Unlink
                 </button>
@@ -217,7 +241,7 @@ export const StaffModal: React.FC<StaffModalProps> = ({
 
           {/* Personal details card */}
           <div className="bg-gray-50 rounded-2xl p-4 space-y-4">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+            <p className="text-base font-bold text-gray-400 uppercase tracking-widest">
               Personal Details
             </p>
 
@@ -235,7 +259,7 @@ export const StaffModal: React.FC<StaffModalProps> = ({
                 className={inputCls(errors.name, isLinked)}
               />
               {errors.name && (
-                <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+                <p className="text-red-500 text-base mt-1">{errors.name}</p>
               )}
             </div>
 
@@ -243,9 +267,7 @@ export const StaffModal: React.FC<StaffModalProps> = ({
               <div>
                 <label className={labelCls}>
                   Email{" "}
-                  <span className="text-red-500 normal-case font-normal">
-                    *
-                  </span>
+                  <span className="text-red-500 normal-case font-normal">*</span>
                 </label>
                 <input
                   type="email"
@@ -256,15 +278,13 @@ export const StaffModal: React.FC<StaffModalProps> = ({
                   className={inputCls(errors.email, isLinked)}
                 />
                 {errors.email && (
-                  <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                  <p className="text-red-500 text-base mt-1">{errors.email}</p>
                 )}
               </div>
               <div>
                 <label className={labelCls}>
                   Phone{" "}
-                  <span className="text-red-500 normal-case font-normal">
-                    *
-                  </span>
+                  <span className="text-red-500 normal-case font-normal">*</span>
                 </label>
                 <input
                   type="tel"
@@ -274,7 +294,7 @@ export const StaffModal: React.FC<StaffModalProps> = ({
                   className={inputCls(errors.phone)}
                 />
                 {errors.phone && (
-                  <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+                  <p className="text-red-500 text-base mt-1">{errors.phone}</p>
                 )}
               </div>
             </div>
@@ -282,7 +302,7 @@ export const StaffModal: React.FC<StaffModalProps> = ({
 
           {/* Job details card */}
           <div className="bg-gray-50 rounded-2xl p-4 space-y-4">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+            <p className="text-base font-bold text-gray-400 uppercase tracking-widest">
               Job Details
             </p>
 
@@ -290,9 +310,7 @@ export const StaffModal: React.FC<StaffModalProps> = ({
               <div>
                 <label className={labelCls}>
                   Job Title{" "}
-                  <span className="text-red-500 normal-case font-normal">
-                    *
-                  </span>
+                  <span className="text-red-500 normal-case font-normal">*</span>
                 </label>
                 <input
                   type="text"
@@ -302,9 +320,7 @@ export const StaffModal: React.FC<StaffModalProps> = ({
                   className={inputCls(errors.job_title)}
                 />
                 {errors.job_title && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.job_title}
-                  </p>
+                  <p className="text-red-500 text-base mt-1">{errors.job_title}</p>
                 )}
               </div>
               <div>
@@ -386,14 +402,14 @@ export const StaffModal: React.FC<StaffModalProps> = ({
             variant="outline"
             onClick={onClose}
             disabled={submitting}
-            className="flex-1 border-gray-200 h-10 rounded-xl font-semibold text-sm"
+            className="flex-1 border-gray-200 h-10 rounded-xl font-semibold text-base"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={submitting}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-10 rounded-xl font-semibold text-sm shadow-sm"
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-10 rounded-xl font-semibold text-base shadow-sm"
           >
             {submitting ? (
               <>

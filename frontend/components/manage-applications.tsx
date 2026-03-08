@@ -19,8 +19,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import {
-  Calendar,
-  MapPin,
   Clock,
   CheckCircle,
   XCircle,
@@ -85,7 +83,7 @@ function StatusBadge({ status }: { status: string }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border shrink-0",
+        "inline-flex items-center gap-1.5 text-base font-semibold px-2.5 py-1 rounded-full border whitespace-nowrap",
         s.color
       )}
     >
@@ -95,22 +93,39 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function RowSkeleton() {
+function TableSkeleton() {
   return (
-    <div className="flex items-center gap-4 px-5 py-4 animate-pulse">
-      <div className="w-9 h-9 bg-gray-100 rounded-xl shrink-0" />
-      <div className="flex-1 space-y-2">
-        <div className="h-3.5 bg-gray-100 rounded w-1/4" />
-        <div className="h-3 bg-gray-100 rounded w-1/3" />
-      </div>
-      <div className="h-3 bg-gray-100 rounded w-20 hidden md:block" />
-      <div className="h-6 bg-gray-100 rounded-full w-20 hidden sm:block" />
-      <div className="flex gap-2 shrink-0">
-        <div className="h-8 w-8 bg-gray-100 rounded-lg" />
-        <div className="h-8 w-8 bg-gray-100 rounded-lg" />
-        <div className="h-8 w-8 bg-gray-100 rounded-lg" />
-      </div>
-    </div>
+    <>
+      {[...Array(5)].map((_, i) => (
+        <tr key={i} className="animate-pulse">
+          <td className="px-5 py-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gray-100 rounded-xl shrink-0" />
+              <div className="space-y-1.5">
+                <div className="h-3.5 bg-gray-100 rounded w-28" />
+                <div className="h-3 bg-gray-100 rounded w-36" />
+              </div>
+            </div>
+          </td>
+          <td className="px-5 py-4 hidden md:table-cell">
+            <div className="h-3 bg-gray-100 rounded w-28" />
+          </td>
+          <td className="px-5 py-4 hidden lg:table-cell">
+            <div className="h-3 bg-gray-100 rounded w-24" />
+          </td>
+          <td className="px-5 py-4 hidden sm:table-cell">
+            <div className="h-6 bg-gray-100 rounded-full w-20" />
+          </td>
+          <td className="px-5 py-4">
+            <div className="flex gap-1.5">
+              <div className="w-8 h-8 bg-gray-100 rounded-xl" />
+              <div className="w-8 h-8 bg-gray-100 rounded-xl" />
+              <div className="w-8 h-8 bg-gray-100 rounded-xl" />
+            </div>
+          </td>
+        </tr>
+      ))}
+    </>
   );
 }
 
@@ -143,9 +158,10 @@ export default function ManageApplicationsPage() {
   } = useApplications();
 
   const [statusFilter, setStatusFilter] = useState("all");
-  const [jobFilter, setJobFilter] = useState("all");
-  const [selectedApp, setSelectedApp] = useState<JobApplication | null>(null);
-  const [isUpdating, setIsUpdating] = useState<string | null>(null);
+const [jobFilter, setJobFilter] = useState("all");
+const [selectedApp, setSelectedApp] = useState<JobApplication | null>(null);
+const [isUpdating, setIsUpdating] = useState<string | null>(null);
+const [allJobs, setAllJobs] = useState<{ id: string; title: string }[]>([]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -159,22 +175,29 @@ export default function ManageApplicationsPage() {
     loadBusinessApplications();
   }, [isAuthenticated, user, router, loadBusinessApplications]);
 
-  const filtered = applications.filter((app) => {
-    const statusOk =
-      statusFilter === "all" || app.status === statusFilter.toUpperCase();
-    const jobId =
-      typeof app.job === "string" ? app.job : (app.job as { id: string })?.id;
-    const jobOk = jobFilter === "all" || jobId === jobFilter;
-    return statusOk && jobOk;
-  });
+  useEffect(() => {
+    if (!isAuthenticated) { router.push("/login"); return; }
+    if (user?.account_type !== "BUSINESS") { router.push("/jobs"); return; }
+    loadBusinessApplications().then((result) => {
+      if (result.payload) {
+        const jobs = (result.payload as JobApplication[])
+          .map((a) => a.job)
+          .filter((j) => !!j && typeof j === "object" && "id" in j && "title" in j)
+          .map((j) => ({ id: (j as { id: string; title: string }).id, title: (j as { id: string; title: string }).title }))
+          .filter((j, i, arr) => arr.findIndex((x) => x.id === j.id) === i);
+        setAllJobs(jobs);
+      }
+    });
+  }, [isAuthenticated, user, router, loadBusinessApplications]);
 
-  const uniqueJobs = applications
-    .map((a) => a.job)
-    .filter(
-      (j): j is Extract<typeof j, { id: string; title: string }> =>
-        !!j && typeof j === "object" && "id" in j
-    )
-    .filter((j, i, arr) => arr.findIndex((x) => x.id === j.id) === i);
+  useEffect(() => {
+    if (!isAuthenticated || user?.account_type !== "BUSINESS") return;
+    loadBusinessApplications({
+      status: statusFilter !== "all" ? statusFilter : undefined,
+      job: jobFilter !== "all" ? jobFilter : undefined,
+    });
+  }, [statusFilter, jobFilter]);
+
 
   const stats = {
     total: applications.length,
@@ -202,12 +225,9 @@ export default function ManageApplicationsPage() {
       await updateApplicationStatus(id, newStatus);
       toast.success(`Application ${newStatus.toLowerCase()} successfully`);
       loadBusinessApplications();
-      // Update the modal if open
       if (selectedApp?.id === id)
         setSelectedApp((prev) =>
-          prev
-            ? { ...prev, status: newStatus as JobApplication["status"] }
-            : null
+          prev ? { ...prev, status: newStatus as JobApplication["status"] } : null
         );
     } catch {
       toast.error(`Failed to ${newStatus.toLowerCase()} application`);
@@ -229,16 +249,17 @@ export default function ManageApplicationsPage() {
   return (
     <div className="bg-gray-50 -ml-4 -mt-5 min-h-screen -mr-4">
       <div className="w-full px-4 sm:px-6 lg:px-8 py-8 space-y-5">
+
         {/* ── Header ── */}
         <div className="bg-white rounded-2xl border border-gray-100 px-6 py-5 flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Applications</h1>
-            <p className="text-gray-500 text-sm mt-0.5">
+            <p className="text-gray-500 text-base mt-0.5">
               Review and manage applications for your job postings
             </p>
           </div>
           {stats.pending > 0 && (
-            <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
+            <span className="inline-flex items-center gap-1.5 text-base font-semibold px-3 py-1.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
               <Clock className="w-3 h-3" />
               {stats.pending} need review
             </span>
@@ -248,44 +269,14 @@ export default function ManageApplicationsPage() {
         {/* ── Stats ── */}
         <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
           {[
-            {
-              label: "Total",
-              value: stats.total,
-              color: "border-gray-100",
-              text: "text-gray-900",
-            },
-            {
-              label: "Pending",
-              value: stats.pending,
-              color: "border-amber-100",
-              text: "text-amber-700",
-            },
-            {
-              label: "Reviewed",
-              value: stats.reviewed,
-              color: "border-blue-100",
-              text: "text-blue-700",
-            },
-            {
-              label: "Accepted",
-              value: stats.accepted,
-              color: "border-emerald-100",
-              text: "text-emerald-700",
-            },
-            {
-              label: "Rejected",
-              value: stats.rejected,
-              color: "border-red-100",
-              text: "text-red-600",
-            },
+            { label: "Total",    value: stats.total,    color: "border-gray-100",   text: "text-gray-900"    },
+            { label: "Pending",  value: stats.pending,  color: "border-amber-100",  text: "text-amber-700"   },
+            { label: "Reviewed", value: stats.reviewed, color: "border-blue-100",   text: "text-blue-700"    },
+            { label: "Accepted", value: stats.accepted, color: "border-emerald-100",text: "text-emerald-700" },
+            { label: "Rejected", value: stats.rejected, color: "border-red-100",    text: "text-red-600"     },
           ].map(({ label, value, color, text }) => (
-            <div
-              key={label}
-              className={cn("bg-white rounded-2xl border p-4", color)}
-            >
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">
-                {label}
-              </p>
+            <div key={label} className={cn("bg-white rounded-2xl border p-4", color)}>
+              <p className="text-base font-semibold text-gray-400 uppercase tracking-wide mb-1">{label}</p>
               <p className={cn("text-2xl font-bold", text)}>{value}</p>
             </div>
           ))}
@@ -294,24 +285,25 @@ export default function ManageApplicationsPage() {
         {/* ── Error ── */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-center justify-between gap-4">
-            <p className="text-sm text-red-700">{error}</p>
+            <p className="text-base text-red-700">{error}</p>
             <Button
               variant="outline"
               size="sm"
               onClick={clearApplicationError}
-              className="border-red-200 text-red-700 hover:bg-red-100 shrink-0 h-8 px-3 text-xs rounded-xl"
+              className="border-red-200 text-red-700 hover:bg-red-100 shrink-0 h-8 px-3 text-base rounded-xl"
             >
               Dismiss
             </Button>
           </div>
         )}
 
-        {/* ── Filters + List ── */}
+        {/* ── Table card ── */}
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+
           {/* Filter bar */}
-          <div className="flex flex-wrap items-center gap-3 px-5 py-3.5 border-b border-gray-50">
+          <div className="flex flex-wrap items-center gap-3 px-5 py-3.5 border-b border-gray-100">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="h-9 w-36 border-gray-200 rounded-xl text-sm">
+              <SelectTrigger className="h-9 w-36 border-gray-200 rounded-xl text-base">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -324,168 +316,183 @@ export default function ManageApplicationsPage() {
             </Select>
 
             <Select value={jobFilter} onValueChange={setJobFilter}>
-              <SelectTrigger className="h-9 w-52 border-gray-200 rounded-xl text-sm">
+              <SelectTrigger className="h-9 w-52 border-gray-200 rounded-xl text-base">
                 <SelectValue placeholder="All Jobs" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Jobs</SelectItem>
-                {uniqueJobs.map((j) => (
-                  <SelectItem key={j.id} value={j.id}>
-                    {j.title || "Untitled Job"}
-                  </SelectItem>
-                ))}
+                {allJobs.map((j) => (
+  <SelectItem key={j.id} value={j.id}>{j.title}</SelectItem>
+))}
               </SelectContent>
             </Select>
 
             {hasActiveFilters && (
               <button
-                onClick={() => {
-                  setStatusFilter("all");
-                  setJobFilter("all");
-                }}
-                className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+                onClick={() => { setStatusFilter("all"); setJobFilter("all"); }}
+                className="text-base font-semibold text-blue-600 hover:text-blue-800 transition-colors"
               >
                 Clear filters
               </button>
             )}
 
-            <span className="ml-auto text-xs text-gray-400 font-medium">
-              {filtered.length}{" "}
-              {filtered.length === 1 ? "application" : "applications"}
+            <span className="ml-auto text-base text-gray-400 font-medium">
+              {applications.length} {applications.length === 1 ? "application" : "applications"}
             </span>
           </div>
 
-          {/* List */}
-          {loading ? (
-            <div className="divide-y divide-gray-50">
-              {[...Array(5)].map((_, i) => (
-                <RowSkeleton key={i} />
-              ))}
-            </div>
-          ) : filtered.length === 0 ? (
+          {/* Table */}
+          {applications.length === 0 && !loading ? (
             <div className="text-center py-20">
               <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Users className="w-8 h-8 text-gray-300" />
               </div>
-              <h3 className="text-base font-semibold text-gray-900 mb-2">
-                No applications found
-              </h3>
-              <p className="text-gray-500 text-sm max-w-xs mx-auto">
+              <h3 className="text-base font-semibold text-gray-900 mb-2">No applications found</h3>
+              <p className="text-gray-500 text-base max-w-xs mx-auto">
                 {hasActiveFilters
                   ? "Try adjusting your filters."
                   : "You haven't received any applications yet."}
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-50">
-              {filtered.map((app: JobApplication) => {
-                const job =
-                  typeof app.job === "object" && app.job !== null
-                    ? (app.job as {
-                        id: string;
-                        title?: string;
-                        location?: string;
-                      })
-                    : null;
-                const busy = isUpdating === app.id;
+            <div className="overflow-x-auto">
+              <table className="w-full text-base">
+                <thead>
+                  <tr className="border-b border-gray-100 bg-gray-50/60">
+                    <th className="text-left px-5 py-3.5 text-base font-semibold text-gray-400 uppercase tracking-wide">
+                      Applicant
+                    </th>
+                    <th className="text-left px-5 py-3.5 text-base font-semibold text-gray-400 uppercase tracking-wide hidden md:table-cell">
+                      Job
+                    </th>
+                    <th className="text-left px-5 py-3.5 text-base font-semibold text-gray-400 uppercase tracking-wide hidden lg:table-cell">
+                      Location
+                    </th>
+                    <th className="text-left px-5 py-3.5 text-base font-semibold text-gray-400 uppercase tracking-wide hidden sm:table-cell">
+                      Applied
+                    </th>
+                    <th className="text-left px-5 py-3.5 text-base font-semibold text-gray-400 uppercase tracking-wide">
+                      Status
+                    </th>
+                    <th className="px-5 py-3.5 text-base font-semibold text-gray-400 uppercase tracking-wide text-right">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {loading ? (
+                    <TableSkeleton />
+                  ) : (
+                    applications.map((app: JobApplication) => {
+                      const job =
+                        typeof app.job === "object" && app.job !== null
+                          ? (app.job as { id: string; title?: string; location?: string })
+                          : null;
+                      const busy = isUpdating === app.id;
 
-                return (
-                  <div
-                    key={app.id}
-                    className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50/60 transition-colors"
-                  >
-                    {/* Avatar */}
-                    <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
-                      <User className="w-4 h-4 text-blue-600" />
-                    </div>
+                      return (
+                        <tr
+                          key={app.id}
+                          className="hover:bg-gray-50/60 transition-colors group"
+                        >
+                          {/* Applicant */}
+                          <td className="px-5 py-4">
+                            <div className="flex items-center gap-3">
+                              <p className="font-semibold text-gray-900 text-base truncate max-w-[140px]">
+                                {app.applicant_name || "Unknown Applicant"}
+                              </p>
+                            </div>
+                          </td>
 
-                    {/* Applicant + job */}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-900 text-sm truncate">
-                        {app.applicant_name || "Unknown Applicant"}
-                      </p>
-                      <div className="flex items-center gap-3 mt-0.5 flex-wrap">
-                        <span className="text-xs text-gray-500 truncate">
-                          {job?.title || "Job unavailable"}
-                        </span>
-                        {job?.location && (
-                          <span className="hidden sm:flex items-center gap-1 text-xs text-gray-400">
-                            <MapPin className="w-3 h-3" />
-                            {job.location}
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                          {/* Job title */}
+                          <td className="px-5 py-4 hidden md:table-cell">
+                            <span className="text-base text-gray-600 truncate max-w-[180px] block">
+                              {job?.title || "—"}
+                            </span>
+                          </td>
 
-                    {/* Applied date */}
-                    <span className="hidden md:flex items-center gap-1.5 text-xs text-gray-400 shrink-0">
-                      <Calendar className="w-3.5 h-3.5" />
-                      {formatDate(app.created_at)}
-                    </span>
-
-                    {/* Status */}
-                    <div className="hidden sm:block shrink-0">
-                      <StatusBadge status={app.status || "PENDING"} />
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      {/* View */}
-                      <button
-                        onClick={() => setSelectedApp(app)}
-                        className="w-8 h-8 rounded-xl border border-gray-200 flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-200 transition-colors"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                      </button>
-
-                      {canAct(app.status) && (
-                        <>
-                          <button
-                            onClick={() => handleUpdate(app.id, "ACCEPTED")}
-                            disabled={busy}
-                            className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 hover:bg-emerald-100 transition-colors disabled:opacity-40"
-                          >
-                            {busy ? (
-                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          {/* Location */}
+                          <td className="px-5 py-4 hidden lg:table-cell">
+                            {job?.location ? (
+                              <span className="flex items-center gap-1.5 text-base text-gray-500">
+                                {job.location}
+                              </span>
                             ) : (
-                              <Check className="w-3.5 h-3.5" />
+                              <span className="text-base text-gray-300">—</span>
                             )}
-                          </button>
-                          <button
-                            onClick={() => handleUpdate(app.id, "REJECTED")}
-                            disabled={busy}
-                            className="w-8 h-8 rounded-xl bg-red-50 border border-red-200 flex items-center justify-center text-red-600 hover:bg-red-100 transition-colors disabled:opacity-40"
-                          >
-                            {busy ? (
-                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            ) : (
-                              <X className="w-3.5 h-3.5" />
-                            )}
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+                          </td>
+
+                          {/* Applied date */}
+                          <td className="px-5 py-4 hidden sm:table-cell">
+                            <span className="flex items-center gap-1.5 text-base text-gray-400">
+                              {formatDate(app.created_at)}
+                            </span>
+                          </td>
+
+                          {/* Status */}
+                          <td className="px-5 py-4">
+                            <StatusBadge status={app.status || "PENDING"} />
+                          </td>
+
+                          {/* Actions */}
+                          <td className="px-5 py-4">
+                            <div className="flex items-center gap-1.5 justify-end">
+                              <button
+                                onClick={() => setSelectedApp(app)}
+                                className="w-8 h-8 rounded-xl border border-gray-200 flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-200 transition-colors"
+                                title="View details"
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                              </button>
+                              {canAct(app.status) && (
+                                <>
+                                  <button
+                                    onClick={() => handleUpdate(app.id, "ACCEPTED")}
+                                    disabled={busy}
+                                    className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 hover:bg-emerald-100 transition-colors disabled:opacity-40"
+                                    title="Accept"
+                                  >
+                                    {busy ? (
+                                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    ) : (
+                                      <Check className="w-3.5 h-3.5" />
+                                    )}
+                                  </button>
+                                  <button
+                                    onClick={() => handleUpdate(app.id, "REJECTED")}
+                                    disabled={busy}
+                                    className="w-8 h-8 rounded-xl bg-red-50 border border-red-200 flex items-center justify-center text-red-600 hover:bg-red-100 transition-colors disabled:opacity-40"
+                                    title="Reject"
+                                  >
+                                    {busy ? (
+                                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    ) : (
+                                      <X className="w-3.5 h-3.5" />
+                                    )}
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
       </div>
 
       {/* ── Application details modal ── */}
-      <Dialog
-        open={!!selectedApp}
-        onOpenChange={(open) => {
-          if (!open) setSelectedApp(null);
-        }}
-      >
+      <Dialog open={!!selectedApp} onOpenChange={(open) => { if (!open) setSelectedApp(null); }}>
         <DialogContent className="max-w-lg rounded-2xl p-0 overflow-hidden">
           <DialogHeader className="px-6 py-5 border-b border-gray-100">
             <DialogTitle className="text-lg font-bold text-gray-900">
               Application Details
             </DialogTitle>
-            <DialogDescription className="text-sm text-gray-500">
+            <DialogDescription className="text-base text-gray-500">
               Review applicant info and take action
             </DialogDescription>
           </DialogHeader>
@@ -502,7 +509,7 @@ export default function ManageApplicationsPage() {
                     <p className="font-semibold text-gray-900">
                       {selectedApp.applicant_name || "Unknown"}
                     </p>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-base text-gray-400">
                       Applied {formatDate(selectedApp.created_at)}
                     </p>
                   </div>
@@ -511,12 +518,9 @@ export default function ManageApplicationsPage() {
                   </div>
                 </div>
                 {typeof selectedApp.job === "object" && selectedApp.job && (
-                  <div className="flex items-center gap-2 text-xs text-gray-500 pt-1 border-t border-gray-200">
+                  <div className="flex items-center gap-2 text-base text-gray-500 pt-1 border-t border-gray-200">
                     <span className="font-medium">Job:</span>
-                    <span>
-                      {(selectedApp.job as { title?: string }).title ||
-                        "Untitled"}
-                    </span>
+                    <span>{(selectedApp.job as { title?: string }).title || "Untitled"}</span>
                   </div>
                 )}
               </div>
@@ -524,11 +528,11 @@ export default function ManageApplicationsPage() {
               {/* Cover letter */}
               {selectedApp.cover_letter && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                  <p className="text-base font-semibold text-gray-400 uppercase tracking-wide mb-2">
                     Cover Letter
                   </p>
                   <div className="bg-gray-50 rounded-xl p-4 max-h-48 overflow-y-auto">
-                    <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+                    <p className="text-base text-gray-700 whitespace-pre-wrap leading-relaxed">
                       {selectedApp.cover_letter}
                     </p>
                   </div>
@@ -538,12 +542,12 @@ export default function ManageApplicationsPage() {
               {/* Resume */}
               {selectedApp.resume && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                  <p className="text-base font-semibold text-gray-400 uppercase tracking-wide mb-2">
                     Resume
                   </p>
                   <button
                     onClick={() => window.open(selectedApp.resume!, "_blank")}
-                    className="flex items-center gap-2.5 px-4 py-2.5 bg-blue-50 border border-blue-100 rounded-xl text-sm font-semibold text-blue-700 hover:bg-blue-100 transition-colors"
+                    className="flex items-center gap-2.5 px-4 py-2.5 bg-blue-50 border border-blue-100 rounded-xl text-base font-semibold text-blue-700 hover:bg-blue-100 transition-colors"
                   >
                     <FileText className="w-4 h-4" />
                     View Resume
@@ -563,10 +567,7 @@ export default function ManageApplicationsPage() {
                       {isUpdating === selectedApp.id ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
                       ) : (
-                        <>
-                          <Check className="w-4 h-4 mr-1.5" />
-                          Accept
-                        </>
+                        <><Check className="w-4 h-4 mr-1.5" />Accept</>
                       )}
                     </Button>
                     <Button
@@ -578,15 +579,12 @@ export default function ManageApplicationsPage() {
                       {isUpdating === selectedApp.id ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
                       ) : (
-                        <>
-                          <X className="w-4 h-4 mr-1.5" />
-                          Reject
-                        </>
+                        <><X className="w-4 h-4 mr-1.5" />Reject</>
                       )}
                     </Button>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <div className="flex items-center gap-2 text-base text-gray-500">
                     <StatusBadge status={selectedApp.status} />
                     <span>— no further action needed</span>
                   </div>
