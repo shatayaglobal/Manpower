@@ -20,7 +20,6 @@ import {
   TrendingUp,
   FileCheck,
   UserCheck,
-  UserX,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useBusiness } from "@/lib/redux/useBusiness";
@@ -477,15 +476,15 @@ function BusinessModal({ business, onClose }: ModalProps) {
         <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/60 rounded-b-2xl flex items-center justify-between gap-3 shrink-0">
           <div>
             {step > 1 && (
-              <Button variant="outline" onClick={() => setStep((s) => s - 1)} disabled={submitting} className="border-gray-200 h-9 px-4 rounded-xl text-base">Back</Button>
+              <Button  type="button" variant="outline" onClick={() => setStep((s) => s - 1)} disabled={submitting} className="border-gray-200 h-9 px-4 rounded-xl text-base">Back</Button>
             )}
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={onClose} disabled={submitting} className="border-gray-200 h-9 px-4 rounded-xl text-base">Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose} disabled={submitting} className="border-gray-200 h-9 px-4 rounded-xl text-base">Cancel</Button>
             {step < 3 ? (
-              <Button onClick={() => { if (validate(step)) setStep((s) => s + 1); }} className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-5 rounded-xl text-base font-semibold">Next</Button>
+              <Button type="button" onClick={() => { if (validate(step)) setStep((s) => s + 1); }} className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-5 rounded-xl text-base font-semibold">Next</Button>
             ) : (
-              <Button onClick={handleSubmit} disabled={submitting} className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-5 rounded-xl text-base font-semibold">
+              <Button type="button" onClick={handleSubmit} disabled={submitting} className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-5 rounded-xl text-base font-semibold">
                 {submitting ? (<><Loader2 className="w-4 h-4 mr-2 animate-spin" />{business ? "Updating..." : "Creating..."}</>) : business ? "Update Business" : "Create Business"}
               </Button>
             )}
@@ -528,7 +527,7 @@ export default function MyBusinessPage() {
             <p className="text-gray-500 text-base max-w-md mx-auto mb-6">
               Create your business profile to start managing your workforce, scheduling shifts, and posting jobs.
             </p>
-            <Button onClick={() => setShowModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 h-11 rounded-xl">
+            <Button type="button" onClick={() => setShowModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 h-11 rounded-xl">
               <Plus className="w-4 h-4 mr-2" />
               Create Business Profile
             </Button>
@@ -572,7 +571,7 @@ export default function MyBusinessPage() {
               <AlertCircle className="h-4 w-4 text-red-600 shrink-0" />
               <p className="text-base text-red-700">{error}</p>
             </div>
-            <Button variant="outline" size="sm" onClick={clearBusinessError} className="border-red-200 text-red-700 hover:bg-red-100 shrink-0 h-8 px-3 text-base rounded-xl">
+            <Button type="button" variant="outline" size="sm" onClick={clearBusinessError} className="border-red-200 text-red-700 hover:bg-red-100 shrink-0 h-8 px-3 text-base rounded-xl">
               Dismiss
             </Button>
           </div>
@@ -628,7 +627,7 @@ export default function MyBusinessPage() {
                 </p>
               </div>
             </div>
-            <Button variant="outline" size="sm" onClick={() => setShowModal(true)} className="border-gray-200 text-gray-700 hover:border-blue-200 hover:text-blue-700 h-9 px-4 rounded-xl shrink-0">
+            <Button type="button" variant="outline" size="sm" onClick={() => setShowModal(true)} className="border-gray-200 text-gray-700 hover:border-blue-200 hover:text-blue-700 h-9 px-4 rounded-xl shrink-0">
               <Edit2 className="w-3.5 h-3.5 mr-1.5" />Edit
             </Button>
           </div>
