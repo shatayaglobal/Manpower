@@ -1,4 +1,4 @@
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector, shallowEqual } from "react-redux";
 import { useCallback } from "react";
 import { AppDispatch } from "./store";
 import {
@@ -59,7 +59,7 @@ export const useBusiness = () => {
     contactLoading,
     contactError,
     contactSubmitted,
-  } = useSelector((state: RootState) => state.business);
+  } = useSelector((state: RootState) => state.business, shallowEqual);
   const loadBusinesses = useCallback(
     (params?: BusinessSearchParams) => {
       return dispatch(fetchBusinesses(params));

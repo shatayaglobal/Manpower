@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Building2,
   Users,
@@ -37,7 +37,6 @@ import { cn } from "@/lib/utils";
 const getCategoryLabel = (v: string) =>
   BUSINESS_CATEGORIES.find((c) => c.value === v)?.label ?? "Other";
 
-// ── Stat card with live pulse ─────────────────────────────────────────────────
 function StatCard({
   title,
   value,
@@ -62,7 +61,9 @@ function StatCard({
         {live && (
           <span className="flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[10px] text-gray-300 font-semibold">LIVE</span>
+            <span className="text-[10px] text-gray-300 font-semibold">
+              LIVE
+            </span>
           </span>
         )}
       </div>
@@ -97,7 +98,9 @@ function FunnelRow({
           <div className={cn("w-2 h-2 rounded-full shrink-0", dot)} />
           <span className="text-base text-gray-500">{label}</span>
         </div>
-        <span className="text-base font-bold text-gray-900 tabular-nums">{value}</span>
+        <span className="text-base font-bold text-gray-900 tabular-nums">
+          {value}
+        </span>
       </div>
       <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
         <div
@@ -109,7 +112,6 @@ function FunnelRow({
   );
 }
 
-// ── Quick action link ─────────────────────────────────────────────────────────
 function QuickAction({
   href,
   icon: Icon,
@@ -139,7 +141,9 @@ function QuickAction({
         <Icon className="w-5 h-5 text-white" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-base font-semibold text-gray-900 truncate">{title}</p>
+        <p className="text-base font-semibold text-gray-900 truncate">
+          {title}
+        </p>
         <p className="text-base text-gray-400 truncate">{subtitle}</p>
       </div>
       {badge !== undefined && badge > 0 && (
@@ -152,9 +156,6 @@ function QuickAction({
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Business Modal (unchanged)
-// ─────────────────────────────────────────────────────────────────────────────
 interface ModalProps {
   business: Business | null;
   onClose: () => void;
@@ -262,17 +263,35 @@ function BusinessModal({ business, onClose }: ModalProps) {
                     <div
                       className={cn(
                         "w-7 h-7 rounded-full flex items-center justify-center text-base font-bold transition-colors",
-                        done ? "bg-emerald-500 text-white" : active ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-400"
+                        done
+                          ? "bg-emerald-500 text-white"
+                          : active
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-100 text-gray-400"
                       )}
                     >
                       {done ? <CheckCircle className="w-4 h-4" /> : n}
                     </div>
-                    <span className={cn("text-base font-semibold hidden sm:block", active ? "text-blue-600" : done ? "text-emerald-600" : "text-gray-400")}>
+                    <span
+                      className={cn(
+                        "text-base font-semibold hidden sm:block",
+                        active
+                          ? "text-blue-600"
+                          : done
+                          ? "text-emerald-600"
+                          : "text-gray-400"
+                      )}
+                    >
                       {label}
                     </span>
                   </div>
                   {i < STEPS.length - 1 && (
-                    <div className={cn("flex-1 h-px transition-colors", step > n ? "bg-emerald-300" : "bg-gray-100")} />
+                    <div
+                      className={cn(
+                        "flex-1 h-px transition-colors",
+                        step > n ? "bg-emerald-300" : "bg-gray-100"
+                      )}
+                    />
                   )}
                 </React.Fragment>
               );
@@ -284,20 +303,41 @@ function BusinessModal({ business, onClose }: ModalProps) {
           {step === 1 && (
             <>
               <div>
-                <label className={labelCls}>Business Name <span className="text-red-500">*</span></label>
-                <input value={formData.name} onChange={(e) => set("name", e.target.value)} className={inputCls(errors.name)} placeholder="Enter your business name" />
-                {errors.name && <p className="text-red-500 text-base mt-1">{errors.name}</p>}
+                <label className={labelCls}>
+                  Business Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  value={formData.name}
+                  onChange={(e) => set("name", e.target.value)}
+                  className={inputCls(errors.name)}
+                  placeholder="Enter your business name"
+                />
+                {errors.name && (
+                  <p className="text-red-500 text-base mt-1">{errors.name}</p>
+                )}
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
                   <label className={labelCls}>Category</label>
-                  <select value={formData.category} onChange={(e) => set("category", e.target.value)} className={selectCls}>
-                    {BUSINESS_CATEGORIES.slice(1).map((c) => (<option key={c.value} value={c.value}>{c.label}</option>))}
+                  <select
+                    value={formData.category}
+                    onChange={(e) => set("category", e.target.value)}
+                    className={selectCls}
+                  >
+                    {BUSINESS_CATEGORIES.slice(1).map((c) => (
+                      <option key={c.value} value={c.value}>
+                        {c.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div>
                   <label className={labelCls}>Business Size</label>
-                  <select value={formData.size} onChange={(e) => set("size", e.target.value)} className={selectCls}>
+                  <select
+                    value={formData.size}
+                    onChange={(e) => set("size", e.target.value)}
+                    className={selectCls}
+                  >
                     <option value="SMALL">1–10 employees</option>
                     <option value="MEDIUM">11–50 employees</option>
                     <option value="LARGE">51–200 employees</option>
@@ -307,24 +347,67 @@ function BusinessModal({ business, onClose }: ModalProps) {
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className={labelCls}>Email <span className="text-red-500">*</span></label>
-                  <input type="email" value={formData.email} onChange={(e) => set("email", e.target.value)} className={inputCls(errors.email)} placeholder="business@example.com" />
-                  {errors.email && <p className="text-red-500 text-base mt-1">{errors.email}</p>}
+                  <label className={labelCls}>
+                    Email <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => set("email", e.target.value)}
+                    className={inputCls(errors.email)}
+                    placeholder="business@example.com"
+                  />
+                  {errors.email && (
+                    <p className="text-red-500 text-base mt-1">
+                      {errors.email}
+                    </p>
+                  )}
                 </div>
                 <div>
-                  <label className={labelCls}>Phone <span className="text-red-500">*</span></label>
-                  <input type="tel" value={formData.phone} onChange={(e) => set("phone", e.target.value)} className={inputCls(errors.phone)} placeholder="+927-700-000000" />
-                  {errors.phone && <p className="text-red-500 text-base mt-1">{errors.phone}</p>}
+                  <label className={labelCls}>
+                    Phone <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => set("phone", e.target.value)}
+                    className={inputCls(errors.phone)}
+                    placeholder="+927-700-000000"
+                  />
+                  {errors.phone && (
+                    <p className="text-red-500 text-base mt-1">
+                      {errors.phone}
+                    </p>
+                  )}
                 </div>
               </div>
               <div>
-                <label className={labelCls}>Website <span className="text-gray-300 font-normal">(optional)</span></label>
-                <input type="url" value={formData.website} onChange={(e) => set("website", e.target.value)} className={inputCls(errors.website)} placeholder="https://example.com" />
-                {errors.website && <p className="text-red-500 text-base mt-1">{errors.website}</p>}
+                <label className={labelCls}>
+                  Website{" "}
+                  <span className="text-gray-300 font-normal">(optional)</span>
+                </label>
+                <input
+                  type="url"
+                  value={formData.website}
+                  onChange={(e) => set("website", e.target.value)}
+                  className={inputCls(errors.website)}
+                  placeholder="https://example.com"
+                />
+                {errors.website && (
+                  <p className="text-red-500 text-base mt-1">
+                    {errors.website}
+                  </p>
+                )}
               </div>
               <div>
                 <label className={labelCls}>Description</label>
-                <textarea value={formData.description} onChange={(e) => set("description", e.target.value)} rows={3} className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="Brief description of your business..." />
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => set("description", e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  placeholder="Brief description of your business..."
+                />
               </div>
             </>
           )}
@@ -332,7 +415,9 @@ function BusinessModal({ business, onClose }: ModalProps) {
           {step === 2 && (
             <>
               <div>
-                <label className={labelCls}>Business Address <span className="text-red-500">*</span></label>
+                <label className={labelCls}>
+                  Business Address <span className="text-red-500">*</span>
+                </label>
                 <AddressAutocomplete
                   value={formData.address}
                   onChange={(address) => set("address", address)}
@@ -349,35 +434,76 @@ function BusinessModal({ business, onClose }: ModalProps) {
                     }))
                   }
                 />
-                {errors.address && <p className="text-red-500 text-base mt-1">{errors.address}</p>}
-                <p className="text-base text-gray-400 mt-1">Start typing to search for your address</p>
+                {errors.address && (
+                  <p className="text-red-500 text-base mt-1">
+                    {errors.address}
+                  </p>
+                )}
+                <p className="text-base text-gray-400 mt-1">
+                  Start typing to search for your address
+                </p>
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
                   <label className={labelCls}>Street Address</label>
-                  <input value={formData.street || ""} onChange={(e) => set("street", e.target.value)} className={inputCls()} placeholder="e.g. Plot 123, Acacia Avenue" />
+                  <input
+                    value={formData.street || ""}
+                    onChange={(e) => set("street", e.target.value)}
+                    className={inputCls()}
+                    placeholder="e.g. Plot 123, Acacia Avenue"
+                  />
                 </div>
                 <div>
-                  <label className={labelCls}>City <span className="text-red-500">*</span></label>
-                  <input value={formData.city} onChange={(e) => set("city", e.target.value)} className={inputCls(errors.city)} placeholder="Kampala" />
-                  {errors.city && <p className="text-red-500 text-base mt-1">{errors.city}</p>}
+                  <label className={labelCls}>
+                    City <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    value={formData.city}
+                    onChange={(e) => set("city", e.target.value)}
+                    className={inputCls(errors.city)}
+                    placeholder="Kampala"
+                  />
+                  {errors.city && (
+                    <p className="text-red-500 text-base mt-1">{errors.city}</p>
+                  )}
                 </div>
                 <div>
-                  <label className={labelCls}>Country <span className="text-red-500">*</span></label>
-                  <input value={formData.country} onChange={(e) => set("country", e.target.value)} className={inputCls(errors.country)} placeholder="Uganda" />
-                  {errors.country && <p className="text-red-500 text-base mt-1">{errors.country}</p>}
+                  <label className={labelCls}>
+                    Country <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    value={formData.country}
+                    onChange={(e) => set("country", e.target.value)}
+                    className={inputCls(errors.country)}
+                    placeholder="Uganda"
+                  />
+                  {errors.country && (
+                    <p className="text-red-500 text-base mt-1">
+                      {errors.country}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className={labelCls}>Postal Code</label>
-                  <input value={formData.postal_code} onChange={(e) => set("postal_code", e.target.value)} className={inputCls()} placeholder="00000" />
+                  <input
+                    value={formData.postal_code}
+                    onChange={(e) => set("postal_code", e.target.value)}
+                    className={inputCls()}
+                    placeholder="00000"
+                  />
                 </div>
               </div>
               {formData.workplace_latitude && formData.workplace_longitude && (
                 <div className="flex items-center gap-2.5 p-3.5 bg-emerald-50 border border-emerald-100 rounded-xl">
                   <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
                   <div>
-                    <p className="text-base font-semibold text-emerald-700">Location pinned</p>
-                    <p className="text-base text-emerald-600">{formData.workplace_latitude.toFixed(6)}, {formData.workplace_longitude.toFixed(6)}</p>
+                    <p className="text-base font-semibold text-emerald-700">
+                      Location pinned
+                    </p>
+                    <p className="text-base text-emerald-600">
+                      {formData.workplace_latitude.toFixed(6)},{" "}
+                      {formData.workplace_longitude.toFixed(6)}
+                    </p>
                   </div>
                 </div>
               )}
@@ -385,9 +511,11 @@ function BusinessModal({ business, onClose }: ModalProps) {
                 <label className={labelCls}>Service Hours</label>
                 <div className="grid sm:grid-cols-2 gap-4">
                   {(["Opening", "Closing"] as const).map((label, idx) => {
-                    const raw = formData.service_time.split(" - ")[idx]?.trim() || "";
+                    const raw =
+                      formData.service_time.split(" - ")[idx]?.trim() || "";
                     const hour = raw ? parseInt(raw.split(":")[0]) : null;
-                    const ampm = hour === null ? "AM" : hour >= 12 ? "PM" : "AM";
+                    const ampm =
+                      hour === null ? "AM" : hour >= 12 ? "PM" : "AM";
                     const toggleAmPm = (period: "AM" | "PM") => {
                       if (!raw) return;
                       const [h, m] = raw.split(":");
@@ -395,28 +523,46 @@ function BusinessModal({ business, onClose }: ModalProps) {
                       if (period === "AM" && h24 >= 12) h24 -= 12;
                       if (period === "PM" && h24 < 12) h24 += 12;
                       const time = `${String(h24).padStart(2, "0")}:${m}`;
-                      const parts = formData.service_time.split(" - ").map((s) => s.trim());
+                      const parts = formData.service_time
+                        .split(" - ")
+                        .map((s) => s.trim());
                       parts[idx] = time;
                       set("service_time", parts.filter(Boolean).join(" - "));
                     };
                     return (
                       <div key={label}>
-                        <p className="text-base text-gray-400 mb-1.5">{label} Time</p>
+                        <p className="text-base text-gray-400 mb-1.5">
+                          {label} Time
+                        </p>
                         <div className="flex items-center gap-2">
                           <input
                             type="time"
                             value={raw}
                             onChange={(e) => {
-                              const parts = formData.service_time.split(" - ").map((s) => s.trim());
+                              const parts = formData.service_time
+                                .split(" - ")
+                                .map((s) => s.trim());
                               parts[idx] = e.target.value;
-                              set("service_time", parts.filter(Boolean).join(" - "));
+                              set(
+                                "service_time",
+                                parts.filter(Boolean).join(" - ")
+                              );
                             }}
                             className="flex-1 px-3 py-2.5 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                           <div className="flex rounded-xl border border-gray-200 overflow-hidden shrink-0">
                             {(["AM", "PM"] as const).map((period) => (
-                              <button key={period} type="button" onClick={() => toggleAmPm(period)}
-                                className={cn("px-2.5 py-2.5 text-base font-semibold transition-colors", ampm === period && raw ? "bg-blue-600 text-white" : "bg-white text-gray-400 hover:text-gray-600")}>
+                              <button
+                                key={period}
+                                type="button"
+                                onClick={() => toggleAmPm(period)}
+                                className={cn(
+                                  "px-2.5 py-2.5 text-base font-semibold transition-colors",
+                                  ampm === period && raw
+                                    ? "bg-blue-600 text-white"
+                                    : "bg-white text-gray-400 hover:text-gray-600"
+                                )}
+                              >
                                 {period}
                               </button>
                             ))}
@@ -426,7 +572,11 @@ function BusinessModal({ business, onClose }: ModalProps) {
                     );
                   })}
                 </div>
-                {formData.service_time && <p className="text-base text-gray-400 mt-2">Hours: {formData.service_time}</p>}
+                {formData.service_time && (
+                  <p className="text-base text-gray-400 mt-2">
+                    Hours: {formData.service_time}
+                  </p>
+                )}
               </div>
             </>
           )}
@@ -435,10 +585,20 @@ function BusinessModal({ business, onClose }: ModalProps) {
             <div className="space-y-4">
               <div className="bg-gray-50 rounded-2xl p-5 space-y-4">
                 <div>
-                  <p className="text-base font-semibold text-gray-400 uppercase tracking-wide mb-2">Basic Information</p>
+                  <p className="text-base font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                    Basic Information
+                  </p>
                   <div className="space-y-1">
-                    {[["Name", formData.name], ["Category", getCategoryLabel(formData.category)], ["Email", formData.email], ["Phone", formData.phone]].map(([k, v]) => (
-                      <div key={k} className="flex items-center justify-between text-base">
+                    {[
+                      ["Name", formData.name],
+                      ["Category", getCategoryLabel(formData.category)],
+                      ["Email", formData.email],
+                      ["Phone", formData.phone],
+                    ].map(([k, v]) => (
+                      <div
+                        key={k}
+                        className="flex items-center justify-between text-base"
+                      >
                         <span className="text-gray-400">{k}</span>
                         <span className="font-medium text-gray-900">{v}</span>
                       </div>
@@ -446,27 +606,47 @@ function BusinessModal({ business, onClose }: ModalProps) {
                   </div>
                 </div>
                 <div className="border-t border-gray-100 pt-4">
-                  <p className="text-base font-semibold text-gray-400 uppercase tracking-wide mb-2">Location</p>
+                  <p className="text-base font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                    Location
+                  </p>
                   <div className="space-y-1">
-                    {[["Address", formData.address], ["City", formData.city], ["Country", formData.country]].map(([k, v]) => v && (
-                      <div key={k} className="flex items-center justify-between text-base">
-                        <span className="text-gray-400">{k}</span>
-                        <span className="font-medium text-gray-900">{v}</span>
-                      </div>
-                    ))}
+                    {[
+                      ["Address", formData.address],
+                      ["City", formData.city],
+                      ["Country", formData.country],
+                    ].map(
+                      ([k, v]) =>
+                        v && (
+                          <div
+                            key={k}
+                            className="flex items-center justify-between text-base"
+                          >
+                            <span className="text-gray-400">{k}</span>
+                            <span className="font-medium text-gray-900">
+                              {v}
+                            </span>
+                          </div>
+                        )
+                    )}
                   </div>
                 </div>
                 {formData.service_time && (
                   <div className="border-t border-gray-100 pt-4">
-                    <p className="text-base font-semibold text-gray-400 uppercase tracking-wide mb-1">Service Hours</p>
-                    <p className="text-base font-medium text-gray-900">{formData.service_time}</p>
+                    <p className="text-base font-semibold text-gray-400 uppercase tracking-wide mb-1">
+                      Service Hours
+                    </p>
+                    <p className="text-base font-medium text-gray-900">
+                      {formData.service_time}
+                    </p>
                   </div>
                 )}
               </div>
               <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-100 rounded-xl">
                 <CheckCircle className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
                 <p className="text-base text-blue-700 leading-relaxed">
-                  By {business ? "updating" : "creating"} this business, you agree to our terms of service and may need to complete verification to access all features.
+                  By {business ? "updating" : "creating"} this business, you
+                  agree to our terms of service and may need to complete
+                  verification to access all features.
                 </p>
               </div>
             </div>
@@ -476,16 +656,54 @@ function BusinessModal({ business, onClose }: ModalProps) {
         <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/60 rounded-b-2xl flex items-center justify-between gap-3 shrink-0">
           <div>
             {step > 1 && (
-              <Button  type="button" variant="outline" onClick={() => setStep((s) => s - 1)} disabled={submitting} className="border-gray-200 h-9 px-4 rounded-xl text-base">Back</Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setStep((s) => s - 1)}
+                disabled={submitting}
+                className="border-gray-200 h-9 px-4 rounded-xl text-base"
+              >
+                Back
+              </Button>
             )}
           </div>
           <div className="flex gap-2">
-            <Button type="button" variant="outline" onClick={onClose} disabled={submitting} className="border-gray-200 h-9 px-4 rounded-xl text-base">Cancel</Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={submitting}
+              className="border-gray-200 h-9 px-4 rounded-xl text-base"
+            >
+              Cancel
+            </Button>
             {step < 3 ? (
-              <Button type="button" onClick={() => { if (validate(step)) setStep((s) => s + 1); }} className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-5 rounded-xl text-base font-semibold">Next</Button>
+              <Button
+                type="button"
+                onClick={() => {
+                  if (validate(step)) setStep((s) => s + 1);
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-5 rounded-xl text-base font-semibold"
+              >
+                Next
+              </Button>
             ) : (
-              <Button type="button" onClick={handleSubmit} disabled={submitting} className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-5 rounded-xl text-base font-semibold">
-                {submitting ? (<><Loader2 className="w-4 h-4 mr-2 animate-spin" />{business ? "Updating..." : "Creating..."}</>) : business ? "Update Business" : "Create Business"}
+              <Button
+                type="button"
+                onClick={handleSubmit}
+                disabled={submitting}
+                className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-5 rounded-xl text-base font-semibold"
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    {business ? "Updating..." : "Creating..."}
+                  </>
+                ) : business ? (
+                  "Update Business"
+                ) : (
+                  "Create Business"
+                )}
               </Button>
             )}
           </div>
@@ -497,14 +715,26 @@ function BusinessModal({ business, onClose }: ModalProps) {
 
 export default function MyBusinessPage() {
   const [showModal, setShowModal] = useState(false);
-  const { businesses, loading, error, loadBusinesses, editBusiness, clearBusinessError } = useBusiness();
+  const {
+    businesses,
+    loading,
+    error,
+    loadBusinesses,
+    editBusiness,
+    clearBusinessError,
+  } = useBusiness();
   const business = businesses[0] ?? null;
+  const loadRef = useRef(loadBusinesses);
 
   useEffect(() => {
-    loadBusinesses();
-    const interval = setInterval(loadBusinesses, 30_000);
+    loadRef.current = loadBusinesses;
+  });
+
+  useEffect(() => {
+    loadRef.current();
+    const interval = setInterval(() => loadRef.current(), 30_000);
     return () => clearInterval(interval);
-  }, [loadBusinesses]);
+  }, []);
 
   if (loading && !business) {
     return (
@@ -514,7 +744,6 @@ export default function MyBusinessPage() {
     );
   }
 
-  // ── No business yet ──
   if (!business) {
     return (
       <div className="bg-gray-50 -ml-4 -mt-5 min-h-screen -mr-4">
@@ -523,35 +752,76 @@ export default function MyBusinessPage() {
             <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Building2 className="w-8 h-8 text-blue-600" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome to Your Business Dashboard</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              Welcome to Your Business Dashboard
+            </h1>
             <p className="text-gray-500 text-base max-w-md mx-auto mb-6">
-              Create your business profile to start managing your workforce, scheduling shifts, and posting jobs.
+              Create your business profile to start managing your workforce,
+              scheduling shifts, and posting jobs.
             </p>
-            <Button type="button" onClick={() => setShowModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 h-11 rounded-xl">
+            <Button
+              type="button"
+              onClick={() => setShowModal(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 h-11 rounded-xl"
+            >
               <Plus className="w-4 h-4 mr-2" />
               Create Business Profile
             </Button>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
             {[
-              { icon: Users, color: "bg-blue-100 text-blue-600", title: "Manage Staff", desc: "Add and organize your team members with detailed profiles" },
-              { icon: Calendar, color: "bg-emerald-100 text-emerald-600", title: "Schedule Shifts", desc: "Create and manage work schedules efficiently" },
-              { icon: Briefcase, color: "bg-violet-100 text-violet-600", title: "Post Jobs", desc: "Attract talented workers and manage applications" },
-              { icon: BarChart3, color: "bg-amber-100 text-amber-600", title: "Track Performance", desc: "Monitor hours worked and business analytics" },
+              {
+                icon: Users,
+                color: "bg-blue-100 text-blue-600",
+                title: "Manage Staff",
+                desc: "Add and organize your team members with detailed profiles",
+              },
+              {
+                icon: Calendar,
+                color: "bg-emerald-100 text-emerald-600",
+                title: "Schedule Shifts",
+                desc: "Create and manage work schedules efficiently",
+              },
+              {
+                icon: Briefcase,
+                color: "bg-violet-100 text-violet-600",
+                title: "Post Jobs",
+                desc: "Attract talented workers and manage applications",
+              },
+              {
+                icon: BarChart3,
+                color: "bg-amber-100 text-amber-600",
+                title: "Track Performance",
+                desc: "Monitor hours worked and business analytics",
+              },
             ].map(({ icon: Icon, color, title, desc }) => (
-              <div key={title} className="bg-white rounded-2xl border border-gray-100 p-5 flex items-start gap-4">
-                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", color)}>
+              <div
+                key={title}
+                className="bg-white rounded-2xl border border-gray-100 p-5 flex items-start gap-4"
+              >
+                <div
+                  className={cn(
+                    "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+                    color
+                  )}
+                >
                   <Icon className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-900 text-base">{title}</p>
-                  <p className="text-base text-gray-400 mt-0.5 leading-relaxed">{desc}</p>
+                  <p className="font-semibold text-gray-900 text-base">
+                    {title}
+                  </p>
+                  <p className="text-base text-gray-400 mt-0.5 leading-relaxed">
+                    {desc}
+                  </p>
                 </div>
               </div>
             ))}
           </div>
         </div>
-        {showModal && <BusinessModal business={null} onClose={() => setShowModal(false)} />}
+        {showModal && (
+          <BusinessModal business={null} onClose={() => setShowModal(false)} />
+        )}
       </div>
     );
   }
@@ -559,11 +829,9 @@ export default function MyBusinessPage() {
   const pendingApproval = business.hours_pending_approval ?? 0;
   const pendingApps = business.pending_applications ?? 0;
 
-  // ── Has business ──
   return (
     <div className="bg-gray-50 -ml-4 -mt-5 min-h-screen -mr-4">
       <div className="w-full px-4 sm:px-6 lg:px-8 py-8 space-y-5">
-
         {/* Error banner */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-center justify-between gap-4">
@@ -571,7 +839,13 @@ export default function MyBusinessPage() {
               <AlertCircle className="h-4 w-4 text-red-600 shrink-0" />
               <p className="text-base text-red-700">{error}</p>
             </div>
-            <Button type="button" variant="outline" size="sm" onClick={clearBusinessError} className="border-red-200 text-red-700 hover:bg-red-100 shrink-0 h-8 px-3 text-base rounded-xl">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={clearBusinessError}
+              className="border-red-200 text-red-700 hover:bg-red-100 shrink-0 h-8 px-3 text-base rounded-xl"
+            >
               Dismiss
             </Button>
           </div>
@@ -583,18 +857,30 @@ export default function MyBusinessPage() {
             <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
             <p className="text-base font-semibold text-amber-800 flex-1">
               Action required —
-              {pendingApproval > 0 && ` ${pendingApproval} hour card${pendingApproval > 1 ? "s" : ""} awaiting approval`}
+              {pendingApproval > 0 &&
+                ` ${pendingApproval} hour card${
+                  pendingApproval > 1 ? "s" : ""
+                } awaiting approval`}
               {pendingApproval > 0 && pendingApps > 0 && " and"}
-              {pendingApps > 0 && ` ${pendingApps} application${pendingApps > 1 ? "s" : ""} pending review`}
+              {pendingApps > 0 &&
+                ` ${pendingApps} application${
+                  pendingApps > 1 ? "s" : ""
+                } pending review`}
             </p>
             <div className="flex gap-2">
               {pendingApproval > 0 && (
-                <Link href="/hours" className="text-base font-bold text-amber-700 border border-amber-300 bg-white px-3 py-1.5 rounded-lg hover:bg-amber-50 transition-colors">
+                <Link
+                  href="/hours"
+                  className="text-base font-bold text-amber-700 border border-amber-300 bg-white px-3 py-1.5 rounded-lg hover:bg-amber-50 transition-colors"
+                >
                   Review Hours
                 </Link>
               )}
               {pendingApps > 0 && (
-                <Link href="/manage-applications" className="text-base font-bold text-amber-700 border border-amber-300 bg-white px-3 py-1.5 rounded-lg hover:bg-amber-50 transition-colors">
+                <Link
+                  href="/manage-applications"
+                  className="text-base font-bold text-amber-700 border border-amber-300 bg-white px-3 py-1.5 rounded-lg hover:bg-amber-50 transition-colors"
+                >
                   View Applications
                 </Link>
               )}
@@ -611,29 +897,50 @@ export default function MyBusinessPage() {
               </div>
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-xl font-bold text-gray-900">{business.name}</h1>
-                  <span className={cn(
-                    "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-base font-bold border",
-                    business.is_verified
-                      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                      : "bg-amber-50 text-amber-700 border-amber-200"
-                  )}>
-                    {business.is_verified ? <CheckCircle className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}
+                  <h1 className="text-xl font-bold text-gray-900">
+                    {business.name}
+                  </h1>
+                  <span
+                    className={cn(
+                      "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-base font-bold border",
+                      business.is_verified
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        : "bg-amber-50 text-amber-700 border-amber-200"
+                    )}
+                  >
+                    {business.is_verified ? (
+                      <CheckCircle className="w-3 h-3" />
+                    ) : (
+                      <AlertCircle className="w-3 h-3" />
+                    )}
                     {business.is_verified ? "Verified" : "Unverified"}
                   </span>
                 </div>
                 <p className="text-base text-blue-600 font-medium mt-0.5">
-                  {getCategoryLabel(business.category)} · Since {new Date(business.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+                  {getCategoryLabel(business.category)} · Since{" "}
+                  {new Date(business.created_at).toLocaleDateString("en-US", {
+                    month: "short",
+                    year: "numeric",
+                  })}
                 </p>
               </div>
             </div>
-            <Button type="button" variant="outline" size="sm" onClick={() => setShowModal(true)} className="border-gray-200 text-gray-700 hover:border-blue-200 hover:text-blue-700 h-9 px-4 rounded-xl shrink-0">
-              <Edit2 className="w-3.5 h-3.5 mr-1.5" />Edit
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowModal(true)}
+              className="border-gray-200 text-gray-700 hover:border-blue-200 hover:text-blue-700 h-9 px-4 rounded-xl shrink-0"
+            >
+              <Edit2 className="w-3.5 h-3.5 mr-1.5" />
+              Edit
             </Button>
           </div>
 
           {business.description && (
-            <p className="text-base text-gray-500 mb-5 leading-relaxed">{business.description}</p>
+            <p className="text-base text-gray-500 mb-5 leading-relaxed">
+              {business.description}
+            </p>
           )}
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -641,11 +948,18 @@ export default function MyBusinessPage() {
               { icon: MapPin, value: business.address },
               { icon: Mail, value: business.email },
               { icon: Phone, value: business.phone },
-              ...(business.service_time ? [{ icon: Clock, value: business.service_time }] : []),
+              ...(business.service_time
+                ? [{ icon: Clock, value: business.service_time }]
+                : []),
             ].map(({ icon: Icon, value }, i) => (
-              <div key={i} className="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2.5">
+              <div
+                key={i}
+                className="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2.5"
+              >
                 <Icon className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                <span className="text-base text-gray-600 truncate">{value}</span>
+                <span className="text-base text-gray-600 truncate">
+                  {value}
+                </span>
               </div>
             ))}
           </div>
@@ -655,7 +969,9 @@ export default function MyBusinessPage() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             title="Active Staff"
-            value={`${business.total_active_staff ?? 0} / ${business.total_staff ?? 0}`}
+            value={`${business.total_active_staff ?? 0} / ${
+              business.total_staff ?? 0
+            }`}
             icon={Users}
             border="border-blue-100"
           />
@@ -681,37 +997,71 @@ export default function MyBusinessPage() {
 
         {/* ── Secondary stats row ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-
           {/* Applications funnel */}
           <div className="bg-white rounded-2xl border border-gray-100 p-5 col-span-2 lg:col-span-1">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-base font-bold uppercase tracking-widest text-gray-400">Applications</p>
+              <p className="text-base font-bold uppercase tracking-widest text-gray-400">
+                Applications
+              </p>
               <span className="flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[10px] text-gray-300 font-semibold">LIVE</span>
+                <span className="text-[10px] text-gray-300 font-semibold">
+                  LIVE
+                </span>
               </span>
             </div>
             <div className="space-y-3">
-              <FunnelRow label="Total" value={business.total_applications ?? 0} total={business.total_applications ?? 0} dot="bg-gray-300" />
-              <FunnelRow label="Pending" value={business.pending_applications ?? 0} total={business.total_applications ?? 1} dot="bg-amber-400" />
-              <FunnelRow label="Accepted" value={business.accepted_applications ?? 0} total={business.total_applications ?? 1} dot="bg-emerald-400" />
+              <FunnelRow
+                label="Total"
+                value={business.total_applications ?? 0}
+                total={business.total_applications ?? 0}
+                dot="bg-gray-300"
+              />
+              <FunnelRow
+                label="Pending"
+                value={business.pending_applications ?? 0}
+                total={business.total_applications ?? 1}
+                dot="bg-amber-400"
+              />
+              <FunnelRow
+                label="Accepted"
+                value={business.accepted_applications ?? 0}
+                total={business.total_applications ?? 1}
+                dot="bg-emerald-400"
+              />
             </div>
           </div>
 
           {/* Hours pending approval — action card */}
-          <div className={cn(
-            "rounded-2xl border p-5 flex flex-col justify-between",
-            pendingApproval > 0 ? "bg-amber-50 border-amber-200" : "bg-white border-gray-100"
-          )}>
+          <div
+            className={cn(
+              "rounded-2xl border p-5 flex flex-col justify-between",
+              pendingApproval > 0
+                ? "bg-amber-50 border-amber-200"
+                : "bg-white border-gray-100"
+            )}
+          >
             <div>
-              <p className="text-base font-bold uppercase tracking-widest text-amber-500 mb-1">Hours Approval</p>
-              <p className={cn("text-3xl font-bold", pendingApproval > 0 ? "text-amber-700" : "text-gray-900")}>
+              <p className="text-base font-bold uppercase tracking-widest text-amber-500 mb-1">
+                Hours Approval
+              </p>
+              <p
+                className={cn(
+                  "text-3xl font-bold",
+                  pendingApproval > 0 ? "text-amber-700" : "text-gray-900"
+                )}
+              >
                 {pendingApproval}
               </p>
-              <p className="text-base text-gray-400 mt-0.5">Cards awaiting your approval</p>
+              <p className="text-base text-gray-400 mt-0.5">
+                Cards awaiting your approval
+              </p>
             </div>
             {pendingApproval > 0 ? (
-              <Link href="/hours" className="inline-flex items-center gap-1 text-base text-amber-700 font-bold mt-3 hover:underline">
+              <Link
+                href="/hours"
+                className="inline-flex items-center gap-1 text-base text-amber-700 font-bold mt-3 hover:underline"
+              >
                 Review now <ChevronRight className="w-3 h-3" />
               </Link>
             ) : (
@@ -723,45 +1073,82 @@ export default function MyBusinessPage() {
 
           {/* Staff breakdown */}
           <div className="bg-white rounded-2xl border border-gray-100 p-5">
-            <p className="text-base font-bold uppercase tracking-widest text-gray-400 mb-3">Staff Breakdown</p>
+            <p className="text-base font-bold uppercase tracking-widest text-gray-400 mb-3">
+              Staff Breakdown
+            </p>
             <div className="space-y-2.5">
               {[
-                { label: "Active", value: business.total_active_staff ?? 0, dot: "bg-emerald-400", icon: UserCheck },
-                { label: "On Leave", value: business.staff_on_leave ?? 0, dot: "bg-amber-400", icon: Clock },
-                { label: "Total", value: business.total_staff ?? 0, dot: "bg-gray-300", icon: Users },
+                {
+                  label: "Active",
+                  value: business.total_active_staff ?? 0,
+                  dot: "bg-emerald-400",
+                  icon: UserCheck,
+                },
+                {
+                  label: "On Leave",
+                  value: business.staff_on_leave ?? 0,
+                  dot: "bg-amber-400",
+                  icon: Clock,
+                },
+                {
+                  label: "Total",
+                  value: business.total_staff ?? 0,
+                  dot: "bg-gray-300",
+                  icon: Users,
+                },
               ].map(({ label, value, dot, icon: Icon }) => (
                 <div key={label} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className={cn("w-2 h-2 rounded-full shrink-0", dot)} />
                     <span className="text-base text-gray-500">{label}</span>
                   </div>
-                  <span className="text-base font-bold text-gray-900 tabular-nums">{value}</span>
+                  <span className="text-base font-bold text-gray-900 tabular-nums">
+                    {value}
+                  </span>
                 </div>
               ))}
             </div>
-            <Link href="/staff" className="inline-flex items-center gap-1 text-base text-blue-600 font-semibold mt-3 hover:underline">
+            <Link
+              href="/staff"
+              className="inline-flex items-center gap-1 text-base text-blue-600 font-semibold mt-3 hover:underline"
+            >
               Manage staff <ChevronRight className="w-3 h-3" />
             </Link>
           </div>
 
           {/* Hours cards summary */}
           <div className="bg-white rounded-2xl border border-gray-100 p-5">
-            <p className="text-base font-bold uppercase tracking-widest text-gray-400 mb-3">Hour Cards</p>
+            <p className="text-base font-bold uppercase tracking-widest text-gray-400 mb-3">
+              Hour Cards
+            </p>
             <div className="space-y-2.5">
               {[
-                { label: "Pending Sign", value: pendingApproval, dot: "bg-amber-400" },
-                { label: "Approved", value: business.total_approved_hours ?? 0, dot: "bg-emerald-400" },
+                {
+                  label: "Pending Sign",
+                  value: pendingApproval,
+                  dot: "bg-amber-400",
+                },
+                {
+                  label: "Approved",
+                  value: business.total_approved_hours ?? 0,
+                  dot: "bg-emerald-400",
+                },
               ].map(({ label, value, dot }) => (
                 <div key={label} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className={cn("w-2 h-2 rounded-full shrink-0", dot)} />
                     <span className="text-base text-gray-500">{label}</span>
                   </div>
-                  <span className="text-base font-bold text-gray-900 tabular-nums">{value}</span>
+                  <span className="text-base font-bold text-gray-900 tabular-nums">
+                    {value}
+                  </span>
                 </div>
               ))}
             </div>
-            <Link href="/hours" className="inline-flex items-center gap-1 text-base text-blue-600 font-semibold mt-3 hover:underline">
+            <Link
+              href="/hours"
+              className="inline-flex items-center gap-1 text-base text-blue-600 font-semibold mt-3 hover:underline"
+            >
               View all hours <ChevronRight className="w-3 h-3" />
             </Link>
           </div>
@@ -770,11 +1157,31 @@ export default function MyBusinessPage() {
         {/* ── Quick actions + Location ── */}
         <div className="grid lg:grid-cols-2 gap-5">
           <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <h2 className="text-base font-bold text-gray-900 mb-4">Quick Actions</h2>
+            <h2 className="text-base font-bold text-gray-900 mb-4">
+              Quick Actions
+            </h2>
             <div className="space-y-2">
-              <QuickAction href="/staff" icon={Users} color="bg-blue-600" title="Manage Staff" subtitle="View and edit team members" />
-              <QuickAction href="/shifts" icon={Calendar} color="bg-emerald-600" title="Schedule Shifts" subtitle="Create and manage schedules" />
-              <QuickAction href="/jobs/create" icon={Briefcase} color="bg-violet-600" title="Post New Job" subtitle="Create a job listing" />
+              <QuickAction
+                href="/staff"
+                icon={Users}
+                color="bg-blue-600"
+                title="Manage Staff"
+                subtitle="View and edit team members"
+              />
+              <QuickAction
+                href="/shifts"
+                icon={Calendar}
+                color="bg-emerald-600"
+                title="Schedule Shifts"
+                subtitle="Create and manage schedules"
+              />
+              <QuickAction
+                href="/jobs/create"
+                icon={Briefcase}
+                color="bg-violet-600"
+                title="Post New Job"
+                subtitle="Create a job listing"
+              />
               <QuickAction
                 href="/manage-applications"
                 icon={BarChart3}
@@ -799,7 +1206,7 @@ export default function MyBusinessPage() {
               business={business}
               onUpdate={async (data) => {
                 await editBusiness(business.id, data);
-                loadBusinesses();
+                loadRef.current();
               }}
             />
           </div>
@@ -807,7 +1214,10 @@ export default function MyBusinessPage() {
       </div>
 
       {showModal && (
-        <BusinessModal business={business} onClose={() => setShowModal(false)} />
+        <BusinessModal
+          business={business}
+          onClose={() => setShowModal(false)}
+        />
       )}
     </div>
   );
