@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Building2,
   Users,
@@ -732,11 +732,21 @@ export default function MyBusinessPage() {
 
   useEffect(() => {
     loadRef.current();
+    if (showModal) return;
     const interval = setInterval(() => loadRef.current(), 30_000);
     return () => clearInterval(interval);
-  }, []);
+  }, [showModal]);
 
-  if (loading && !business) {
+  const handleModalClose = useCallback(() => setShowModal(false), []);
+  const handleLocationUpdate = useCallback(
+    async (data: Parameters<typeof editBusiness>[1]) => {
+      await editBusiness(business!.id, data);
+      loadRef.current();
+    },
+    [editBusiness, business]
+  );
+
+  if (loading && businesses.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <Loader2 className="w-7 h-7 animate-spin text-blue-500" />
@@ -1204,20 +1214,14 @@ export default function MyBusinessPage() {
           <div className="bg-white rounded-2xl border border-gray-100 p-6">
             <WorkplaceLocationSettings
               business={business}
-              onUpdate={async (data) => {
-                await editBusiness(business.id, data);
-                loadRef.current();
-              }}
+              onUpdate={handleLocationUpdate}
             />
           </div>
         </div>
       </div>
 
       {showModal && (
-        <BusinessModal
-          business={business}
-          onClose={() => setShowModal(false)}
-        />
+        <BusinessModal business={business} onClose={handleModalClose} />
       )}
     </div>
   );
