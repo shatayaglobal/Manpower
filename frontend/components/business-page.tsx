@@ -214,14 +214,13 @@ function BusinessModal({ business, onClose }: ModalProps) {
         await editBusiness(business.id, formData).unwrap();
         toast.success("Business updated!");
       } else {
-        await submitBusiness(formData).unwrap(); 
+        await submitBusiness(formData).unwrap();
         toast.success("Business created!");
       }
       onClose();
       selectBusiness(null);
-    } catch (err: any) {
-      // Now this actually catches API errors
-      toast.error(err?.message || "Failed to save business.");
+    } catch (err: unknown) {
+      toast.error((err as { message?: string })?.message || "Failed to save business.");
     } finally {
       setSubmitting(false);
     }
