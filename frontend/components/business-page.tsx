@@ -55,7 +55,7 @@ function StatCard({
   return (
     <div className={cn("bg-white rounded-2xl border p-5", border)}>
       <div className="flex items-center justify-between mb-1">
-        <p className="text-base font-bold uppercase tracking-widest text-gray-400">
+        <p className="text-base font-medium uppercase tracking-widest text-gray-600">
           {title}
         </p>
         {live && (
@@ -162,7 +162,7 @@ interface ModalProps {
 }
 
 function BusinessModal({ business, onClose }: ModalProps) {
-  const { submitBusiness, editBusiness, selectBusiness, loadBusinesses } =
+  const { submitBusiness, editBusiness, selectBusiness} =
     useBusiness();
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
@@ -1009,7 +1009,7 @@ export default function MyBusinessPage() {
           {/* Applications funnel */}
           <div className="bg-white rounded-2xl border border-gray-100 p-5 col-span-2 lg:col-span-1">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-base font-bold uppercase tracking-widest text-gray-400">
+              <p className="text-base font-medium uppercase tracking-widest text-gray-600">
                 Applications
               </p>
               <span className="flex items-center gap-1">
@@ -1082,7 +1082,7 @@ export default function MyBusinessPage() {
 
           {/* Staff breakdown */}
           <div className="bg-white rounded-2xl border border-gray-100 p-5">
-            <p className="text-base font-bold uppercase tracking-widest text-gray-400 mb-3">
+            <p className="text-base font-medium uppercase tracking-widest text-gray-600 mb-3">
               Staff Breakdown
             </p>
             <div className="space-y-2.5">
@@ -1105,7 +1105,7 @@ export default function MyBusinessPage() {
                   dot: "bg-gray-300",
                   icon: Users,
                 },
-              ].map(({ label, value, dot, icon: Icon }) => (
+              ].map(({ label, value, dot, }) => (
                 <div key={label} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className={cn("w-2 h-2 rounded-full shrink-0", dot)} />
@@ -1127,7 +1127,7 @@ export default function MyBusinessPage() {
 
           {/* Hours cards summary */}
           <div className="bg-white rounded-2xl border border-gray-100 p-5">
-            <p className="text-base font-bold uppercase tracking-widest text-gray-400 mb-3">
+            <p className="text-base font-medium uppercase tracking-widest text-gray-600 mb-3">
               Hour Cards
             </p>
             <div className="space-y-2.5">
