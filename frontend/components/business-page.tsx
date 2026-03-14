@@ -55,7 +55,7 @@ function StatCard({
   return (
     <div className={cn("bg-white rounded-2xl border p-5", border)}>
       <div className="flex items-center justify-between mb-1">
-        <p className="text-base font-bold uppercase  text-gray-600">
+        <p className="text-base font-bold uppercase  text-gray-900">
           {title}
         </p>
         {live && (
@@ -1009,7 +1009,7 @@ export default function MyBusinessPage() {
           {/* Applications funnel */}
           <div className="bg-white rounded-2xl border border-gray-100 p-5 col-span-2 lg:col-span-1">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-base font-bold uppercase text-gray-600">
+              <p className="text-base font-bold uppercase text-gray-900">
                 Applications
               </p>
               <span className="flex items-center gap-1">
@@ -1082,7 +1082,7 @@ export default function MyBusinessPage() {
 
           {/* Staff breakdown */}
           <div className="bg-white rounded-2xl border border-gray-100 p-5">
-            <p className="text-base font-bold uppercase  text-gray-600 mb-3">
+            <p className="text-base font-bold uppercase  text-gray-900 mb-3">
               Staff Breakdown
             </p>
             <div className="space-y-2.5">
@@ -1127,7 +1127,7 @@ export default function MyBusinessPage() {
 
           {/* Hours cards summary */}
           <div className="bg-white rounded-2xl border border-gray-100 p-5">
-            <p className="text-base font-bold uppercase text-gray-600 mb-3">
+            <p className="text-base font-bold uppercase text-gray-900 mb-3">
               Hour Cards
             </p>
             <div className="space-y-2.5">
