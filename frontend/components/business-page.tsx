@@ -55,7 +55,7 @@ function StatCard({
   return (
     <div className={cn("bg-white rounded-2xl border p-5", border)}>
       <div className="flex items-center justify-between mb-1">
-        <p className="text-base font-medium uppercase tracking-widest text-gray-600">
+        <p className="text-base font-bold uppercase tracking-widest text-gray-600">
           {title}
         </p>
         {live && (
@@ -599,7 +599,7 @@ function BusinessModal({ business, onClose }: ModalProps) {
                         className="flex items-center justify-between text-base"
                       >
                         <span className="text-gray-400">{k}</span>
-                        <span className="font-medium text-gray-900">{v}</span>
+                        <span className="font-bold text-gray-900">{v}</span>
                       </div>
                     ))}
                   </div>
@@ -621,7 +621,7 @@ function BusinessModal({ business, onClose }: ModalProps) {
                             className="flex items-center justify-between text-base"
                           >
                             <span className="text-gray-400">{k}</span>
-                            <span className="font-medium text-gray-900">
+                            <span className="font-bold text-gray-900">
                               {v}
                             </span>
                           </div>
@@ -634,7 +634,7 @@ function BusinessModal({ business, onClose }: ModalProps) {
                     <p className="text-base font-semibold text-gray-400 uppercase tracking-wide mb-1">
                       Service Hours
                     </p>
-                    <p className="text-base font-medium text-gray-900">
+                    <p className="text-base font-bold text-gray-900">
                       {formData.service_time}
                     </p>
                   </div>
@@ -925,7 +925,7 @@ export default function MyBusinessPage() {
                     {business.is_verified ? "Verified" : "Unverified"}
                   </span>
                 </div>
-                <p className="text-base text-blue-600 font-medium mt-0.5">
+                <p className="text-base text-blue-600 font-bold mt-0.5">
                   {getCategoryLabel(business.category)} · Since{" "}
                   {new Date(business.created_at).toLocaleDateString("en-US", {
                     month: "short",
@@ -1009,7 +1009,7 @@ export default function MyBusinessPage() {
           {/* Applications funnel */}
           <div className="bg-white rounded-2xl border border-gray-100 p-5 col-span-2 lg:col-span-1">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-base font-medium uppercase tracking-widest text-gray-600">
+              <p className="text-base font-bold uppercase tracking-widest text-gray-600">
                 Applications
               </p>
               <span className="flex items-center gap-1">
@@ -1082,7 +1082,7 @@ export default function MyBusinessPage() {
 
           {/* Staff breakdown */}
           <div className="bg-white rounded-2xl border border-gray-100 p-5">
-            <p className="text-base font-medium uppercase tracking-widest text-gray-600 mb-3">
+            <p className="text-base font-bold uppercase tracking-widest text-gray-600 mb-3">
               Staff Breakdown
             </p>
             <div className="space-y-2.5">
@@ -1127,7 +1127,7 @@ export default function MyBusinessPage() {
 
           {/* Hours cards summary */}
           <div className="bg-white rounded-2xl border border-gray-100 p-5">
-            <p className="text-base font-medium uppercase tracking-widest text-gray-600 mb-3">
+            <p className="text-base font-bold uppercase tracking-widest text-gray-600 mb-3">
               Hour Cards
             </p>
             <div className="space-y-2.5">
